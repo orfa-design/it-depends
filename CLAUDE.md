@@ -15,6 +15,21 @@ Core insight: decomposition + micro-start problem, not a navigation problem.
 - Interview notes and insights: /docs/research/interviews.md
 
 ## How we work
+
+### Thinking → synthesis → decision flow
+Each person uses their own Claude Code instance to dump intermediate thoughts:
+- Liuda's stream: /docs/thinking/liuda.md
+- Vlad's stream: /docs/thinking/vlad.md
+
+When it's time to synthesize: one person pulls both files and asks Claude Code to
+find patterns, tensions, and produce a synthesis. Result goes into DECISIONS.md or
+updates a hypothesis. The thinking files stay as-is (history).
+
+**When asked to synthesize:** read both thinking files, identify what overlaps,
+what conflicts, what's new in each — then produce a clear summary with a proposed
+decision or next question.
+
+### Other files
 - Decisions go in DECISIONS.md with date and reasoning
 - Hypotheses in docs/hypotheses.md with status (draft / testing / validated / invalidated)
 - After each interview, key quotes and insights go in docs/research/interviews.md
