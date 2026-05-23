@@ -35,6 +35,19 @@ updates a hypothesis. The thinking files stay as-is (history).
 what conflicts, what's new in each — then produce a clear summary with a proposed
 decision or next question.
 
+### Iteration log (Claude's responsibility)
+After every meaningful action — writing to any doc, synthesizing, updating a hypothesis,
+making a decision — automatically append an entry to /docs/changelog.md.
+Do not ask the user, just do it. Format:
+
+```
+## YYYY-MM-DD — Short title
+**What:** one sentence
+**Why:** one sentence
+```
+
+The user never edits changelog.md manually. It is built automatically from Claude's actions.
+
 ### Other files
 - Decisions go in DECISIONS.md with date and reasoning
 - Hypotheses in docs/hypotheses.md with status (draft / testing / validated / invalidated)
