@@ -8,6 +8,7 @@ but feel overwhelmed and close the tool before starting.
 Core insight: decomposition + micro-start problem, not a navigation problem.
 
 ## Team context — read these before answering
+- Original hackathon brief: /docs/brief.md
 - Project overview and hypothesis: /README.md
 - All decisions with reasoning: /DECISIONS.md
 - Hypotheses and their status: /docs/hypotheses.md
