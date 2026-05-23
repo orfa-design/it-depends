@@ -16,6 +16,11 @@ Core insight: decomposition + micro-start problem, not a navigation problem.
 
 ## How we work
 
+### Git sync rule
+Before writing anything to docs/ — always ask the user: "Did you run `git pull`?"
+Before synthesizing thinking files — always ask: "Did both you and your teammate push their latest changes?"
+Do not skip this check even if the user seems in a hurry.
+
 ### Thinking → synthesis → decision flow
 Each person uses their own Claude Code instance to dump intermediate thoughts:
 - Liuda's stream: /docs/thinking/liuda.md
