@@ -196,15 +196,17 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           <th style={{ ...th, width: 40, textAlign: 'right' }}>n</th>
         </tr></thead>
         <tbody>
-          {Object.entries(PARALYSIS_LABELS).map(([key, label]) => {
-            const n = paralysisCount[key] ?? 0
-            const pct = Math.round(n / responses.length * 100)
-            return <tr key={key}>
-              <td style={cell}>{label}</td>
-              <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{pct}%</td>
-              <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
-            </tr>
-          })}
+          {Object.entries(PARALYSIS_LABELS)
+            .sort(([a], [b]) => (paralysisCount[b] ?? 0) - (paralysisCount[a] ?? 0))
+            .map(([key, label]) => {
+              const n = paralysisCount[key] ?? 0
+              const pct = Math.round(n / responses.length * 100)
+              return <tr key={key}>
+                <td style={cell}>{label}</td>
+                <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{pct}%</td>
+                <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
+              </tr>
+            })}
         </tbody>
       </table>
 
@@ -217,12 +219,14 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           <th style={{ ...th, width: 40, textAlign: 'right' }}>n</th>
         </tr></thead>
         <tbody>
-          {Object.entries(TRIGGER_LABELS).map(([key, label]) => (
-            <tr key={key}>
-              <td style={cell}>{label}</td>
-              <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{triggerCount[key] ?? 0}</td>
-            </tr>
-          ))}
+          {Object.entries(TRIGGER_LABELS)
+            .sort(([a], [b]) => (triggerCount[b] ?? 0) - (triggerCount[a] ?? 0))
+            .map(([key, label]) => (
+              <tr key={key}>
+                <td style={cell}>{label}</td>
+                <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{triggerCount[key] ?? 0}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
@@ -236,15 +240,17 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           <th style={{ ...th, width: 40, textAlign: 'right' }}>n</th>
         </tr></thead>
         <tbody>
-          {Object.entries(ONE_STEP_LABELS).map(([key, label]) => {
-            const n = oneStepCount[key] ?? 0
-            const pct = Math.round(n / responses.length * 100)
-            return <tr key={key}>
-              <td style={cell}>{label}</td>
-              <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{pct}%</td>
-              <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
-            </tr>
-          })}
+          {Object.entries(ONE_STEP_LABELS)
+            .sort(([a], [b]) => (oneStepCount[b] ?? 0) - (oneStepCount[a] ?? 0))
+            .map(([key, label]) => {
+              const n = oneStepCount[key] ?? 0
+              const pct = Math.round(n / responses.length * 100)
+              return <tr key={key}>
+                <td style={cell}>{label}</td>
+                <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{pct}%</td>
+                <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
+              </tr>
+            })}
         </tbody>
       </table>
 
