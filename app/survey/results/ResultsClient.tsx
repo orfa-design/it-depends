@@ -4,36 +4,40 @@ import { useState } from 'react'
 import type { SurveyResponse } from '../../api/survey/submit/route'
 
 const PARALYSIS_LABELS: Record<string, string> = {
-  'which-tool': 'Не знаю який інструмент (meta)',
-  'which-task': 'Не знаю з якої задачі (meta)',
-  'how-to-use': 'Не розумів як користуватись (tool-level)',
-  'disappointing': 'Результат розчарував (tool-level)',
-  'no-problem': 'Не проблема',
+  'where-to-start': 'Не знаю з чого почати',
+  'no-clear-use-case': 'Не розумію де AI корисний саме для мене',
+  'weak-results': 'Результати виглядали слабкими',
+  'no-time': 'Не вистачає часу розібратись',
+  'too-many-tools': 'Занадто багато інструментів',
+  'no-trust': 'Не довіряю якості результатів',
+  'no-need': 'Не бачу потреби',
+  'not-a-problem': 'Це вже не проблема',
   'other': 'Інше',
 }
 
 const TRIGGER_LABELS: Record<string, string> = {
-  colleague: 'Колега з AI',
-  media: 'Стаття / відео',
-  task: 'Задача на роботі',
-  team: 'Команда / менеджер',
-  curiosity: 'Цікавість',
-  'no-desire': 'Ще не маю бажання починати',
-  'already-using': 'Вже активно використовую',
+  colleague: 'Приклад від колеги',
+  task: 'Конкретна задача на роботі',
+  media: 'Контент: стаття або відео',
+  team: 'Вимоги або ініціативи команди',
+  curiosity: 'Власна цікавість',
+  'nothing-yet': 'Поки не було нічого такого',
   other: 'Інше',
 }
 
 const AI_LEVEL_LABELS: Record<string, string> = {
-  'not-started': 'Ще не починав/ла',
-  'tried-stopped': 'Спробував/ла, не продовжую',
-  'occasional': 'Використовую зрідка',
+  'not-tried': 'Ще не пробував/ла',
+  'tried-few': 'Пробував/ла кілька разів',
+  'occasional': 'Використовую епізодично',
   'regular': 'Використовую регулярно',
+  'core': 'AI — важлива частина процесу',
 }
 
 const ONE_STEP_LABELS: Record<string, string> = {
-  yes: 'Так, одразу',
-  maybe: 'Мабуть',
-  no: 'Ні, потрібно більше розуміння',
+  'example-trigger': 'Саме те чого не вистачає — одразу б спробував/ла',
+  'useful-partial': 'Скоріше корисний, але не тільки в браку прикладів',
+  'need-basics': 'Навряд чи — потрібно розібратись в основах',
+  'already-using': 'Не потрібен — вже використовую',
   other: 'Інше',
 }
 
@@ -96,23 +100,25 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
     }
   }
 
-  // H2 — тільки non-adopters (ще не почали або спробували і зупинились)
-  const nonAdopters = responses.filter(r => r.aiLevel === 'not-started' || r.aiLevel === 'tried-stopped' || r.aiLevel === '')
+  // H2 — тільки non-adopters (ще не пробували або пробували кілька разів)
+  const nonAdopters = responses.filter(r => r.aiLevel === 'not-tried' || r.aiLevel === 'tried-few' || r.aiLevel === '')
   const nonAdopterParalysis: Record<string, number> = {}
   for (const r of nonAdopters) {
     nonAdopterParalysis[r.paralysis] = (nonAdopterParalysis[r.paralysis] ?? 0) + 1
   }
 
-  const metaCount = (nonAdopterParalysis['which-tool'] ?? 0) + (nonAdopterParalysis['which-task'] ?? 0)
-  const toolCount = (nonAdopterParalysis['how-to-use'] ?? 0) + (nonAdopterParalysis['disappointing'] ?? 0)
+  // meta = орієнтаційний параліч (не знаю з чого / де корисний / забагато інструментів)
+  const metaCount = (nonAdopterParalysis['where-to-start'] ?? 0) + (nonAdopterParalysis['no-clear-use-case'] ?? 0) + (nonAdopterParalysis['too-many-tools'] ?? 0)
+  // tool-level = розчарування від результату / недовіра
+  const toolCount = (nonAdopterParalysis['weak-results'] ?? 0) + (nonAdopterParalysis['no-trust'] ?? 0)
 
   const workshopAttendees = responses.filter(r => r.wasAtWorkshop)
   const workshopParalysisCount: Record<string, number> = {}
   for (const r of workshopAttendees) {
     workshopParalysisCount[r.paralysis] = (workshopParalysisCount[r.paralysis] ?? 0) + 1
   }
-  const workshopMetaCount = (workshopParalysisCount['which-tool'] ?? 0) + (workshopParalysisCount['which-task'] ?? 0)
-  const workshopToolCount = (workshopParalysisCount['how-to-use'] ?? 0) + (workshopParalysisCount['disappointing'] ?? 0)
+  const workshopMetaCount = (workshopParalysisCount['where-to-start'] ?? 0) + (workshopParalysisCount['no-clear-use-case'] ?? 0) + (workshopParalysisCount['too-many-tools'] ?? 0)
+  const workshopToolCount = (workshopParalysisCount['weak-results'] ?? 0) + (workshopParalysisCount['no-trust'] ?? 0)
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
@@ -184,14 +190,14 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           </div>
           {workshopAttendees.length >= 2 && (
             <div style={{ fontSize: 12, color: '#999', marginTop: 6 }}>
-              {workshopParalysisCount['no-problem'] ?? 0} з {workshopAttendees.length} людей після воркшопу кажуть "вже не проблема" ({Math.round(((workshopParalysisCount['no-problem'] ?? 0) / workshopAttendees.length) * 100)}%)
+              {workshopParalysisCount['not-a-problem'] ?? 0} з {workshopAttendees.length} людей після воркшопу кажуть "вже не проблема" ({Math.round(((workshopParalysisCount['not-a-problem'] ?? 0) / workshopAttendees.length) * 100)}%)
             </div>
           )}
         </div>
       )}
 
       {/* Q2 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Коли думаєш про те щоб почати з AI — що здається найскладнішим?</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що зараз найбільше заважає тобі використовувати AI частіше?</h2>
       <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q2 · один варіант</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
@@ -227,7 +233,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
       </table>
 
       {/* Q1 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що підштовхнуло тебе до думки "треба нарешті з AI щось робити"?</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що найбільше вплинуло на твій інтерес до AI?</h2>
       <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q1 · можна кілька</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
@@ -257,7 +263,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
       </table>
 
       {/* Q4 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Якби хтось сказав тобі "ось що зроби першим кроком з AI" — ти б спробував/ла?</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Конкретний приклад "як дизайнер використовує AI в реальних задачах" для мене:</h2>
       <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q4 · один варіант</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>

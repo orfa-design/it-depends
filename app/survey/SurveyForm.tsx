@@ -8,34 +8,38 @@ import {
 } from '@mui/material'
 
 const AI_LEVELS = [
-  { value: 'not-started', label: 'Ще не починав/ла — не знаю з чого' },
-  { value: 'tried-stopped', label: 'Спробував/ла, але не продовжую' },
-  { value: 'occasional', label: 'Використовую зрідка, коли є нагода' },
-  { value: 'regular', label: 'Використовую регулярно — вже частина процесу' },
+  { value: 'not-tried', label: 'Ще не пробував/ла' },
+  { value: 'tried-few', label: 'Пробував/ла кілька разів' },
+  { value: 'occasional', label: 'Використовую епізодично' },
+  { value: 'regular', label: 'Використовую регулярно' },
+  { value: 'core', label: 'AI — важлива частина мого процесу' },
 ]
 
 const TRIGGERS = [
-  { value: 'colleague', label: 'Бачив/ла як колега зробив щось класне з AI' },
-  { value: 'media', label: 'Читав/ла статтю або дивився/ла відео' },
-  { value: 'task', label: 'Конкретна задача на роботі де AI міг би допомогти' },
-  { value: 'team', label: 'Команда або менеджер почали використовувати' },
-  { value: 'curiosity', label: 'Просто цікавість, без конкретного тригера' },
-  { value: 'no-desire', label: 'Ще не маю конкретного бажання починати' },
-  { value: 'already-using', label: 'Вже активно використовую' },
+  { value: 'colleague', label: 'Побачив/ла приклад від колеги' },
+  { value: 'task', label: 'Конкретна задача на роботі' },
+  { value: 'media', label: 'Контент: стаття або відео' },
+  { value: 'team', label: 'Вимоги або ініціативи команди' },
+  { value: 'curiosity', label: 'Власна цікавість' },
+  { value: 'nothing-yet', label: 'Поки не було нічого такого' },
 ]
 
-const PARALYSIS_OPTIONS = [
-  { value: 'which-tool', label: 'Не знаю який інструмент взяти — їх дуже багато' },
-  { value: 'which-task', label: 'Не знаю з якої задачі починати — що взагалі можна робити з AI?' },
-  { value: 'how-to-use', label: 'Відкривав/ла щось конкретне, але не розумів/ла як в ньому працювати' },
-  { value: 'disappointing', label: 'Спробував/ла — але результат розчарував' },
-  { value: 'no-problem', label: 'Для мене це вже не проблема' },
+const BARRIER_OPTIONS = [
+  { value: 'where-to-start', label: 'Не знаю з чого почати' },
+  { value: 'no-clear-use-case', label: 'Не розумію де AI реально корисний саме для мене' },
+  { value: 'weak-results', label: 'Результати виглядали слабкими' },
+  { value: 'no-time', label: 'Не вистачає часу розібратись' },
+  { value: 'too-many-tools', label: 'Занадто багато інструментів — важко вибрати' },
+  { value: 'no-trust', label: 'Не довіряю якості результатів' },
+  { value: 'no-need', label: 'Не бачу потреби' },
+  { value: 'not-a-problem', label: 'Це вже не проблема' },
 ]
 
-const ONE_STEP_OPTIONS = [
-  { value: 'yes', label: 'Так, одразу — саме цього і не вистачає' },
-  { value: 'maybe', label: 'Мабуть, але залежить від того що саме' },
-  { value: 'no', label: 'Ні — мені потрібно спочатку більше розуміти як це влаштовано' },
+const EXAMPLE_OPTIONS = [
+  { value: 'example-trigger', label: 'Саме те чого не вистачає — одразу б спробував/ла щось схоже' },
+  { value: 'useful-partial', label: 'Скоріше корисний, але проблема не тільки в браку прикладів' },
+  { value: 'need-basics', label: 'Навряд чи допоміг би — мені потрібно спочатку більше розібратись в основах' },
+  { value: 'already-using', label: 'Не потрібен — я вже активно використовую AI в роботі' },
 ]
 
 export function SurveyForm() {
@@ -100,7 +104,7 @@ export function SurveyForm() {
         2 хвилини про AI
       </Typography>
       <Typography sx={{ color: 'text.secondary', mb: 4, fontSize: 14 }}>
-        Досліджуємо як дизайнери DataArt підходять до старту з AI.
+        Досліджуємо як дизайнери DataArt взаємодіють з AI у своїй роботі.
         Анонімно, 4 питання.
       </Typography>
 
@@ -167,7 +171,7 @@ export function SurveyForm() {
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
-            Що підштовхнуло тебе до думки "треба нарешті з AI щось робити"?
+            Що найбільше вплинуло на твій інтерес до AI?
           </FormLabel>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
             Вибери все що підходить
@@ -211,17 +215,17 @@ export function SurveyForm() {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Q2 — Paralysis */}
+      {/* Q2 — Barrier */}
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth required>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
-            Коли думаєш про те щоб почати з AI — що здається найскладнішим?
+            Що зараз найбільше заважає тобі використовувати AI частіше?
           </FormLabel>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
             Вибери одне що найближче *
           </Typography>
           <RadioGroup value={paralysis} onChange={e => setParalysis(e.target.value)}>
-            {PARALYSIS_OPTIONS.map(o => (
+            {BARRIER_OPTIONS.map(o => (
               <FormControlLabel
                 key={o.value}
                 value={o.value}
@@ -253,12 +257,10 @@ export function SurveyForm() {
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl fullWidth>
           <FormLabel sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
-            Є в твоїй роботі дизайнера щось що ти регулярно робиш руками і думаєш
-            "це мало б бути простіше або автоматичніше"?
+            Які повторювані або рутинні задачі в роботі дизайнера тобі хотілося б спростити або автоматизувати?
           </FormLabel>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
-            Коротко, будь-що — наприклад: "кожного разу руками пишу однотипний бриф",
-            "збираю фідбек від клієнта в чаті"
+            Наприклад: тексти, ресерч, документація, фідбек, UI cleanup, handoff…
           </Typography>
           <TextField
             multiline
@@ -274,18 +276,17 @@ export function SurveyForm() {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Q4 — One step */}
+      {/* Q4 — Example reaction */}
       <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth required>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
-            Якби хтось сказав тобі конкретно "ось що зроби першим кроком з AI" —
-            ти б спробував/ла?
+            Конкретний приклад "як дизайнер використовує AI в реальних задачах" для мене:
           </FormLabel>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
             Вибери одне *
           </Typography>
           <RadioGroup value={oneStep} onChange={e => setOneStep(e.target.value)}>
-            {ONE_STEP_OPTIONS.map(o => (
+            {EXAMPLE_OPTIONS.map(o => (
               <FormControlLabel
                 key={o.value}
                 value={o.value}
