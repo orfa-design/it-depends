@@ -49,6 +49,10 @@ function AssigneeBadge({
   )
 }
 
+type Tab = 'plan' | 'brief'
+
+const PLAN_SECTION_TITLE = '🗓 Наш план — дослідження'
+
 export function ChecklistClient({
   sections,
   initialState,
@@ -62,6 +66,11 @@ export function ChecklistClient({
   const [assignees, setAssignees] = useState<Record<string, Assignee>>(initialAssignees)
   const [saving, setSaving] = useState<string | null>(null)
   const [showQuotes, setShowQuotes] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('plan')
+
+  const visibleSections = sections.filter((s) =>
+    activeTab === 'plan' ? s.title === PLAN_SECTION_TITLE : s.title !== PLAN_SECTION_TITLE
+  )
 
   async function toggle(id: string) {
     const next = !state[id]
@@ -100,33 +109,59 @@ export function ChecklistClient({
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
-      <div style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>It Depends — Checklist</h1>
-          <p style={{ margin: 0, color: '#666', fontSize: 14 }}>
-            {done} / {total} виконано · оновлюється при перезавантаженні
-          </p>
-        </div>
-        <button
-          onClick={() => setShowQuotes((v) => !v)}
-          style={{
-            padding: '6px 14px', borderRadius: 8,
-            border: '1px solid #ddd',
-            background: showQuotes ? '#111' : '#fff',
-            color: showQuotes ? '#fff' : '#444',
-            fontSize: 13, cursor: 'pointer',
-            whiteSpace: 'nowrap', marginTop: 4,
-          }}
-        >
-          {showQuotes ? 'Сховати цитати' : 'Показати цитати'}
-        </button>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 4px' }}>It Depends — Checklist</h1>
+        <p style={{ margin: 0, color: '#666', fontSize: 14 }}>
+          {done} / {total} виконано · оновлюється при перезавантаженні
+        </p>
       </div>
 
-      {sections.map((section) => (
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 28, alignItems: 'center' }}>
+        {(['plan', 'brief'] as Tab[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              padding: '8px 18px',
+              borderRadius: 20,
+              border: activeTab === tab ? '1.5px solid #111' : '1.5px solid #e0e0e0',
+              background: activeTab === tab ? '#111' : '#fff',
+              color: activeTab === tab ? '#fff' : '#555',
+              fontSize: 13,
+              fontWeight: activeTab === tab ? 600 : 400,
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+          >
+            {tab === 'plan' ? '🗓 Наш план' : '📋 Бриф'}
+          </button>
+        ))}
+        {activeTab === 'brief' && (
+          <button
+            onClick={() => setShowQuotes((v) => !v)}
+            style={{
+              marginLeft: 'auto',
+              padding: '6px 14px', borderRadius: 8,
+              border: '1px solid #ddd',
+              background: showQuotes ? '#111' : '#fff',
+              color: showQuotes ? '#fff' : '#444',
+              fontSize: 13, cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {showQuotes ? 'Сховати цитати' : 'Показати цитати'}
+          </button>
+        )}
+      </div>
+
+      {visibleSections.map((section) => (
         <div key={section.title} style={{ marginBottom: 36 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 12px' }}>
-            {section.title}
-          </h2>
+          {activeTab !== 'plan' && (
+            <h2 style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 12px' }}>
+              {section.title}
+            </h2>
+          )}
           <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eee', overflow: 'hidden' }}>
             {section.items.map((item, i) => (
               <div
