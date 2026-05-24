@@ -16,9 +16,9 @@ const OWNER_NEXT: Record<string, Owner> = {
 }
 
 const PINNED_SECTIONS: { key: keyof WorkflowState['pinned']; label: string }[] = [
-  { key: 'next48h',   label: '🔥 Next 48h' },
-  { key: 'blocked',   label: '🚧 Blocked / decisions' },
-  { key: 'questions', label: '🧠 Open questions' },
+  { key: 'next48h',   label: '🔥 Наступні 48 год' },
+  { key: 'blocked',   label: '🚧 Блокери / рішення' },
+  { key: 'questions', label: '🧠 Відкриті питання' },
 ]
 
 const uid   = () => crypto.randomUUID()
@@ -75,7 +75,7 @@ function PinnedInput({ onCommit, onCancel }: { onCommit: (text: string) => void;
       className="wf-pinned-input"
       value={val}
       autoFocus
-      placeholder="Type and press Enter…"
+      placeholder="Напишіть і натисніть Enter…"
       onChange={e => setVal(e.target.value)}
       onKeyDown={e => {
         if (e.key === 'Enter')  { e.preventDefault(); onCommit(val) }
@@ -186,7 +186,7 @@ function PhaseCard({
             />
           ))}
           <div className="wf-add-item" onClick={onAddItem} role="button" tabIndex={0}>
-            <IcPlus /> Add item
+            <IcPlus /> Додати пункт
           </div>
         </div>
       )}
@@ -352,7 +352,7 @@ export function WorkflowClient({ initialState }: { initialState: WorkflowState }
   }
 
   function deleteItem(phaseId: string, itemId: string) {
-    if (!confirm('Delete this item?')) return
+    if (!confirm('Видалити цей пункт?')) return
     update({ ...state, phases: state.phases.map(p => p.id !== phaseId ? p : { ...p, items: p.items.filter(it => it.id !== itemId) }) })
   }
 
@@ -369,7 +369,7 @@ export function WorkflowClient({ initialState }: { initialState: WorkflowState }
 
   // ── Reset ─────────────────────────────────────────────────────────────────
   function doReset() {
-    if (!confirm('Reset workflow to defaults? All progress will be lost.')) return
+    if (!confirm('Скинути до початкового стану? Весь прогрес буде втрачено.')) return
     const seed = getSeed()
     setState(seed)
     persist(seed)
@@ -392,16 +392,16 @@ export function WorkflowClient({ initialState }: { initialState: WorkflowState }
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             {savedTime && (
               <span className="wf-save-time">
-                {saveStatus === 'unsaved' ? '⚠ unsaved' : `Saved ${savedTime}`}
+                {saveStatus === 'unsaved' ? '⚠ не збережено' : `Збережено ${savedTime}`}
               </span>
             )}
-            <button className="wf-btn wf-btn-danger" onClick={doReset}>Reset</button>
+            <button className="wf-btn wf-btn-danger" onClick={doReset}>Скинути</button>
           </div>
         </div>
 
         {/* Brief Reminders */}
         <div className="wf-constraints">
-          <div className="wf-section-label">Brief Reminders</div>
+          <div className="wf-section-label">Нагадування</div>
           <div className="wf-reminders">
             {state.constraints.map(c => <span key={c.id} className="wf-reminder">• {c.title}</span>)}
           </div>
@@ -428,7 +428,7 @@ export function WorkflowClient({ initialState }: { initialState: WorkflowState }
                 </div>
                 {editingId === addKey
                   ? <PinnedInput onCommit={text => addPinned(key, text)} onCancel={() => setEditing(null)} />
-                  : <button className="wf-pinned-add" onClick={() => setEditing(addKey)} type="button"><IcPlus /> Add</button>
+                  : <button className="wf-pinned-add" onClick={() => setEditing(addKey)} type="button"><IcPlus /> Додати</button>
                 }
               </div>
             )
