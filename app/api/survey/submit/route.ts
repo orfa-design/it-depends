@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 export interface SurveyResponse {
   id: string
   submittedAt: string
+  name: string
   triggers: string[]
   triggersOther: string
   paralysis: string
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
   const response: SurveyResponse = {
     id: crypto.randomUUID(),
     submittedAt: new Date().toISOString(),
+    name: body.name ?? '',
     triggers: body.triggers ?? [],
     triggersOther: body.triggersOther ?? '',
     paralysis: body.paralysis ?? '',

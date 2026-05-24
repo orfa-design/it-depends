@@ -31,6 +31,7 @@ const ONE_STEP_OPTIONS = [
 ]
 
 export function SurveyForm() {
+  const [name, setName] = useState('')
   const [triggers, setTriggers] = useState<string[]>([])
   const [triggersOther, setTriggersOther] = useState('')
   const [paralysis, setParalysis] = useState('')
@@ -57,7 +58,7 @@ export function SurveyForm() {
       const res = await fetch('/api/survey/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
+        body: JSON.stringify({ name, triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
       })
       if (!res.ok) throw new Error('API error')
       setSubmitted(true)
@@ -92,6 +93,24 @@ export function SurveyForm() {
         Досліджуємо як дизайнери DataArt підходять до старту з AI.
         Анонімно, 4 питання.
       </Typography>
+
+      {/* Name */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <FormControl fullWidth>
+          <FormLabel sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
+            Як тебе звати? <Typography component="span" sx={{ fontWeight: 400, color: 'text.secondary', fontSize: 13 }}>(необов'язково)</Typography>
+          </FormLabel>
+          <TextField
+            size="small"
+            placeholder="Ім'я або нік..."
+            value={name}
+            onChange={e => setName(e.target.value)}
+            fullWidth
+          />
+        </FormControl>
+      </Paper>
+
+      <Divider sx={{ mb: 3 }} />
 
       {/* Q1 — Тригер */}
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
