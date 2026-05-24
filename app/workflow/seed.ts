@@ -25,7 +25,7 @@ export interface PinnedItem {
 }
 
 export interface WorkflowState {
-  version: 3
+  version: 4
   lastSaved: string
   owners: Array<{ id: string; name: string; color: string }>
   pinned: {
@@ -46,36 +46,40 @@ function mkItem(title: string, owner: Owner = null): WorkflowItem {
 
 export function getSeed(): WorkflowState {
   return {
-    version: 3,
+    version: 4,
     lastSaved: tsNow(),
     owners: [
       { id: 'vlad', name: 'Vlad', color: '#3b82f6' },
       { id: 'liuda', name: 'Liuda', color: '#10b981' },
     ],
     pinned: {
-      next48h: [{ id: uid(), text: 'Зафіксувати момент тертя разом з Liuda' }],
+      next48h: [
+        { id: uid(), text: 'Провести перше інтерв\'ю' },
+      ],
       blocked: [],
       questions: [
-        { id: uid(), text: 'На якій категорії AI інструментів фокусуємось першою — генерація зображень, чат, IDE чи візуальні?' },
-        { id: uid(), text: 'Який найменший «мікро-старт» доводить що декомпозиція працює?' },
-        { id: uid(), text: 'Користувач сам обирає мікро-крок, чи AI пропонує?' },
+        { id: uid(), text: 'Чи соціальний тригер (бачу колегу → розумію що відстав) резонує з реальними дизайнерами?' },
+        { id: uid(), text: 'Що є «першою дією» в нашому рішенні — і чому саме вона знімає paralysis?' },
+        { id: uid(), text: 'Як виміряти що рішення спрацювало? Яка мінімальна метрика для журі?' },
       ],
     },
     constraints: [
-      { id: uid(), title: 'Використовуємо Material UI + DataArt іконки' },
-      { id: uid(), title: 'Прототип задеплоєно на Vercel — публічне посилання' },
-      { id: uid(), title: 'Фокус на ПЕРШІЙ дії — не розпилятись' },
+      { id: uid(), title: 'Material UI + DataArt іконки — перевіряє журі' },
+      { id: uid(), title: 'Прототип на Vercel — публічне посилання (hard requirement)' },
+      { id: uid(), title: 'Кожна ітерація: скріншот до/після + changelog з reasoning' },
+      { id: uid(), title: 'Одна перша дія — без розпилення на кілька сценаріїв' },
       { id: uid(), title: 'Не to-do список і не мотивашка — допомагає почати і продовжити' },
     ],
     phases: [
       {
-        id: 'problem',
-        title: 'Визначити проблему',
+        id: 'foundation',
+        title: 'Проблема і гіпотеза',
         collapsed: false,
         items: [
-          mkItem('Зафіксувати момент тертя (коли саме дизайнер закриває інструмент?)'),
-          mkItem('Визначити справжній намір (що вони хотіли зробити до того як кинути?)'),
-          mkItem('Сформулювати problem statement: «Ми допомагаємо [хто] коли [момент] перейти від [наміру] до [першої дії]»'),
+          mkItem('Момент тертя зафіксовано — коли і чому юзер зупиняється (не "не хоче", а "не знає звідки")'),
+          mkItem('Problem Statement: «Ми допомагаємо [хто] коли [момент] перейти від [наміру] до [першої дії]»'),
+          mkItem('UX Hypothesis: «Вважаємо що [рішення] допоможе [юзеру] [досягти], тому що [причина], виміряємо через [метрику]»'),
+          mkItem('User Flow — перший драфт: де починається взаємодія, де перша дія, де кінець'),
         ],
       },
       {
@@ -83,9 +87,10 @@ export function getSeed(): WorkflowState {
         title: 'Дослідження',
         collapsed: false,
         items: [
-          mkItem('Згенерувати анкету з Claude (5–7 питань, фокус на момент тертя)'),
-          mkItem('Провести з 2–3 дизайнерами DataArt (коридорне або асинхронне)'),
-          mkItem('Синтезувати відповіді — записати 2–3 підтверджені інсайти в docs/research/interviews.md'),
+          mkItem('Провести 2–3 коридорних інтерв\'ю (обов\'язково задокументувати)'),
+          mkItem('Занести findings в docs/research/interviews.md — цитати + інсайти'),
+          mkItem('Оновити user-snapshot.md після інтерв\'ю'),
+          mkItem('Гіпотезу підтверджено або відхилено — оновити docs/hypotheses.md'),
         ],
       },
       {
@@ -93,19 +98,23 @@ export function getSeed(): WorkflowState {
         title: 'Прототип і ітерації',
         collapsed: false,
         items: [
-          mkItem('Накидати основний флоу (папір або швидкий вайрфрейм — механіка «мікро-старту»)'),
-          mkItem('Зібрати клікабельний прототип (Material UI + обраний інструмент: Figma Make / Next.js / тощо)'),
-          mkItem('Протестувати з 1–2 дизайнерами, зафіксувати точки тертя'),
-          mkItem('Ітерувати за результатами — задокументувати до/після в docs/changelog.md'),
+          mkItem('Перший прототип: Material UI + DataArt іконки — обов\'язково'),
+          mkItem('Задеплоєно на Vercel — публічне посилання є і працює, додати в README'),
+          mkItem('Тест з 1–2 дизайнерами — точки тертя записані в docs/changelog.md'),
+          mkItem('Кожна ітерація: скріншот до → зміна → скріншот після → запис з reasoning'),
         ],
       },
       {
-        id: 'ship',
-        title: 'Запустити і презентувати',
+        id: 'presentation',
+        title: 'Презентація (2 червня)',
         collapsed: false,
         items: [
-          mkItem('Фінальний прототип зафіксовано і задеплоєно на Vercel'),
-          mkItem('Згенерувати HTML презентацію з Claude (слайди як стилізований HTML)'),
+          mkItem('Слайд: Problem Statement'),
+          mkItem('Слайд: UX Hypothesis'),
+          mkItem('Слайд: User Flow'),
+          mkItem('Слайд: Live prototype demo — публічне посилання'),
+          mkItem('Слайд: Technologies & Tools — як і де використовували AI'),
+          mkItem('Слайд: Iteration Journey — скріншоти, рішення, гіпотези, тести'),
           mkItem('Репетиція від початку до кінця + фінальна відшліфовка'),
         ],
       },

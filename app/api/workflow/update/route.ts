@@ -5,7 +5,7 @@ import type { WorkflowState } from '../../../workflow/seed'
 export async function POST(request: Request) {
   try {
     const body: WorkflowState = await request.json()
-    if (!body || body.version !== 3) {
+    if (!body || body.version !== 4) {
       return NextResponse.json({ ok: false, error: 'invalid version' }, { status: 400 })
     }
     const lastSaved = new Date().toISOString()

@@ -10,7 +10,7 @@ export default async function WorkflowPage() {
   let state: WorkflowState
   try {
     const stored = await kv.get<WorkflowState>('workflow:vlad')
-    if (stored && stored.version === 3) {
+    if (stored && stored.version === 4) {
       state = stored
     } else {
       state = getSeed()
