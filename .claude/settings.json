@@ -12,11 +12,11 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash(git push*)",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "echo '📝 git push виконано → оновити docs/changelog.md + запропонувати log entry в docs/log/liuda.md або docs/log/vlad.md'"
+            "command": "input=$(cat 2>/dev/null); if echo \"$input\" | grep -q '\"git push'; then echo '📝 git push виконано → оновити docs/changelog.md + запропонувати log entry в docs/log/liuda.md або docs/log/vlad.md'; fi"
           }
         ]
       }
