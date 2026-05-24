@@ -19,6 +19,14 @@ Core insight: decomposition + micro-start problem, not a navigation problem.
 
 ## How we work
 
+### Session start
+At the beginning of every new session:
+1. Run: `git fetch && git log origin/main --oneline -5`
+2. Check the last commit author:
+   - If it's the current user → proceed normally
+   - If it's the teammate → say "Твій тімейт пушив після тебе. Зроби git pull. Хочеш я покажу що він/вона зробив/ла?"
+3. If user says yes → read the teammate's log file (docs/log/vlad.md or docs/log/liuda.md) and show only entries added after the teammate's last commit date.
+
 ### Git sync rule
 Before writing anything to docs/ — always ask the user: "Did you run `git pull`?"
 Before synthesizing thinking files — always ask: "Did both you and your teammate push their latest changes?"
