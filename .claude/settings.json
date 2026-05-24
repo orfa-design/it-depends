@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git fetch origin main --quiet 2>/dev/null; behind=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo 0); if [ \"$behind\" -gt \"0\" ]; then echo \"⚠️ Тімейт пушив $behind коміт(ів) після тебе. Зроби git pull перед роботою з docs/.\"; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(git push*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📝 git push виконано → оновити docs/changelog.md + запропонувати log entry в docs/log/liuda.md або docs/log/vlad.md'"
+          }
+        ]
+      }
+    ]
+  }
+}
