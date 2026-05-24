@@ -1,0 +1,204 @@
+'use client'
+
+import { useState } from 'react'
+import {
+  Box, Button, Checkbox, FormControl, FormControlLabel,
+  FormGroup, FormLabel, Radio, RadioGroup, TextField,
+  Typography, Paper, Divider, Alert,
+} from '@mui/material'
+
+const TRIGGERS = [
+  { value: 'colleague', label: 'Бачив/ла як колега зробив щось класне з AI' },
+  { value: 'media', label: 'Читав/ла статтю або дивився/ла відео' },
+  { value: 'task', label: 'Конкретна задача на роботі де AI міг би допомогти' },
+  { value: 'team', label: 'Команда або менеджер почали використовувати' },
+  { value: 'curiosity', label: 'Просто цікавість, без конкретного тригера' },
+  { value: 'none', label: 'Ще не маю такого бажання / вже активно використовую' },
+]
+
+const PARALYSIS_OPTIONS = [
+  { value: 'which-tool', label: 'Не знаю який інструмент взяти — їх дуже багато' },
+  { value: 'which-task', label: 'Не знаю з якої задачі починати — що взагалі можна робити з AI?' },
+  { value: 'how-to-use', label: 'Відкривав/ла щось конкретне, але не розумів/ла як в ньому працювати' },
+  { value: 'disappointing', label: 'Спробував/ла — але результат розчарував' },
+  { value: 'no-problem', label: 'Для мене це вже не проблема' },
+]
+
+const ONE_STEP_OPTIONS = [
+  { value: 'yes', label: 'Так, одразу — саме цього і не вистачає' },
+  { value: 'maybe', label: 'Мабуть, але залежить від того що саме' },
+  { value: 'no', label: 'Ні — мені потрібно спочатку більше розуміти як це влаштовано' },
+]
+
+export function SurveyForm() {
+  const [triggers, setTriggers] = useState<string[]>([])
+  const [paralysis, setParalysis] = useState('')
+  const [workIdea, setWorkIdea] = useState('')
+  const [oneStep, setOneStep] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  function toggleTrigger(value: string) {
+    setTriggers(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    )
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!paralysis || !oneStep) return
+    setLoading(true)
+    await fetch('/api/survey/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ triggers, paralysis, workIdea, oneStep }),
+    })
+    setSubmitted(true)
+    setLoading(false)
+  }
+
+  if (submitted) {
+    return (
+      <Box sx={{ maxWidth: 600, mx: 'auto', px: 3, py: 8, textAlign: 'center' }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>Дякую!</Typography>
+        <Typography sx={{ color: 'text.secondary' }}>
+          Твоя відповідь допоможе нам зробити кращий продукт для дизайнерів DataArt.
+        </Typography>
+      </Box>
+    )
+  }
+
+  return (
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{ maxWidth: 600, mx: 'auto', px: 3, py: 6 }}
+    >
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+        2 хвилини про AI
+      </Typography>
+      <Typography sx={{ color: 'text.secondary', mb: 4, fontSize: 14 }}>
+        Досліджуємо як дизайнери DataArt підходять до старту з AI.
+        Анонімно, 4 питання.
+      </Typography>
+
+      {/* Q1 — Тригер */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <FormControl component="fieldset" fullWidth>
+          <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
+            Що підштовхнуло тебе до думки "треба нарешті з AI щось робити"?
+          </FormLabel>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
+            Вибери все що підходить
+          </Typography>
+          <FormGroup>
+            {TRIGGERS.map(t => (
+              <FormControlLabel
+                key={t.value}
+                control={
+                  <Checkbox
+                    checked={triggers.includes(t.value)}
+                    onChange={() => toggleTrigger(t.value)}
+                    size="small"
+                  />
+                }
+                label={<Typography sx={{ fontSize: 14 }}>{t.label}</Typography>}
+              />
+            ))}
+          </FormGroup>
+        </FormControl>
+      </Paper>
+
+      <Divider sx={{ mb: 3 }} />
+
+      {/* Q2 — Paralysis */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <FormControl component="fieldset" fullWidth required>
+          <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
+            Коли думаєш про те щоб почати з AI — що здається найскладнішим?
+          </FormLabel>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
+            Вибери одне що найближче *
+          </Typography>
+          <RadioGroup value={paralysis} onChange={e => setParalysis(e.target.value)}>
+            {PARALYSIS_OPTIONS.map(o => (
+              <FormControlLabel
+                key={o.value}
+                value={o.value}
+                control={<Radio size="small" />}
+                label={<Typography sx={{ fontSize: 14 }}>{o.label}</Typography>}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </Paper>
+
+      <Divider sx={{ mb: 3 }} />
+
+      {/* Q3 — Work idea */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <FormControl fullWidth>
+          <FormLabel sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
+            Є в твоїй роботі дизайнера щось що ти регулярно робиш руками і думаєш
+            "це мало б бути простіше або автоматичніше"?
+          </FormLabel>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
+            Коротко, будь-що — наприклад: "кожного разу руками пишу однотипний бриф",
+            "збираю фідбек від клієнта в чаті"
+          </Typography>
+          <TextField
+            multiline
+            rows={2}
+            placeholder="Напиши що спадає на думку..."
+            value={workIdea}
+            onChange={e => setWorkIdea(e.target.value)}
+            size="small"
+            fullWidth
+          />
+        </FormControl>
+      </Paper>
+
+      <Divider sx={{ mb: 3 }} />
+
+      {/* Q4 — One step */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+        <FormControl component="fieldset" fullWidth required>
+          <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
+            Якби хтось сказав тобі конкретно "ось що зроби першим кроком з AI" —
+            ти б спробував/ла?
+          </FormLabel>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
+            Вибери одне *
+          </Typography>
+          <RadioGroup value={oneStep} onChange={e => setOneStep(e.target.value)}>
+            {ONE_STEP_OPTIONS.map(o => (
+              <FormControlLabel
+                key={o.value}
+                value={o.value}
+                control={<Radio size="small" />}
+                label={<Typography sx={{ fontSize: 14 }}>{o.label}</Typography>}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </Paper>
+
+      {(!paralysis || !oneStep) && (
+        <Alert severity="info" sx={{ mb: 2, fontSize: 13 }}>
+          Заповни обов'язкові питання (Q2 і Q4) щоб відправити
+        </Alert>
+      )}
+
+      <Button
+        type="submit"
+        variant="contained"
+        disabled={!paralysis || !oneStep || loading}
+        fullWidth
+        size="large"
+        sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+      >
+        {loading ? 'Відправляємо...' : 'Відправити відповідь'}
+      </Button>
+    </Box>
+  )
+}
