@@ -2,31 +2,64 @@
 
 Statuses: `draft` → `testing` → `validated` / `invalidated`
 
+Пріоритети: 🔴 критична (визначає що будуємо) · 🟡 середня (тест через прототип)
+
 ---
 
-## H1 — Activation energy hypothesis `draft`
+## H2 — Meta-level paralysis `draft` 🔴 пріоритет 1
 
-**Statement:** A designer knows they want to level up with AI tools. The intention is there. But the first step feels too large. Our product reduces activation energy to the point where the brain doesn't have time to get scared.
+**Statement:** Paralysis відбувається до відкриття будь-якого інструменту. Дизайнер не знає "як користуватись Claude" — він не знає з чого взагалі починати з AI як явищем: який напрямок, яке завдання, який інструмент обрати першим.
 
 **Assumes:**
-- The problem is not motivation (they want to do it)
-- The problem is not awareness (they know tools exist)
-- The problem is the perceived gap between current state and required effort
+- Confusion на рівні "куди йти?" а не "як виконати дію в інструменті?"
+- Проблема — відсутність точки входу, не складність конкретного тулу
 
-**How to test:** Interviews — ask about the specific moment of closing the tool. Does "gap" language appear naturally?
+**How to test:** В інтерв'ю — коли кажуть "не знаю з чого почати" уточнити: з чого саме? З вибору інструменту? З типу завдання? З першого кроку всередині?
+
+**Kill criteria:** Якщо більшість описує конкретний інструмент який спробували і не змогли — paralysis tool-level, не meta. Тоді ми вирішуємо не ту проблему.
 
 **Evidence so far:** None yet — pre-interview.
 
 ---
 
-## H2 — One next step hypothesis `draft`
+## H4 — Work-adjacent idea `draft` 🔴 пріоритет 2
 
-**Statement:** Giving ONE concrete next step in the moment of friction is enough to keep the user going.
+**Statement:** У дизайнера є конкретна незручність або рутина в його дизайнерській роботі яку він хотів би оцифрувати — але ніколи не думав що це реально зробити без розробника.
 
 **Assumes:**
-- The paralysis is caused by too many options / unclear path, not by skill gap
-- A single small action can break the loop
+- Ідея контекстуальна і робоча: "форма для фідбеку від клієнта", "генератор брифів", "хендофф-сторінка" — не абстрактний todo-list
+- Бажання є, але здавалось технічно недосяжним
 
-**How to test:** After interviews, prototype the "one step" interaction and test with same users.
+**How to test:** В інтерв'ю — "Є щось в твоїй дизайнерській роботі що ти робиш руками і думаєш — мало б бути простіше?" Якщо є і називають конкретне — підтверджено.
 
-**Evidence so far:** None yet.
+**Kill criteria:** Більше половини не можуть назвати нічого з роботи — треба давати шаблони і приклади замість відкритого питання.
+
+**Evidence so far:** None yet — pre-interview.
+
+---
+
+## H3 — Wow moment `draft` 🟡 пріоритет 3 (тест через прототип)
+
+**Statement:** Побачити свою робочу ідею живою в браузері — зроблену тобою, не туторіал — достатньо щоб зламати paralysis і захотіти продовжити.
+
+**Assumes:**
+- Ownership ("я це зробила") важливіший за якість результату
+- Один успішний досвід = мотивація на наступний крок
+
+**How to test:** Показати прототип реальному юзеру — чи звучить "моя ідея" vs "навчилась інструменту"? Чи хоче продовжити після?
+
+**Kill criteria:** Якщо після wow моменту людина каже "круто, але не розумію як це повторити самостійно" — одного моменту мало, потрібен шлях далі.
+
+**Evidence so far:** None yet — pre-prototype.
+
+---
+
+## Архів — переглянуті гіпотези
+
+### H1 — Activation energy (переглянута 2026-05-24)
+
+Оригінальна версія описувала paralysis всередині інструменту ("відкрив → злякався → закрив"). Після pivot'у user moment — paralysis відбувається до відкриття будь-чого. Замінена на H2 (meta-level) і H4 (work-adjacent idea).
+
+### H2 (оригінал) — One next step (переглянута 2026-05-24)
+
+"Giving ONE concrete next step is enough to keep the user going." Гіпотеза правильна по духу але описувала крок всередині інструменту. Перероблена: тепер H3 описує wow moment як точку входу, H2 описує природу paralysis на meta-рівні.
