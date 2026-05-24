@@ -32,9 +32,12 @@ const ONE_STEP_OPTIONS = [
 
 export function SurveyForm() {
   const [triggers, setTriggers] = useState<string[]>([])
+  const [triggersOther, setTriggersOther] = useState('')
   const [paralysis, setParalysis] = useState('')
+  const [paralysisOther, setParalysisOther] = useState('')
   const [workIdea, setWorkIdea] = useState('')
   const [oneStep, setOneStep] = useState('')
+  const [oneStepOther, setOneStepOther] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -51,7 +54,7 @@ export function SurveyForm() {
     await fetch('/api/survey/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ triggers, paralysis, workIdea, oneStep }),
+      body: JSON.stringify({ triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
     })
     setSubmitted(true)
     setLoading(false)
@@ -105,6 +108,25 @@ export function SurveyForm() {
                 label={<Typography sx={{ fontSize: 14 }}>{t.label}</Typography>}
               />
             ))}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={triggers.includes('other')}
+                  onChange={() => toggleTrigger('other')}
+                  size="small"
+                />
+              }
+              label={<Typography sx={{ fontSize: 14 }}>Інше</Typography>}
+            />
+            {triggers.includes('other') && (
+              <TextField
+                size="small"
+                placeholder="Напиши що саме..."
+                value={triggersOther}
+                onChange={e => setTriggersOther(e.target.value)}
+                sx={{ mt: 0.5, ml: 4 }}
+              />
+            )}
           </FormGroup>
         </FormControl>
       </Paper>
@@ -129,6 +151,20 @@ export function SurveyForm() {
                 label={<Typography sx={{ fontSize: 14 }}>{o.label}</Typography>}
               />
             ))}
+            <FormControlLabel
+              value="other"
+              control={<Radio size="small" />}
+              label={<Typography sx={{ fontSize: 14 }}>Інше</Typography>}
+            />
+            {paralysis === 'other' && (
+              <TextField
+                size="small"
+                placeholder="Напиши що саме..."
+                value={paralysisOther}
+                onChange={e => setParalysisOther(e.target.value)}
+                sx={{ mt: 0.5, ml: 4 }}
+              />
+            )}
           </RadioGroup>
         </FormControl>
       </Paper>
@@ -179,6 +215,20 @@ export function SurveyForm() {
                 label={<Typography sx={{ fontSize: 14 }}>{o.label}</Typography>}
               />
             ))}
+            <FormControlLabel
+              value="other"
+              control={<Radio size="small" />}
+              label={<Typography sx={{ fontSize: 14 }}>Інше</Typography>}
+            />
+            {oneStep === 'other' && (
+              <TextField
+                size="small"
+                placeholder="Напиши що саме..."
+                value={oneStepOther}
+                onChange={e => setOneStepOther(e.target.value)}
+                sx={{ mt: 0.5, ml: 4 }}
+              />
+            )}
           </RadioGroup>
         </FormControl>
       </Paper>

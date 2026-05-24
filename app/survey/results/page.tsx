@@ -7,6 +7,7 @@ const PARALYSIS_LABELS: Record<string, string> = {
   'how-to-use': 'Не розумів як користуватись (tool-level)',
   'disappointing': 'Результат розчарував (tool-level)',
   'no-problem': 'Не проблема',
+  'other': 'Інше',
 }
 
 const TRIGGER_LABELS: Record<string, string> = {
@@ -16,12 +17,14 @@ const TRIGGER_LABELS: Record<string, string> = {
   team: 'Команда / менеджер',
   curiosity: 'Цікавість',
   none: 'Немає бажання / вже використовую',
+  other: 'Інше',
 }
 
 const ONE_STEP_LABELS: Record<string, string> = {
   yes: 'Так, одразу',
   maybe: 'Мабуть',
   no: 'Ні, потрібно більше розуміння',
+  other: 'Інше',
 }
 
 export default async function SurveyResultsPage() {
@@ -168,6 +171,22 @@ export default async function SurveyResultsPage() {
           </div>
         )}
       </div>
+
+      {/* Other answers */}
+      {responses.some(r => r.triggersOther || r.paralysisOther || r.oneStepOther) && (
+        <>
+          <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Відповіді "Інше"</h2>
+          <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden', marginBottom: 32 }}>
+            {responses.filter(r => r.triggersOther || r.paralysisOther || r.oneStepOther).map((r, i) => (
+              <div key={r.id} style={{ padding: '12px 16px', borderTop: i > 0 ? '1px solid #f0f0f0' : 'none', fontSize: 13 }}>
+                {r.triggersOther && <div><span style={{ color: '#999' }}>Q1:</span> {r.triggersOther}</div>}
+                {r.paralysisOther && <div style={{ marginTop: r.triggersOther ? 4 : 0 }}><span style={{ color: '#999' }}>Q2:</span> {r.paralysisOther}</div>}
+                {r.oneStepOther && <div style={{ marginTop: (r.triggersOther || r.paralysisOther) ? 4 : 0 }}><span style={{ color: '#999' }}>Q4:</span> {r.oneStepOther}</div>}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <p style={{ fontSize: 12, color: '#ccc', textAlign: 'center' }}>
         it-depends.vercel.app/survey/results · оновлюється при перезавантаженні
