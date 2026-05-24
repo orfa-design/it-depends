@@ -66,11 +66,11 @@ const sections = [
 
 export default async function ChecklistPage() {
   let state: Record<string, boolean> = {}
-  let assignees: Record<string, 'liuda' | 'vlad'> = {}
+  let assignees: Record<string, 'liuda' | 'vlad' | 'none'> = {}
 
   try {
     state = (await kv.get<Record<string, boolean>>('checklist')) ?? {}
-    assignees = (await kv.get<Record<string, 'liuda' | 'vlad'>>('checklist-assignees')) ?? {}
+    assignees = (await kv.get<Record<string, 'liuda' | 'vlad' | 'none'>>('checklist-assignees')) ?? {}
   } catch {
     state = {}
     assignees = {}

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 
 type Assignee = 'liuda' | 'vlad'
+// 'none' = explicitly unassigned (differs from undefined = show defaultAssignee)
+type StoredAssignee = Assignee | 'none'
 type Item = { id: string; label: string; quote?: string; defaultAssignee?: Assignee }
 type Section = { title: string; items: Item[] }
 
@@ -60,10 +62,10 @@ export function ChecklistClient({
 }: {
   sections: Section[]
   initialState: Record<string, boolean>
-  initialAssignees: Record<string, Assignee>
+  initialAssignees: Record<string, StoredAssignee>
 }) {
   const [state, setState] = useState<Record<string, boolean>>(initialState)
-  const [assignees, setAssignees] = useState<Record<string, Assignee>>(initialAssignees)
+  const [assignees, setAssignees] = useState<Record<string, StoredAssignee>>(initialAssignees)
   const [saving, setSaving] = useState<string | null>(null)
   const [showQuotes, setShowQuotes] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('plan')
@@ -85,26 +87,36 @@ export function ChecklistClient({
   }
 
   async function cycleAssignee(id: string) {
-    const allItems = sections.flatMap((s) => s.items)
-    const item = allItems.find((i) => i.id === id)
-    // Use displayed value (including defaultAssignee fallback) so the cycle
-    // starts from what the user actually sees, not from the raw stored state.
-    const displayed = assignees[id] ?? item?.defaultAssignee ?? null
-    const next: Assignee | null =
+    const item = sections.flatMap((s) => s.items).find((i) => i.id === id)
+
+    // What the user currently sees (stored 'none' → display null)
+    const stored = assignees[id]
+    const displayed: Assignee | null =
+      stored === 'none' ? null :
+      stored != null ? stored :
+      item?.defaultAssignee ?? null
+
+    // Next displayed value in cycle: null → liuda → vlad → null
+    const nextDisplayed: Assignee | null =
       displayed === null ? 'liuda' :
       displayed === 'liuda' ? 'vlad' : null
 
+    // For items with a defaultAssignee we must store 'none' explicitly —
+    // otherwise deleting the key makes badge fall back to defaultAssignee again.
+    const nextStored: StoredAssignee | null =
+      nextDisplayed === null && item?.defaultAssignee ? 'none' : nextDisplayed
+
     setAssignees((s) => {
       const updated = { ...s }
-      if (next === null) delete updated[id]
-      else updated[id] = next
+      if (nextStored === null) delete updated[id]
+      else updated[id] = nextStored
       return updated
     })
 
     await fetch('/api/checklist/assign', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, assignee: next }),
+      body: JSON.stringify({ id, assignee: nextStored }),
     })
   }
 
@@ -204,7 +216,10 @@ export function ChecklistClient({
                     )}
                   </div>
                   <AssigneeBadge
-                    assignee={assignees[item.id] ?? item.defaultAssignee ?? null}
+                    assignee={
+                      assignees[item.id] === 'none' ? null :
+                      (assignees[item.id] as Assignee | undefined) ?? item.defaultAssignee ?? null
+                    }
                     onClick={() => cycleAssignee(item.id)}
                   />
                 </label>
