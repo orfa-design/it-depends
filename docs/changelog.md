@@ -27,3 +27,7 @@ Auto-maintained by Claude. Do not edit manually.
 ## 2026-05-24 — Shared Claude Code hooks configured
 **What:** .claude/settings.json з двома хуками: UserPromptSubmit (git fetch — попереджає якщо тімейт пушив) + PostToolUse (нагадування після git push оновити changelog).
 **Why:** Поведінкові інструкції в CLAUDE.md ненадійні — Claude забуває. Хуки гарантують виконання. settings.json в git → Влад отримає після git pull.
+
+## 2026-05-24 — User moment і product concept переосмислені
+**What:** Повністю переписано user-snapshot.md. Новий запис в DECISIONS.md.
+**Why:** Sounding session виявила що старий момент ("відкрив інструмент → злякався → закрив") — неправильний. Реальний тригер — соціальний (бачить колегу що вайткодить) → paralysis перед цілим AI-всесвітом ще до відкриття будь-якого інструменту. Product concept: ми entry point, відповідь на "з чого починати з AI взагалі." Wow момент = жива власна ідея в браузері.
