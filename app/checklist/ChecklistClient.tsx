@@ -85,10 +85,14 @@ export function ChecklistClient({
   }
 
   async function cycleAssignee(id: string) {
-    const current = assignees[id] ?? null
+    const allItems = sections.flatMap((s) => s.items)
+    const item = allItems.find((i) => i.id === id)
+    // Use displayed value (including defaultAssignee fallback) so the cycle
+    // starts from what the user actually sees, not from the raw stored state.
+    const displayed = assignees[id] ?? item?.defaultAssignee ?? null
     const next: Assignee | null =
-      current === null ? 'liuda' :
-      current === 'liuda' ? 'vlad' : null
+      displayed === null ? 'liuda' :
+      displayed === 'liuda' ? 'vlad' : null
 
     setAssignees((s) => {
       const updated = { ...s }
