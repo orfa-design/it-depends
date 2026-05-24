@@ -14,6 +14,8 @@ Core insight: decomposition + micro-start problem, not a navigation problem.
 - Hypotheses and their status: /docs/hypotheses.md
 - User portrait and key moment: /docs/user-snapshot.md
 - Interview notes and insights: /docs/research/interviews.md
+- Liuda's iteration log: /docs/log/liuda.md
+- Vlad's iteration log: /docs/log/vlad.md
 
 ## How we work
 
@@ -35,18 +37,23 @@ updates a hypothesis. The thinking files stay as-is (history).
 what conflicts, what's new in each — then produce a clear summary with a proposed
 decision or next question.
 
-### Iteration log (Claude's responsibility)
-After every meaningful action — writing to any doc, synthesizing, updating a hypothesis,
-making a decision — automatically append an entry to /docs/changelog.md.
-Do not ask the user, just do it. Format:
+### Iteration logs (per person)
+Each person keeps their own rich log of what they did and why:
+- Liuda's log: /docs/log/liuda.md
+- Vlad's log: /docs/log/vlad.md
 
+Format for each entry:
 ```
 ## YYYY-MM-DD — Short title
-**What:** one sentence
-**Why:** one sentence
+**Що робив/ла:** what was done and the context around it
+**Чому саме так:** reasoning, what drove the decision
+**Що вийшло:** outcome, what exists now that didn't before
+**Що здивувало:** surprises, obstacles, unexpected learnings (if any)
+**Наступний крок:** what comes next
 ```
 
-The user never edits changelog.md manually. It is built automatically from Claude's actions.
+**After every `git push`:** ask the user "Зафіксувати цей пуш в лозі?" —
+if yes, write a new entry to their log file, then push the log update too.
 
 ### Other files
 - Decisions go in DECISIONS.md with date and reasoning
