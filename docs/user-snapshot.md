@@ -1,36 +1,46 @@
 # User Snapshot
 
-Last updated: 2026-05-23 (pre-interview draft)
+Last updated: 2026-05-24 (revised after sounding session — previous version was pre-interview assumption)
 
 ---
 
-## Who
+## Хто
 
-DataArt designer. Mid-level. Uses ChatGPT for work questions — copy, quick answers, maybe call analysis. Sees colleagues doing more advanced things with AI. Wants to catch up but doesn't know where to start.
+DataArt дизайнер, mid-level. Використовує ChatGPT для базових задач.
+Бачить колег (девелоперів, більш просунутих дизайнерів) що роблять щось вражаюче з AI.
+Хоче теж, але не знає як підступитись.
 
-## The moment
+## Тригер
 
-Opens a new AI tool (Midjourney, Claude, a design AI plugin, etc.).
-Sees the interface. Feels the gap between "where I am now" and "what this requires."
-Closes it. Tells themselves "later."
+Бачить колегу що за одну сесію вайткодив щось живе і робоче.
+Думає: "вааау, треба нарешті з тим AI розібратись."
 
-This is the moment we're designing for.
+## Момент (реальний)
 
-## What they feel (hypothesis)
+Розуміє що AI — це не новий Figma (встанови і користуйся).
+Це цілий новий всесвіт: агенти, GitHub, бази даних, як дивитись результат, про що питати.
+Не знає з чого починати взагалі — paralysis ще до відкриття будь-якого конкретного інструменту.
 
-Not "I don't want this." More like "I don't know where to start and I don't want to waste time figuring it out."
+## Що хоче
 
-Possibly: mild shame (others are doing it), mild anxiety (what if I do it wrong), decision fatigue (too many choices).
+Реалізувати свою маленьку ідею і побачити що вона живе і працює.
+"Я це зробила сама" — ось wow момент.
+Не "розібратись з AI" абстрактно, а конкретний живий результат власної ідеї.
 
-## What they're NOT
+## Поточне рішення
 
-- Not a beginner who's never used AI
-- Not someone who doesn't care about AI
-- Not someone who needs convincing — they're already convinced
+Нічого (paralysis). Або питає колегу — але це не масштабується
+і вимагає від неї "бути тою що не знає" перед кимось.
 
-## Open questions (to answer in interviews)
+## Що вона НЕ є
 
-- What tool specifically triggered the "close" reaction last time?
-- Was it the UI, the onboarding, the blank canvas, or something else?
-- What would "one good first step" look like to them?
-- Do they have a specific AI skill they want to learn, or is it more vague?
+- Не новачок який ніколи не чув про AI
+- Не той хто не хоче — вона вже хоче
+- Не той кому треба пояснювати навіщо AI дизайнерам
+
+## Відкриті питання (перевірити в інтерв'ю)
+
+- Що є її "маленькою ідеєю" — вона вже є, чи продукт допомагає її знайти?
+- Як вона дізнається що наш продукт існує?
+- Чи вистачає одного wow моменту щоб продовжила, чи потрібна підтримка далі?
+- Соціальний тригер (колега) — наскільки він universal чи це тільки DataArt контекст?
