@@ -42,18 +42,41 @@ Each person keeps their own rich log of what they did and why:
 - Liuda's log: /docs/log/liuda.md
 - Vlad's log: /docs/log/vlad.md
 
-Format for each entry:
+**When asked to write a log entry:**
+1. Draft the entry using the format below
+2. Show the draft to the user with: "Запишу в [filename]. Ось що буде:"
+3. Wait for approval or edits before writing to file
+4. After approval — write to file, then push
+
+**What makes a good entry (follow this strictly):**
+- "Що робила" — not just what, but the context: what problem you were solving, what you tried, what changed your mind
+- "Чому саме так" — the actual reasoning, not "because it's better". What tradeoff did you make? What did you reject?
+- "Що вийшло" — concrete: what exists now that didn't before. Link or describe it.
+- "Що здивувало" — something that didn't go as expected. If nothing, skip this field.
+- "Наступний крок" — specific, not vague.
+
+**Bad entry:** "Налаштували репо. Бо треба було. Вийшло добре."
+**Good entry:** "Витратила годину на організацію репо перш ніж будувати продукт. Зрозуміла що жюрі оцінює процес окремо — тому краще документувати з першого дня ніж реконструювати потім."
+
+Format:
 ```
 ## YYYY-MM-DD — Short title
-**Що робив/ла:** what was done and the context around it
-**Чому саме так:** reasoning, what drove the decision
-**Що вийшло:** outcome, what exists now that didn't before
-**Що здивувало:** surprises, obstacles, unexpected learnings (if any)
-**Наступний крок:** what comes next
-```
 
-**After every `git push`:** ask the user "Зафіксувати цей пуш в лозі?" —
-if yes, write a new entry to their log file, then push the log update too.
+**Що робила:**
+...
+
+**Чому саме так:**
+...
+
+**Що вийшло:**
+...
+
+**Що здивувало:** *(якщо є)*
+...
+
+**Наступний крок:**
+...
+```
 
 ### Other files
 - Decisions go in DECISIONS.md with date and reasoning
