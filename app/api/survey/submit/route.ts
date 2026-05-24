@@ -5,6 +5,7 @@ export interface SurveyResponse {
   id: string
   submittedAt: string
   name: string
+  wasAtWorkshop: boolean
   triggers: string[]
   triggersOther: string
   paralysis: string
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
     id: crypto.randomUUID(),
     submittedAt: new Date().toISOString(),
     name: body.name ?? '',
+    wasAtWorkshop: body.wasAtWorkshop ?? false,
     triggers: body.triggers ?? [],
     triggersOther: body.triggersOther ?? '',
     paralysis: body.paralysis ?? '',

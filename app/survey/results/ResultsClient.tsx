@@ -76,6 +76,14 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
   const metaCount = (paralysisCount['which-tool'] ?? 0) + (paralysisCount['which-task'] ?? 0)
   const toolCount = (paralysisCount['how-to-use'] ?? 0) + (paralysisCount['disappointing'] ?? 0)
 
+  const workshopAttendees = responses.filter(r => r.wasAtWorkshop)
+  const workshopParalysisCount: Record<string, number> = {}
+  for (const r of workshopAttendees) {
+    workshopParalysisCount[r.paralysis] = (workshopParalysisCount[r.paralysis] ?? 0) + 1
+  }
+  const workshopMetaCount = (workshopParalysisCount['which-tool'] ?? 0) + (workshopParalysisCount['which-task'] ?? 0)
+  const workshopToolCount = (workshopParalysisCount['how-to-use'] ?? 0) + (workshopParalysisCount['disappointing'] ?? 0)
+
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
       <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Survey Results</h1>
@@ -97,6 +105,26 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           Tool-level (не зміг користуватись): <strong>{toolCount}</strong>
         </div>
       </div>
+
+      {/* Workshop segment */}
+      {workshopAttendees.length > 0 && (
+        <div style={{
+          background: '#fafafa', border: '1px solid #e5e7eb',
+          borderRadius: 10, padding: '16px 20px', marginBottom: 32,
+        }}>
+          <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
+            🎓 Воркшоп — {workshopAttendees.length} з {responses.length} були присутні
+          </div>
+          <div style={{ fontSize: 13, color: '#555' }}>
+            Paralysis після воркшопу → Meta: <strong>{workshopMetaCount}</strong> · Tool-level: <strong>{workshopToolCount}</strong> · Немає проблеми: <strong>{workshopParalysisCount['no-problem'] ?? 0}</strong>
+          </div>
+          {workshopAttendees.length >= 2 && (
+            <div style={{ fontSize: 12, color: '#999', marginTop: 6 }}>
+              {workshopParalysisCount['no-problem'] ?? 0} з {workshopAttendees.length} людей після воркшопу кажуть "вже не проблема" ({Math.round(((workshopParalysisCount['no-problem'] ?? 0) / workshopAttendees.length) * 100)}%)
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Q2 */}
       <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Q2 — Що зупиняє</h2>
@@ -201,6 +229,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
             <div style={{ fontSize: 13, lineHeight: 1.6, flex: 1 }}>
               <div style={{ fontWeight: 600, marginBottom: 2 }}>
                 {r.name || <span style={{ color: '#ccc' }}>Анонімно</span>}
+                {r.wasAtWorkshop && <span style={{ fontSize: 11, color: '#6366f1', marginLeft: 6, fontWeight: 400 }}>🎓 воркшоп</span>}
                 <span style={{ fontWeight: 400, color: '#999', fontSize: 12, marginLeft: 8 }}>
                   {new Date(r.submittedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 </span>

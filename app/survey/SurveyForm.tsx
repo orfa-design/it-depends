@@ -32,6 +32,7 @@ const ONE_STEP_OPTIONS = [
 
 export function SurveyForm() {
   const [name, setName] = useState('')
+  const [wasAtWorkshop, setWasAtWorkshop] = useState(false)
   const [triggers, setTriggers] = useState<string[]>([])
   const [triggersOther, setTriggersOther] = useState('')
   const [paralysis, setParalysis] = useState('')
@@ -58,7 +59,7 @@ export function SurveyForm() {
       const res = await fetch('/api/survey/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
+        body: JSON.stringify({ name, wasAtWorkshop, triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
       })
       if (!res.ok) throw new Error('API error')
       setSubmitted(true)
@@ -108,6 +109,23 @@ export function SurveyForm() {
             fullWidth
           />
         </FormControl>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={wasAtWorkshop}
+              onChange={e => setWasAtWorkshop(e.target.checked)}
+              size="small"
+            />
+          }
+          label={
+            <Typography sx={{ fontSize: 14 }}>
+              Я був/ла на AI-воркшопі в офісі DataArt
+            </Typography>
+          }
+        />
       </Paper>
 
       <Divider sx={{ mb: 3 }} />
