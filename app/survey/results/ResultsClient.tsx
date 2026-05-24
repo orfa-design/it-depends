@@ -201,6 +201,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         </tr></thead>
         <tbody>
           {Object.entries(PARALYSIS_LABELS)
+            .filter(([key]) => key !== 'other')
             .sort(([a], [b]) => (paralysisCount[b] ?? 0) - (paralysisCount[a] ?? 0))
             .map(([key, label]) => {
               const n = paralysisCount[key] ?? 0
@@ -211,16 +212,17 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
                 <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
               </tr>
             })}
-          {paralysisOtherTexts.map((text, i) => (
-            <tr key={`other-${i}`}>
+          {paralysisOtherTexts.map((text, i) => {
+            const pct = Math.round(1 / responses.length * 100)
+            return <tr key={`other-${i}`}>
               <td style={{ ...cell, background: '#fafafa' }}>
                 <span style={{ fontSize: 11, color: '#94a3b8', marginRight: 6, fontWeight: 500 }}>Інше</span>
                 <span style={{ fontStyle: 'italic' }}>{text}</span>
               </td>
-              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>—</td>
+              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>{pct}%</td>
               <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>1</td>
             </tr>
-          ))}
+          })}
         </tbody>
       </table>
 
@@ -234,6 +236,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         </tr></thead>
         <tbody>
           {Object.entries(TRIGGER_LABELS)
+            .filter(([key]) => key !== 'other')
             .sort(([a], [b]) => (triggerCount[b] ?? 0) - (triggerCount[a] ?? 0))
             .map(([key, label]) => (
               <tr key={key}>
@@ -264,6 +267,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         </tr></thead>
         <tbody>
           {Object.entries(ONE_STEP_LABELS)
+            .filter(([key]) => key !== 'other')
             .sort(([a], [b]) => (oneStepCount[b] ?? 0) - (oneStepCount[a] ?? 0))
             .map(([key, label]) => {
               const n = oneStepCount[key] ?? 0
@@ -274,16 +278,17 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
                 <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
               </tr>
             })}
-          {oneStepOtherTexts.map((text, i) => (
-            <tr key={`other-${i}`}>
+          {oneStepOtherTexts.map((text, i) => {
+            const pct = Math.round(1 / responses.length * 100)
+            return <tr key={`other-${i}`}>
               <td style={{ ...cell, background: '#fafafa' }}>
                 <span style={{ fontSize: 11, color: '#94a3b8', marginRight: 6, fontWeight: 500 }}>Інше</span>
                 <span style={{ fontStyle: 'italic' }}>{text}</span>
               </td>
-              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>—</td>
+              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>{pct}%</td>
               <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>1</td>
             </tr>
-          ))}
+          })}
         </tbody>
       </table>
 
