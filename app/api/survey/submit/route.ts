@@ -6,6 +6,7 @@ export interface SurveyResponse {
   submittedAt: string
   name: string
   wasAtWorkshop: boolean
+  aiLevel: string
   triggers: string[]
   triggersOther: string
   paralysis: string
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
     submittedAt: new Date().toISOString(),
     name: body.name ?? '',
     wasAtWorkshop: body.wasAtWorkshop ?? false,
+    aiLevel: body.aiLevel ?? '',
     triggers: body.triggers ?? [],
     triggersOther: body.triggersOther ?? '',
     paralysis: body.paralysis ?? '',

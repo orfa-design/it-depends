@@ -7,13 +7,21 @@ import {
   Typography, Paper, Divider, Alert,
 } from '@mui/material'
 
+const AI_LEVELS = [
+  { value: 'not-started', label: 'Ще не починав/ла — не знаю з чого' },
+  { value: 'tried-stopped', label: 'Спробував/ла, але не продовжую' },
+  { value: 'occasional', label: 'Використовую зрідка, коли є нагода' },
+  { value: 'regular', label: 'Використовую регулярно — вже частина процесу' },
+]
+
 const TRIGGERS = [
   { value: 'colleague', label: 'Бачив/ла як колега зробив щось класне з AI' },
   { value: 'media', label: 'Читав/ла статтю або дивився/ла відео' },
   { value: 'task', label: 'Конкретна задача на роботі де AI міг би допомогти' },
   { value: 'team', label: 'Команда або менеджер почали використовувати' },
   { value: 'curiosity', label: 'Просто цікавість, без конкретного тригера' },
-  { value: 'none', label: 'Ще не маю такого бажання / вже активно використовую' },
+  { value: 'no-desire', label: 'Ще не маю конкретного бажання починати' },
+  { value: 'already-using', label: 'Вже активно використовую' },
 ]
 
 const PARALYSIS_OPTIONS = [
@@ -33,6 +41,7 @@ const ONE_STEP_OPTIONS = [
 export function SurveyForm() {
   const [name, setName] = useState('')
   const [wasAtWorkshop, setWasAtWorkshop] = useState(false)
+  const [aiLevel, setAiLevel] = useState('')
   const [triggers, setTriggers] = useState<string[]>([])
   const [triggersOther, setTriggersOther] = useState('')
   const [paralysis, setParalysis] = useState('')
@@ -52,14 +61,14 @@ export function SurveyForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!paralysis || !oneStep) return
+    if (!aiLevel || !paralysis || !oneStep) return
     setLoading(true)
     setError(false)
     try {
       const res = await fetch('/api/survey/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, wasAtWorkshop, triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
+        body: JSON.stringify({ name, wasAtWorkshop, aiLevel, triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
       })
       if (!res.ok) throw new Error('API error')
       setSubmitted(true)
@@ -126,6 +135,30 @@ export function SurveyForm() {
             </Typography>
           }
         />
+      </Paper>
+
+      <Divider sx={{ mb: 3 }} />
+
+      {/* Q0 — AI level */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <FormControl component="fieldset" fullWidth required>
+          <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
+            Де ти зараз з AI у своїй роботі?
+          </FormLabel>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
+            Вибери одне *
+          </Typography>
+          <RadioGroup value={aiLevel} onChange={e => setAiLevel(e.target.value)}>
+            {AI_LEVELS.map(o => (
+              <FormControlLabel
+                key={o.value}
+                value={o.value}
+                control={<Radio size="small" />}
+                label={<Typography sx={{ fontSize: 14 }}>{o.label}</Typography>}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
       </Paper>
 
       <Divider sx={{ mb: 3 }} />
@@ -278,9 +311,9 @@ export function SurveyForm() {
         </FormControl>
       </Paper>
 
-      {(!paralysis || !oneStep) && (
+      {(!aiLevel || !paralysis || !oneStep) && (
         <Alert severity="info" sx={{ mb: 2, fontSize: 13 }}>
-          Заповни обов'язкові питання (Q2 і Q4) щоб відправити
+          Заповни обов'язкові питання (Q0, Q2 і Q4) щоб відправити
         </Alert>
       )}
 
@@ -293,7 +326,7 @@ export function SurveyForm() {
       <Button
         type="submit"
         variant="contained"
-        disabled={!paralysis || !oneStep || loading}
+        disabled={!aiLevel || !paralysis || !oneStep || loading}
         fullWidth
         size="large"
         sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}

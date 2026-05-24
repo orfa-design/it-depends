@@ -18,8 +18,16 @@ const TRIGGER_LABELS: Record<string, string> = {
   task: 'Задача на роботі',
   team: 'Команда / менеджер',
   curiosity: 'Цікавість',
-  none: 'Немає бажання / вже використовую',
+  'no-desire': 'Ще не маю бажання починати',
+  'already-using': 'Вже активно використовую',
   other: 'Інше',
+}
+
+const AI_LEVEL_LABELS: Record<string, string> = {
+  'not-started': 'Ще не починав/ла',
+  'tried-stopped': 'Спробував/ла, не продовжую',
+  'occasional': 'Використовую зрідка',
+  'regular': 'Використовую регулярно',
 }
 
 const ONE_STEP_LABELS: Record<string, string> = {
@@ -64,17 +72,26 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
   const paralysisCount: Record<string, number> = {}
   const oneStepCount: Record<string, number> = {}
   const triggerCount: Record<string, number> = {}
+  const aiLevelCount: Record<string, number> = {}
 
   for (const r of responses) {
     paralysisCount[r.paralysis] = (paralysisCount[r.paralysis] ?? 0) + 1
     oneStepCount[r.oneStep] = (oneStepCount[r.oneStep] ?? 0) + 1
+    if (r.aiLevel) aiLevelCount[r.aiLevel] = (aiLevelCount[r.aiLevel] ?? 0) + 1
     for (const t of r.triggers) {
       triggerCount[t] = (triggerCount[t] ?? 0) + 1
     }
   }
 
-  const metaCount = (paralysisCount['which-tool'] ?? 0) + (paralysisCount['which-task'] ?? 0)
-  const toolCount = (paralysisCount['how-to-use'] ?? 0) + (paralysisCount['disappointing'] ?? 0)
+  // H2 — тільки non-adopters (ще не почали або спробували і зупинились)
+  const nonAdopters = responses.filter(r => r.aiLevel === 'not-started' || r.aiLevel === 'tried-stopped' || r.aiLevel === '')
+  const nonAdopterParalysis: Record<string, number> = {}
+  for (const r of nonAdopters) {
+    nonAdopterParalysis[r.paralysis] = (nonAdopterParalysis[r.paralysis] ?? 0) + 1
+  }
+
+  const metaCount = (nonAdopterParalysis['which-tool'] ?? 0) + (nonAdopterParalysis['which-task'] ?? 0)
+  const toolCount = (nonAdopterParalysis['how-to-use'] ?? 0) + (nonAdopterParalysis['disappointing'] ?? 0)
 
   const workshopAttendees = responses.filter(r => r.wasAtWorkshop)
   const workshopParalysisCount: Record<string, number> = {}
@@ -91,6 +108,26 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         {responses.length} відповід{responses.length === 1 ? 'ь' : responses.length < 5 ? 'і' : 'ей'}
       </p>
 
+      {/* AI level segment */}
+      {Object.keys(aiLevelCount).length > 0 && (
+        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '14px 20px', marginBottom: 20 }}>
+          <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8, color: '#334155' }}>Де люди зараз з AI</div>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            {Object.entries(AI_LEVEL_LABELS).map(([key, label]) => (
+              <div key={key} style={{ fontSize: 13 }}>
+                <span style={{ color: '#94a3b8' }}>{label}:</span>{' '}
+                <strong>{aiLevelCount[key] ?? 0}</strong>
+              </div>
+            ))}
+          </div>
+          {nonAdopters.length < responses.length && (
+            <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>
+              H2 рахується тільки по non-adopters ({nonAdopters.length} з {responses.length})
+            </div>
+          )}
+        </div>
+      )}
+
       {/* H2 verdict */}
       <div style={{
         background: metaCount > toolCount ? '#f0fdf4' : '#fef2f2',
@@ -103,6 +140,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         <div style={{ fontSize: 13, color: '#555' }}>
           Meta (не знаю з чого/який): <strong>{metaCount}</strong> ·
           Tool-level (не зміг користуватись): <strong>{toolCount}</strong>
+          {nonAdopters.length < responses.length && <span style={{ color: '#94a3b8' }}> · по {nonAdopters.length} non-adopters</span>}
         </div>
       </div>
 
