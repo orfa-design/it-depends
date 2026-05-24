@@ -40,6 +40,7 @@ export function SurveyForm() {
   const [oneStepOther, setOneStepOther] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   function toggleTrigger(value: string) {
     setTriggers(prev =>
@@ -51,13 +52,20 @@ export function SurveyForm() {
     e.preventDefault()
     if (!paralysis || !oneStep) return
     setLoading(true)
-    await fetch('/api/survey/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
-    })
-    setSubmitted(true)
-    setLoading(false)
+    setError(false)
+    try {
+      const res = await fetch('/api/survey/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
+      })
+      if (!res.ok) throw new Error('API error')
+      setSubmitted(true)
+    } catch {
+      setError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -236,6 +244,12 @@ export function SurveyForm() {
       {(!paralysis || !oneStep) && (
         <Alert severity="info" sx={{ mb: 2, fontSize: 13 }}>
           Заповни обов'язкові питання (Q2 і Q4) щоб відправити
+        </Alert>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2, fontSize: 13 }}>
+          Щось пішло не так. Спробуй ще раз або напиши Liuda / Vlad.
         </Alert>
       )}
 
