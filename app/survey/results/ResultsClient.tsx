@@ -47,6 +47,7 @@ const th: React.CSSProperties = {
 export function ResultsClient({ initialResponses }: { initialResponses: SurveyResponse[] }) {
   const [responses, setResponses] = useState(initialResponses)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [clearing, setClearing] = useState(false)
 
   async function deleteResponse(id: string) {
     if (!confirm('Видалити цю відповідь?')) return
@@ -58,6 +59,14 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
     })
     setResponses(prev => prev.filter(r => r.id !== id))
     setDeleting(null)
+  }
+
+  async function clearAll() {
+    if (!confirm(`Видалити всі ${responses.length} відповіді? Це незворотньо.`)) return
+    setClearing(true)
+    await fetch('/api/survey/clear', { method: 'DELETE' })
+    setResponses([])
+    setClearing(false)
   }
 
   if (responses.length === 0) {
@@ -103,7 +112,20 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Survey Results</h1>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700 }}>Survey Results</h1>
+        <button
+          onClick={clearAll}
+          disabled={clearing}
+          style={{
+            border: '1px solid #fca5a5', background: 'none', cursor: 'pointer',
+            color: '#f87171', fontSize: 12, padding: '4px 10px', borderRadius: 6,
+            opacity: clearing ? 0.5 : 1,
+          }}
+        >
+          {clearing ? 'Очищаємо...' : 'Очистити все'}
+        </button>
+      </div>
       <p style={{ color: '#999', fontSize: 14, marginBottom: 40 }}>
         {responses.length} відповід{responses.length === 1 ? 'ь' : responses.length < 5 ? 'і' : 'ей'}
       </p>
