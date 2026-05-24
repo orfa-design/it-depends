@@ -294,9 +294,13 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
                   {new Date(r.submittedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
-              <div><span style={{ color: '#999' }}>Paralysis:</span> {PARALYSIS_LABELS[r.paralysis] ?? r.paralysis}{r.paralysisOther ? ` — ${r.paralysisOther}` : ''}</div>
-              {r.workIdea && <div><span style={{ color: '#999' }}>Ідея:</span> {r.workIdea}</div>}
-              <div><span style={{ color: '#999' }}>Крок:</span> {ONE_STEP_LABELS[r.oneStep] ?? r.oneStep}{r.oneStepOther ? ` — ${r.oneStepOther}` : ''}</div>
+              {r.aiLevel && <div><span style={{ color: '#999' }}>Де зараз з AI:</span> {AI_LEVEL_LABELS[r.aiLevel] ?? r.aiLevel}</div>}
+              {r.triggers.length > 0 && (
+                <div><span style={{ color: '#999' }}>Що підштовхнуло:</span> {r.triggers.map(t => TRIGGER_LABELS[t] ?? t).join(', ')}{r.triggersOther ? ` — ${r.triggersOther}` : ''}</div>
+              )}
+              <div><span style={{ color: '#999' }}>Що здається найскладнішим:</span> {PARALYSIS_LABELS[r.paralysis] ?? r.paralysis}{r.paralysisOther ? ` — ${r.paralysisOther}` : ''}</div>
+              {r.workIdea && <div><span style={{ color: '#999' }}>Що робиш руками:</span> {r.workIdea}</div>}
+              <div><span style={{ color: '#999' }}>Якби хтось сказав "перший крок":</span> {ONE_STEP_LABELS[r.oneStep] ?? r.oneStep}{r.oneStepOther ? ` — ${r.oneStepOther}` : ''}</div>
             </div>
             <button
               onClick={() => deleteResponse(r.id)}
