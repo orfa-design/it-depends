@@ -19,3 +19,11 @@ Auto-maintained by Claude. Do not edit manually.
 ## 2026-05-23 — Iteration logging automated
 **What:** Claude now auto-appends to docs/changelog.md after every meaningful action.
 **Why:** Jury evaluates iterative process — log must exist without adding overhead to the team.
+
+## 2026-05-24 — UX decision partner exercise references added
+**What:** 5 facilitation guides added to docs/ux-exercises/ (user snapshot, JTBD, competitor map, hypotheses, scope tree).
+**Why:** anthropic-skills:ux-decision-partner skill вже встановлений, але без reference файлів. Поклали в проект щоб були доступні без автотригера.
+
+## 2026-05-24 — Shared Claude Code hooks configured
+**What:** .claude/settings.json з двома хуками: UserPromptSubmit (git fetch — попереджає якщо тімейт пушив) + PostToolUse (нагадування після git push оновити changelog).
+**Why:** Поведінкові інструкції в CLAUDE.md ненадійні — Claude забуває. Хуки гарантують виконання. settings.json в git → Влад отримає після git pull.
