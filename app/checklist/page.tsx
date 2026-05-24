@@ -3,6 +3,19 @@ import { ChecklistClient } from './ChecklistClient'
 
 const sections = [
   {
+    title: '🗓 Наш план — дослідження',
+    items: [
+      { id: 'jtbd-statement', label: 'JTBD формулювання — "Коли X, хочу Y, щоб Z"', defaultAssignee: 'liuda' as const },
+      { id: 'interview-questions-updated', label: 'Оновити питання для інтерв\'ю (старі — під старий момент)', defaultAssignee: 'liuda' as const },
+      { id: 'interview-1', label: 'Інтерв\'ю #1 з колегою-дизайнером (15-20 хв)' },
+      { id: 'interview-2', label: 'Інтерв\'ю #2 з колегою-дизайнером (15-20 хв)' },
+      { id: 'interview-3', label: 'Інтерв\'ю #3 з колегою-дизайнером (15-20 хв)' },
+      { id: 'competitor-map', label: 'Competitor map — що роблять зараз замість нас', defaultAssignee: 'vlad' as const },
+      { id: 'synthesis', label: 'Synthesis — оновити гіпотези після інтерв\'ю' },
+      { id: 'scope-tree', label: 'Scope tree — що в MVP, що ні' },
+    ],
+  },
+  {
     title: 'Process',
     items: [
       { id: 'interviews-done', label: 'Провести інтерв\'ю (мінімум 2-3 людини)', quote: 'Teams may conduct informal corridor testing at any point during the hackathon.' },
@@ -53,11 +66,21 @@ const sections = [
 
 export default async function ChecklistPage() {
   let state: Record<string, boolean> = {}
+  let assignees: Record<string, 'liuda' | 'vlad'> = {}
+
   try {
     state = (await kv.get<Record<string, boolean>>('checklist')) ?? {}
+    assignees = (await kv.get<Record<string, 'liuda' | 'vlad'>>('checklist-assignees')) ?? {}
   } catch {
     state = {}
+    assignees = {}
   }
 
-  return <ChecklistClient sections={sections} initialState={state} />
+  return (
+    <ChecklistClient
+      sections={sections}
+      initialState={state}
+      initialAssignees={assignees}
+    />
+  )
 }

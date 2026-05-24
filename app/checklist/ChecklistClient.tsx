@@ -2,17 +2,64 @@
 
 import { useState } from 'react'
 
-type Item = { id: string; label: string; quote?: string }
+type Assignee = 'liuda' | 'vlad'
+type Item = { id: string; label: string; quote?: string; defaultAssignee?: Assignee }
 type Section = { title: string; items: Item[] }
+
+const ASSIGNEE_CONFIG: Record<Assignee, { label: string; bg: string; color: string }> = {
+  liuda: { label: 'L', bg: '#e8f0fe', color: '#1a56db' },
+  vlad:  { label: 'V', bg: '#fde8f0', color: '#db1a6e' },
+}
+
+function AssigneeBadge({
+  assignee,
+  onClick,
+}: {
+  assignee: Assignee | null
+  onClick: () => void
+}) {
+  if (!assignee) {
+    return (
+      <button
+        onClick={(e) => { e.preventDefault(); onClick() }}
+        title="Асайнити"
+        style={{
+          width: 24, height: 24, borderRadius: '50%',
+          border: '1.5px dashed #ddd', background: 'transparent',
+          cursor: 'pointer', flexShrink: 0, display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, color: '#ccc',
+        }}
+      >+</button>
+    )
+  }
+  const cfg = ASSIGNEE_CONFIG[assignee]
+  return (
+    <button
+      onClick={(e) => { e.preventDefault(); onClick() }}
+      title={assignee === 'liuda' ? 'Liuda → Vlad → нікому' : 'Vlad → нікому'}
+      style={{
+        width: 24, height: 24, borderRadius: '50%',
+        border: 'none', background: cfg.bg, color: cfg.color,
+        cursor: 'pointer', flexShrink: 0, display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        fontSize: 11, fontWeight: 700,
+      }}
+    >{cfg.label}</button>
+  )
+}
 
 export function ChecklistClient({
   sections,
   initialState,
+  initialAssignees,
 }: {
   sections: Section[]
   initialState: Record<string, boolean>
+  initialAssignees: Record<string, Assignee>
 }) {
   const [state, setState] = useState<Record<string, boolean>>(initialState)
+  const [assignees, setAssignees] = useState<Record<string, Assignee>>(initialAssignees)
   const [saving, setSaving] = useState<string | null>(null)
   const [showQuotes, setShowQuotes] = useState(false)
 
@@ -26,6 +73,26 @@ export function ChecklistClient({
       body: JSON.stringify({ id, checked: next }),
     })
     setSaving(null)
+  }
+
+  async function cycleAssignee(id: string) {
+    const current = assignees[id] ?? null
+    const next: Assignee | null =
+      current === null ? 'liuda' :
+      current === 'liuda' ? 'vlad' : null
+
+    setAssignees((s) => {
+      const updated = { ...s }
+      if (next === null) delete updated[id]
+      else updated[id] = next
+      return updated
+    })
+
+    await fetch('/api/checklist/assign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, assignee: next }),
+    })
   }
 
   const total = sections.flatMap((s) => s.items).length
@@ -43,15 +110,12 @@ export function ChecklistClient({
         <button
           onClick={() => setShowQuotes((v) => !v)}
           style={{
-            padding: '6px 14px',
-            borderRadius: 8,
+            padding: '6px 14px', borderRadius: 8,
             border: '1px solid #ddd',
             background: showQuotes ? '#111' : '#fff',
             color: showQuotes ? '#fff' : '#444',
-            fontSize: 13,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            marginTop: 4,
+            fontSize: 13, cursor: 'pointer',
+            whiteSpace: 'nowrap', marginTop: 4,
           }}
         >
           {showQuotes ? 'Сховати цитати' : 'Показати цитати'}
@@ -80,7 +144,7 @@ export function ChecklistClient({
                     onChange={() => toggle(item.id)}
                     style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#000', flexShrink: 0, marginTop: 2 }}
                   />
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <span style={{
                       fontSize: 15,
                       color: state[item.id] ? '#bbb' : '#111',
@@ -92,23 +156,28 @@ export function ChecklistClient({
                     </span>
                     {showQuotes && item.quote && (
                       <span style={{
-                        display: 'block',
-                        marginTop: 4,
-                        fontSize: 12,
-                        color: '#999',
-                        fontStyle: 'italic',
-                        lineHeight: 1.4,
+                        display: 'block', marginTop: 4,
+                        fontSize: 12, color: '#999',
+                        fontStyle: 'italic', lineHeight: 1.4,
                       }}>
                         "{item.quote}"
                       </span>
                     )}
                   </div>
+                  <AssigneeBadge
+                    assignee={assignees[item.id] ?? item.defaultAssignee ?? null}
+                    onClick={() => cycleAssignee(item.id)}
+                  />
                 </label>
               </div>
             ))}
           </div>
         </div>
       ))}
+
+      <p style={{ fontSize: 12, color: '#ccc', textAlign: 'center', marginTop: 8 }}>
+        Клік на кружок = асайнити: L (Liuda) → V (Vlad) → нікому
+      </p>
     </div>
   )
 }
