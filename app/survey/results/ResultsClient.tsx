@@ -83,6 +83,10 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
   const triggerCount: Record<string, number> = {}
   const aiLevelCount: Record<string, number> = {}
 
+  const paralysisOtherTexts = responses.filter(r => r.paralysis === 'other' && r.paralysisOther?.trim()).map(r => r.paralysisOther)
+  const triggersOtherTexts = responses.filter(r => r.triggers.includes('other') && r.triggersOther?.trim()).map(r => r.triggersOther)
+  const oneStepOtherTexts = responses.filter(r => r.oneStep === 'other' && r.oneStepOther?.trim()).map(r => r.oneStepOther)
+
   for (const r of responses) {
     paralysisCount[r.paralysis] = (paralysisCount[r.paralysis] ?? 0) + 1
     oneStepCount[r.oneStep] = (oneStepCount[r.oneStep] ?? 0) + 1
@@ -207,6 +211,16 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
                 <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
               </tr>
             })}
+          {paralysisOtherTexts.map((text, i) => (
+            <tr key={`other-${i}`}>
+              <td style={{ ...cell, background: '#fafafa' }}>
+                <span style={{ fontSize: 11, color: '#94a3b8', marginRight: 6, fontWeight: 500 }}>Інше</span>
+                <span style={{ fontStyle: 'italic' }}>{text}</span>
+              </td>
+              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>—</td>
+              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>1</td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
@@ -227,6 +241,15 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
                 <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{triggerCount[key] ?? 0}</td>
               </tr>
             ))}
+          {triggersOtherTexts.map((text, i) => (
+            <tr key={`other-${i}`}>
+              <td style={{ ...cell, background: '#fafafa' }}>
+                <span style={{ fontSize: 11, color: '#94a3b8', marginRight: 6, fontWeight: 500 }}>Інше</span>
+                <span style={{ fontStyle: 'italic' }}>{text}</span>
+              </td>
+              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>1</td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
@@ -251,6 +274,16 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
                 <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
               </tr>
             })}
+          {oneStepOtherTexts.map((text, i) => (
+            <tr key={`other-${i}`}>
+              <td style={{ ...cell, background: '#fafafa' }}>
+                <span style={{ fontSize: 11, color: '#94a3b8', marginRight: 6, fontWeight: 500 }}>Інше</span>
+                <span style={{ fontStyle: 'italic' }}>{text}</span>
+              </td>
+              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>—</td>
+              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>1</td>
+            </tr>
+          ))}
         </tbody>
       </table>
 
@@ -268,23 +301,6 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           <div style={{ padding: '12px 16px', color: '#999', fontSize: 14 }}>Відкритих відповідей ще немає</div>
         )}
       </div>
-
-      {/* Other answers */}
-      {responses.some(r => r.triggersOther || r.paralysisOther || r.oneStepOther) && (
-        <>
-          <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Відповіді "Інше"</h2>
-          <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden', marginBottom: 32 }}>
-            {responses.filter(r => r.triggersOther || r.paralysisOther || r.oneStepOther).map((r, i) => (
-              <div key={r.id} style={{ padding: '12px 16px', borderTop: i > 0 ? '1px solid #f0f0f0' : 'none', fontSize: 13 }}>
-                {r.name && <div style={{ color: '#999', fontSize: 12, marginBottom: 4 }}>{r.name}</div>}
-                {r.triggersOther && <div><span style={{ color: '#bbb' }}>Q1:</span> {r.triggersOther}</div>}
-                {r.paralysisOther && <div><span style={{ color: '#bbb' }}>Q2:</span> {r.paralysisOther}</div>}
-                {r.oneStepOther && <div><span style={{ color: '#bbb' }}>Q4:</span> {r.oneStepOther}</div>}
-              </div>
-            ))}
-          </div>
-        </>
-      )}
 
       {/* All responses with delete */}
       <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Всі відповіді</h2>
