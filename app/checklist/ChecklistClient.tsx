@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-type Item = { id: string; label: string }
+type Item = { id: string; label: string; quote?: string }
 type Section = { title: string; items: Item[] }
 
 export function ChecklistClient({
@@ -14,6 +14,7 @@ export function ChecklistClient({
 }) {
   const [state, setState] = useState<Record<string, boolean>>(initialState)
   const [saving, setSaving] = useState<string | null>(null)
+  const [showQuotes, setShowQuotes] = useState(false)
 
   async function toggle(id: string) {
     const next = !state[id]
@@ -32,11 +33,29 @@ export function ChecklistClient({
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
-      <div style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>It Depends — Checklist</h1>
-        <p style={{ margin: 0, color: '#666', fontSize: 14 }}>
-          {done} / {total} виконано · оновлюється при перезавантаженні
-        </p>
+      <div style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 8px' }}>It Depends — Checklist</h1>
+          <p style={{ margin: 0, color: '#666', fontSize: 14 }}>
+            {done} / {total} виконано · оновлюється при перезавантаженні
+          </p>
+        </div>
+        <button
+          onClick={() => setShowQuotes((v) => !v)}
+          style={{
+            padding: '6px 14px',
+            borderRadius: 8,
+            border: '1px solid #ddd',
+            background: showQuotes ? '#111' : '#fff',
+            color: showQuotes ? '#fff' : '#444',
+            fontSize: 13,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            marginTop: 4,
+          }}
+        >
+          {showQuotes ? 'Сховати цитати' : 'Показати цитати'}
+        </button>
       </div>
 
       {sections.map((section) => (
@@ -46,34 +65,46 @@ export function ChecklistClient({
           </h2>
           <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #eee', overflow: 'hidden' }}>
             {section.items.map((item, i) => (
-              <label
+              <div
                 key={item.id}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '14px 16px',
                   borderTop: i > 0 ? '1px solid #f0f0f0' : 'none',
-                  cursor: 'pointer',
                   opacity: saving === item.id ? 0.5 : 1,
                   transition: 'opacity 0.15s',
                 }}
               >
-                <input
-                  type="checkbox"
-                  checked={!!state[item.id]}
-                  onChange={() => toggle(item.id)}
-                  style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#000', flexShrink: 0 }}
-                />
-                <span style={{
-                  fontSize: 15,
-                  color: state[item.id] ? '#bbb' : '#111',
-                  textDecoration: state[item.id] ? 'line-through' : 'none',
-                  transition: 'color 0.15s',
-                }}>
-                  {item.label}
-                </span>
-              </label>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!state[item.id]}
+                    onChange={() => toggle(item.id)}
+                    style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#000', flexShrink: 0, marginTop: 2 }}
+                  />
+                  <div>
+                    <span style={{
+                      fontSize: 15,
+                      color: state[item.id] ? '#bbb' : '#111',
+                      textDecoration: state[item.id] ? 'line-through' : 'none',
+                      transition: 'color 0.15s',
+                      display: 'block',
+                    }}>
+                      {item.label}
+                    </span>
+                    {showQuotes && item.quote && (
+                      <span style={{
+                        display: 'block',
+                        marginTop: 4,
+                        fontSize: 12,
+                        color: '#999',
+                        fontStyle: 'italic',
+                        lineHeight: 1.4,
+                      }}>
+                        "{item.quote}"
+                      </span>
+                    )}
+                  </div>
+                </label>
+              </div>
             ))}
           </div>
         </div>
