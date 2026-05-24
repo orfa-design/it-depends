@@ -187,7 +187,8 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
       )}
 
       {/* Q2 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Q2 — Що зупиняє</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Коли думаєш про те щоб почати з AI — що здається найскладнішим?</h2>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q2 · один варіант</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
           <th style={th}>Варіант</th>
@@ -208,7 +209,8 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
       </table>
 
       {/* Q1 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Q1 — Тригери</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що підштовхнуло тебе до думки "треба нарешті з AI щось робити"?</h2>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q1 · можна кілька</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
           <th style={th}>Тригер</th>
@@ -225,7 +227,8 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
       </table>
 
       {/* Q4 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Q4 — Один крок</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Якби хтось сказав тобі "ось що зроби першим кроком з AI" — ти б спробував/ла?</h2>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q4 · один варіант</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
           <th style={th}>Відповідь</th>
@@ -246,7 +249,8 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
       </table>
 
       {/* Q3 open */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Q3 — Що робиш руками (H4)</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Є в твоїй роботі щось що робиш руками і думаєш "це мало б бути простіше"?</h2>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q3 · відкрита відповідь</p>
       <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden', marginBottom: 32 }}>
         {responses.filter(r => r.workIdea?.trim()).map((r, i) => (
           <div key={r.id} style={{ padding: '12px 16px', borderTop: i > 0 ? '1px solid #f0f0f0' : 'none', fontSize: 14 }}>
