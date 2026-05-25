@@ -1,5 +1,18 @@
+# Next.js / Vercel
 .next/
 node_modules/
 .env.local
 .vercel
 *.tsbuildinfo
+
+# Local-only work — not synced to GitHub
+.local/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
