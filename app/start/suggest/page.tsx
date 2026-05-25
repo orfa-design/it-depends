@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 type Suggestion = {
   title: string
@@ -169,8 +169,10 @@ const FALLBACK: Suggestion = {
 
 function SuggestContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const level = searchParams.get('level') ?? ''
   const task  = searchParams.get('task')  ?? ''
+  const pain  = searchParams.get('pain')  ?? ''
   const key   = `${level}/${task}`
 
   const s = PROMPTS[key] ?? FALLBACK
@@ -178,7 +180,6 @@ function SuggestContent() {
 
   const [copied, setCopied] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
-  const [done, setDone] = useState(false)
 
   function handleCopy() {
     navigator.clipboard.writeText(s.prompt)
@@ -195,6 +196,15 @@ function SuggestContent() {
   function handleTry() {
     const encoded = encodeURIComponent(s.prompt)
     window.open(`https://claude.ai/new?q=${encoded}`, '_blank')
+  }
+
+  function handleDone() {
+    try {
+      const builds = JSON.parse(localStorage.getItem('itdepends_builds') ?? '[]')
+      builds.push({ card: task, title: s.title, tool: s.cta, level, pain, date: new Date().toISOString() })
+      localStorage.setItem('itdepends_builds', JSON.stringify(builds))
+    } catch {}
+    router.push(`/done?card=${encodeURIComponent(task)}&tool=${s.cta}&level=${level}&title=${encodeURIComponent(s.title)}`)
   }
 
   return (
@@ -217,8 +227,8 @@ function SuggestContent() {
             {[1, 2, 3].map(i => (
               <div key={i} style={{
                 width: 6, height: 6, borderRadius: '50%',
-                background: done ? '#22a55b' : i <= 3 ? '#111' : '#ddd',
-                opacity: done ? 1 : i < 3 ? 0.3 : 1,
+                background: i <= 3 ? '#111' : '#ddd',
+                opacity: i < 3 ? 0.3 : 1,
                 transition: 'all 0.3s',
               }} />
             ))}
@@ -399,96 +409,33 @@ function SuggestContent() {
         )}
 
         {/* "Я спробувала" separator + button */}
-        {!done && (
-          <div style={{ marginTop: 28 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <div style={{ flex: 1, height: 1, background: '#e8e8e8' }} />
-              <span style={{ fontSize: 12, color: '#bbb', whiteSpace: 'nowrap' }}>
-                вже спробувала?
-              </span>
-              <div style={{ flex: 1, height: 1, background: '#e8e8e8' }} />
-            </div>
-            <button
-              onClick={() => setDone(true)}
-              style={{
-                width: '100%',
-                padding: '14px 24px',
-                borderRadius: 12,
-                border: '1.5px solid #e5e5e5',
-                background: '#fff',
-                color: '#111',
-                fontSize: 15,
-                fontWeight: 600,
-                cursor: 'pointer',
-                outline: 'none',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              Я спробувала ✓
-            </button>
+        <div style={{ marginTop: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ flex: 1, height: 1, background: '#e8e8e8' }} />
+            <span style={{ fontSize: 12, color: '#bbb', whiteSpace: 'nowrap' }}>
+              вже спробувала?
+            </span>
+            <div style={{ flex: 1, height: 1, background: '#e8e8e8' }} />
           </div>
-        )}
-
-        {/* Completion state */}
-        {done && (
-          <div style={{
-            marginTop: 28,
-            padding: '24px',
-            background: '#fff',
-            border: '1.5px solid #e5e5e5',
-            borderRadius: 16,
-            textAlign: 'center',
-          }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>🎉</div>
-            <p style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 8 }}>
-              Перший крок зроблено
-            </p>
-            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 20 }}>
-              Ти вже не та що збиралася — ти та що зробила.
-            </p>
-            <button
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({ title: 'Зробила перший крок з AI', url: window.location.href })
-                } else {
-                  navigator.clipboard.writeText(window.location.href)
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '12px 24px',
-                borderRadius: 10,
-                border: '1.5px solid #e5e5e5',
-                background: '#fff',
-                color: '#555',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-                outline: 'none',
-                marginBottom: 10,
-              }}
-            >
-              Поділитися з колегою
-            </button>
-            <button
-              onClick={() => window.location.href = '/start'}
-              style={{
-                width: '100%',
-                padding: '12px 24px',
-                borderRadius: 10,
-                border: 'none',
-                background: '#f5f5f5',
-                color: '#666',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-                outline: 'none',
-              }}
-            >
-              Зробити ще один крок →
-            </button>
-          </div>
-        )}
+          <button
+            onClick={handleDone}
+            style={{
+              width: '100%',
+              padding: '14px 24px',
+              borderRadius: 12,
+              border: '1.5px solid #e5e5e5',
+              background: '#fff',
+              color: '#111',
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            Я спробувала ✓
+          </button>
+        </div>
 
       </div>
     </div>
