@@ -6,24 +6,24 @@ import { Suspense } from 'react'
 
 const OPTIONS = [
   {
-    value: 'briefs',
-    label: 'Аналіз брифів і дзвінків',
-    sub: 'Транскрипти, нотатки, підсумки зустрічей...',
+    value: 'automate',
+    label: 'Автоматизувати щось рутинне',
+    sub: 'Шаблони, чекліти, workflow — один раз і реюзаєш',
   },
   {
-    value: 'design-system',
-    label: 'Робота з дизайн-системою',
-    sub: 'Токени, компоненти, документація...',
+    value: 'build-tool',
+    label: 'Побудувати свій інструмент',
+    sub: 'Плагін, скрипт, автоматизація під свій процес',
   },
   {
-    value: 'presentations',
-    label: 'Презентації та звіти',
-    sub: 'Слайди, handoff, кейси...',
+    value: 'inspired',
+    label: 'Надихнулась чимось — хочу спробувати схоже',
+    sub: 'Бачила результат, хочу зробити своє',
   },
   {
-    value: 'other',
-    label: 'Щось інше',
-    sub: 'Скажеш на наступному кроці',
+    value: 'examples',
+    label: 'Покажи що взагалі можна зробити',
+    sub: 'Без конкретної задачі — хочу побачити варіанти',
   },
 ]
 
@@ -74,7 +74,7 @@ function PainContent() {
           marginBottom: 8,
           lineHeight: 1.3,
         }}>
-          Що найбільше забирає час у роботі?
+          Що хочеш зробити з AI?
         </h1>
 
         <p style={{
@@ -82,7 +82,7 @@ function PainContent() {
           color: '#888',
           marginBottom: 40,
         }}>
-          Вибери одне — зробимо перший крок саме тут.
+          Вибери одне — підберемо перший крок.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
