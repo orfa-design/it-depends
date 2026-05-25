@@ -26,19 +26,23 @@ const TRIGGER_LABELS: Record<string, string> = {
 }
 
 const AI_LEVEL_LABELS: Record<string, string> = {
-  'not-tried': 'Ще не пробував/ла',
-  'tried-few': 'Пробував/ла кілька разів',
-  'occasional': 'Використовую епізодично',
-  'regular': 'Використовую регулярно',
-  'core': 'AI — важлива частина процесу',
+  'chat': 'Питала питання в чаті',
+  'analyze': 'Аналізувала документи або зображення',
+  'build': 'Будувала щось за межами чату',
+  'not-tried': 'Ще не пробувала',
 }
 
-const ONE_STEP_LABELS: Record<string, string> = {
-  'example-trigger': 'Саме те чого не вистачає — одразу б спробував/ла',
-  'useful-partial': 'Скоріше корисний, але не тільки в браку прикладів',
-  'need-basics': 'Навряд чи — потрібно розібратись в основах',
-  'already-using': 'Не потрібен — вже використовую',
-  other: 'Інше',
+const WORKSHOP_EFFECT_LABELS: Record<string, string> = {
+  'workshop-effect-yes': 'Так — дало поштовх, використовую регулярніше',
+  'workshop-effect-relapse': 'Так — дало поштовх, але знову застрягла',
+  'workshop-no-effect': 'Так — особливого ефекту не було',
+  'no-workshop': 'Ні, не була',
+}
+
+const PROMPT_REACTION_LABELS: Record<string, string> = {
+  'yes-immediately': 'Так, одразу б використала',
+  'maybe': 'Можливо, залежить від задачі',
+  'no-needs-context': 'Ні, потрібно більше контексту спочатку',
 }
 
 const cell: React.CSSProperties = {
@@ -83,42 +87,38 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
   }
 
   const paralysisCount: Record<string, number> = {}
-  const oneStepCount: Record<string, number> = {}
+  const promptReactionCount: Record<string, number> = {}
   const triggerCount: Record<string, number> = {}
   const aiLevelCount: Record<string, number> = {}
+  const workshopEffectCount: Record<string, number> = {}
 
   const paralysisOtherTexts = responses.filter(r => r.paralysis === 'other' && r.paralysisOther?.trim()).map(r => r.paralysisOther)
   const triggersOtherTexts = responses.filter(r => r.triggers.includes('other') && r.triggersOther?.trim()).map(r => r.triggersOther)
-  const oneStepOtherTexts = responses.filter(r => r.oneStep === 'other' && r.oneStepOther?.trim()).map(r => r.oneStepOther)
 
   for (const r of responses) {
     paralysisCount[r.paralysis] = (paralysisCount[r.paralysis] ?? 0) + 1
-    oneStepCount[r.oneStep] = (oneStepCount[r.oneStep] ?? 0) + 1
+    if (r.promptReaction) promptReactionCount[r.promptReaction] = (promptReactionCount[r.promptReaction] ?? 0) + 1
     if (r.aiLevel) aiLevelCount[r.aiLevel] = (aiLevelCount[r.aiLevel] ?? 0) + 1
+    if (r.workshopEffect) workshopEffectCount[r.workshopEffect] = (workshopEffectCount[r.workshopEffect] ?? 0) + 1
     for (const t of r.triggers) {
       triggerCount[t] = (triggerCount[t] ?? 0) + 1
     }
   }
 
-  // H2 — тільки non-adopters (ще не пробували або пробували кілька разів)
-  const nonAdopters = responses.filter(r => r.aiLevel === 'not-tried' || r.aiLevel === 'tried-few' || r.aiLevel === '')
-  const nonAdopterParalysis: Record<string, number> = {}
-  for (const r of nonAdopters) {
-    nonAdopterParalysis[r.paralysis] = (nonAdopterParalysis[r.paralysis] ?? 0) + 1
+  // H2 — casual users (not power users): chat + analyze + not-tried
+  const casualUsers = responses.filter(r => r.aiLevel !== 'build')
+  const casualParalysis: Record<string, number> = {}
+  for (const r of casualUsers) {
+    casualParalysis[r.paralysis] = (casualParalysis[r.paralysis] ?? 0) + 1
   }
+  const metaCount = (casualParalysis['where-to-start'] ?? 0) + (casualParalysis['no-clear-use-case'] ?? 0) + (casualParalysis['too-many-tools'] ?? 0)
+  const toolCount = (casualParalysis['weak-results'] ?? 0) + (casualParalysis['no-trust'] ?? 0)
 
-  // meta = орієнтаційний параліч (не знаю з чого / де корисний / забагато інструментів)
-  const metaCount = (nonAdopterParalysis['where-to-start'] ?? 0) + (nonAdopterParalysis['no-clear-use-case'] ?? 0) + (nonAdopterParalysis['too-many-tools'] ?? 0)
-  // tool-level = розчарування від результату / недовіра
-  const toolCount = (nonAdopterParalysis['weak-results'] ?? 0) + (nonAdopterParalysis['no-trust'] ?? 0)
-
-  const workshopAttendees = responses.filter(r => r.wasAtWorkshop)
-  const workshopParalysisCount: Record<string, number> = {}
-  for (const r of workshopAttendees) {
-    workshopParalysisCount[r.paralysis] = (workshopParalysisCount[r.paralysis] ?? 0) + 1
-  }
-  const workshopMetaCount = (workshopParalysisCount['where-to-start'] ?? 0) + (workshopParalysisCount['no-clear-use-case'] ?? 0) + (workshopParalysisCount['too-many-tools'] ?? 0)
-  const workshopToolCount = (workshopParalysisCount['weak-results'] ?? 0) + (workshopParalysisCount['no-trust'] ?? 0)
+  // Workshop segment — those who attended
+  const workshopAttendees = responses.filter(r => r.workshopEffect && r.workshopEffect !== 'no-workshop')
+  const workshopRelapseCount = workshopEffectCount['workshop-effect-relapse'] ?? 0
+  const workshopEffectYesCount = workshopEffectCount['workshop-effect-yes'] ?? 0
+  const workshopNoEffectCount = workshopEffectCount['workshop-no-effect'] ?? 0
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '48px 24px' }}>
@@ -152,9 +152,9 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
               </div>
             ))}
           </div>
-          {nonAdopters.length < responses.length && (
+          {casualUsers.length < responses.length && (
             <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>
-              H2 рахується тільки по non-adopters ({nonAdopters.length} з {responses.length})
+              H2 рахується по casual users — всі крім 'build' ({casualUsers.length} з {responses.length})
             </div>
           )}
         </div>
@@ -167,12 +167,12 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         borderRadius: 10, padding: '16px 20px', marginBottom: 32,
       }}>
         <div style={{ fontWeight: 700, marginBottom: 4 }}>
-          H2 — Meta-level paralysis: {metaCount > toolCount ? '✅ підтверджується' : '❌ поки не підтверджується'}
+          H2 — Casual→Power user paralysis: {metaCount > toolCount ? '✅ підтверджується' : '❌ поки не підтверджується'}
         </div>
         <div style={{ fontSize: 13, color: '#555' }}>
-          Meta (не знаю з чого/який): <strong>{metaCount}</strong> ·
-          Tool-level (не зміг користуватись): <strong>{toolCount}</strong>
-          {nonAdopters.length < responses.length && <span style={{ color: '#94a3b8' }}> · по {nonAdopters.length} non-adopters</span>}
+          Meta (не знаю з чого / який): <strong>{metaCount}</strong> ·
+          Tool-level (результат / довіра): <strong>{toolCount}</strong>
+          {casualUsers.length < responses.length && <span style={{ color: '#94a3b8' }}> · по {casualUsers.length} casual users</span>}
         </div>
       </div>
 
@@ -185,20 +185,22 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           <div style={{ fontWeight: 600, marginBottom: 6, fontSize: 14 }}>
             🎓 Воркшоп — {workshopAttendees.length} з {responses.length} були присутні
           </div>
-          <div style={{ fontSize: 13, color: '#555' }}>
-            Paralysis після воркшопу → Meta: <strong>{workshopMetaCount}</strong> · Tool-level: <strong>{workshopToolCount}</strong> · Немає проблеми: <strong>{workshopParalysisCount['no-problem'] ?? 0}</strong>
+          <div style={{ fontSize: 13, color: '#555', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <span>Дало тривалий поштовх: <strong>{workshopEffectYesCount}</strong></span>
+            <span>Дало, але знову застрягли: <strong>{workshopRelapseCount}</strong></span>
+            <span>Без ефекту: <strong>{workshopNoEffectCount}</strong></span>
           </div>
-          {workshopAttendees.length >= 2 && (
+          {workshopRelapseCount > 0 && (
             <div style={{ fontSize: 12, color: '#999', marginTop: 6 }}>
-              {workshopParalysisCount['not-a-problem'] ?? 0} з {workshopAttendees.length} людей після воркшопу кажуть "вже не проблема" ({Math.round(((workshopParalysisCount['not-a-problem'] ?? 0) / workshopAttendees.length) * 100)}%)
+              {workshopRelapseCount} з {workshopAttendees.length} людей ({Math.round(workshopRelapseCount / workshopAttendees.length * 100)}%) після воркшопу знову застрягли → валідує потребу в продукті
             </div>
           )}
         </div>
       )}
 
-      {/* Q2 */}
+      {/* Q3 — Barrier */}
       <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що зараз найбільше заважає тобі використовувати AI частіше?</h2>
-      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q2 · один варіант</p>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q3 · один варіант</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
           <th style={th}>Варіант</th>
@@ -232,9 +234,9 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         </tbody>
       </table>
 
-      {/* Q1 */}
+      {/* Q2 — Triggers */}
       <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що найбільше вплинуло на твій інтерес до AI?</h2>
-      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q1 · можна кілька</p>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q2 · можна кілька</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
           <th style={th}>Тригер</th>
@@ -262,9 +264,9 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
         </tbody>
       </table>
 
-      {/* Q4 */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Конкретний приклад "як дизайнер використовує AI в реальних задачах" для мене:</h2>
-      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q4 · один варіант</p>
+      {/* Q5 — Prompt reaction */}
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Якби продукт дав тобі готовий промпт під твою конкретну робочу задачу — ти б спробувала?</h2>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q5 · один варіант · валідація ключової фічі</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>
           <th style={th}>Відповідь</th>
@@ -272,11 +274,10 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
           <th style={{ ...th, width: 40, textAlign: 'right' }}>n</th>
         </tr></thead>
         <tbody>
-          {Object.entries(ONE_STEP_LABELS)
-            .filter(([key]) => key !== 'other')
-            .sort(([a], [b]) => (oneStepCount[b] ?? 0) - (oneStepCount[a] ?? 0))
+          {Object.entries(PROMPT_REACTION_LABELS)
+            .sort(([a], [b]) => (promptReactionCount[b] ?? 0) - (promptReactionCount[a] ?? 0))
             .map(([key, label]) => {
-              const n = oneStepCount[key] ?? 0
+              const n = promptReactionCount[key] ?? 0
               const pct = Math.round(n / responses.length * 100)
               return <tr key={key}>
                 <td style={cell}>{label}</td>
@@ -284,23 +285,12 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
                 <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{n}</td>
               </tr>
             })}
-          {oneStepOtherTexts.map((text, i) => {
-            const pct = Math.round(1 / responses.length * 100)
-            return <tr key={`other-${i}`}>
-              <td style={{ ...cell, background: '#fafafa' }}>
-                <span style={{ fontSize: 11, color: '#94a3b8', marginRight: 6, fontWeight: 500 }}>Інше</span>
-                <span style={{ fontStyle: 'italic' }}>{text}</span>
-              </td>
-              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>{pct}%</td>
-              <td style={{ ...cell, background: '#fafafa', textAlign: 'right', color: '#888' }}>1</td>
-            </tr>
-          })}
         </tbody>
       </table>
 
-      {/* Q3 open */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Є в твоїй роботі щось що робиш руками і думаєш "це мало б бути простіше"?</h2>
-      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q3 · відкрита відповідь</p>
+      {/* Q4 — Work idea open */}
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Які повторювані або рутинні задачі тобі хотілося б спростити або автоматизувати?</h2>
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q4 · відкрита відповідь · контент для каталогу кроків</p>
       <div style={{ background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden', marginBottom: 32 }}>
         {responses.filter(r => r.workIdea?.trim()).map((r, i) => (
           <div key={r.id} style={{ padding: '12px 16px', borderTop: i > 0 ? '1px solid #f0f0f0' : 'none', fontSize: 14 }}>
@@ -326,18 +316,21 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
             <div style={{ fontSize: 13, lineHeight: 1.6, flex: 1 }}>
               <div style={{ fontWeight: 600, marginBottom: 2 }}>
                 {r.name || <span style={{ color: '#ccc' }}>Анонімно</span>}
-                {r.wasAtWorkshop && <span style={{ fontSize: 11, color: '#6366f1', marginLeft: 6, fontWeight: 400 }}>🎓 воркшоп</span>}
+                {r.workshopEffect && r.workshopEffect !== 'no-workshop' && (
+                  <span style={{ fontSize: 11, color: '#6366f1', marginLeft: 6, fontWeight: 400 }}>🎓 воркшоп</span>
+                )}
                 <span style={{ fontWeight: 400, color: '#999', fontSize: 12, marginLeft: 8 }}>
                   {new Date(r.submittedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
-              {r.aiLevel && <div><span style={{ color: '#999' }}>Де зараз з AI:</span> {AI_LEVEL_LABELS[r.aiLevel] ?? r.aiLevel}</div>}
+              {r.aiLevel && <div><span style={{ color: '#999' }}>Рівень AI:</span> {AI_LEVEL_LABELS[r.aiLevel] ?? r.aiLevel}</div>}
+              {r.workshopEffect && <div><span style={{ color: '#999' }}>Воркшоп:</span> {WORKSHOP_EFFECT_LABELS[r.workshopEffect] ?? r.workshopEffect}</div>}
               {r.triggers.length > 0 && (
                 <div><span style={{ color: '#999' }}>Що підштовхнуло:</span> {r.triggers.map(t => TRIGGER_LABELS[t] ?? t).join(', ')}{r.triggersOther ? ` — ${r.triggersOther}` : ''}</div>
               )}
-              <div><span style={{ color: '#999' }}>Що здається найскладнішим:</span> {PARALYSIS_LABELS[r.paralysis] ?? r.paralysis}{r.paralysisOther ? ` — ${r.paralysisOther}` : ''}</div>
-              {r.workIdea && <div><span style={{ color: '#999' }}>Що робиш руками:</span> {r.workIdea}</div>}
-              <div><span style={{ color: '#999' }}>Якби хтось сказав "перший крок":</span> {ONE_STEP_LABELS[r.oneStep] ?? r.oneStep}{r.oneStepOther ? ` — ${r.oneStepOther}` : ''}</div>
+              <div><span style={{ color: '#999' }}>Бар'єр:</span> {PARALYSIS_LABELS[r.paralysis] ?? r.paralysis}{r.paralysisOther ? ` — ${r.paralysisOther}` : ''}</div>
+              {r.workIdea && <div><span style={{ color: '#999' }}>Рутина:</span> {r.workIdea}</div>}
+              {r.promptReaction && <div><span style={{ color: '#999' }}>Готовий промпт:</span> {PROMPT_REACTION_LABELS[r.promptReaction] ?? r.promptReaction}</div>}
             </div>
             <button
               onClick={() => deleteResponse(r.id)}

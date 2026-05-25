@@ -8,15 +8,21 @@ import {
 } from '@mui/material'
 
 const AI_LEVELS = [
-  { value: 'not-tried', label: 'Ще не пробував/ла' },
-  { value: 'tried-few', label: 'Пробував/ла кілька разів' },
-  { value: 'occasional', label: 'Використовую епізодично' },
-  { value: 'regular', label: 'Використовую регулярно' },
-  { value: 'core', label: 'AI — важлива частина мого процесу' },
+  { value: 'chat', label: 'Питала питання в чаті' },
+  { value: 'analyze', label: 'Аналізувала документи або зображення' },
+  { value: 'build', label: 'Будувала щось за межами чату (плагін, скіл, автоматизація)' },
+  { value: 'not-tried', label: 'Ще не пробувала' },
+]
+
+const WORKSHOP_OPTIONS = [
+  { value: 'workshop-effect-yes', label: 'Так, і це дало поштовх — використовую AI регулярніше' },
+  { value: 'workshop-effect-relapse', label: 'Так, і це дало поштовх — але після воркшопу знову застрягла' },
+  { value: 'workshop-no-effect', label: 'Так, але особливого ефекту не було' },
+  { value: 'no-workshop', label: 'Ні, не була' },
 ]
 
 const TRIGGERS = [
-  { value: 'colleague', label: 'Побачив/ла приклад від колеги' },
+  { value: 'colleague', label: 'Побачила приклад від колеги' },
   { value: 'task', label: 'Конкретна задача на роботі' },
   { value: 'media', label: 'Контент: стаття або відео' },
   { value: 'team', label: 'Вимоги або ініціативи команди' },
@@ -35,24 +41,22 @@ const BARRIER_OPTIONS = [
   { value: 'not-a-problem', label: 'Це вже не проблема' },
 ]
 
-const EXAMPLE_OPTIONS = [
-  { value: 'example-trigger', label: 'Саме те чого не вистачає — одразу б спробував/ла щось схоже' },
-  { value: 'useful-partial', label: 'Скоріше корисний, але проблема не тільки в браку прикладів' },
-  { value: 'need-basics', label: 'Навряд чи допоміг би — мені потрібно спочатку більше розібратись в основах' },
-  { value: 'already-using', label: 'Не потрібен — я вже активно використовую AI в роботі' },
+const PROMPT_REACTION_OPTIONS = [
+  { value: 'yes-immediately', label: 'Так, одразу б використала' },
+  { value: 'maybe', label: 'Можливо, залежить від задачі' },
+  { value: 'no-needs-context', label: 'Ні, мені потрібно більше контексту спочатку' },
 ]
 
 export function SurveyForm() {
   const [name, setName] = useState('')
-  const [wasAtWorkshop, setWasAtWorkshop] = useState(false)
   const [aiLevel, setAiLevel] = useState('')
+  const [workshopEffect, setWorkshopEffect] = useState('')
   const [triggers, setTriggers] = useState<string[]>([])
   const [triggersOther, setTriggersOther] = useState('')
   const [paralysis, setParalysis] = useState('')
   const [paralysisOther, setParalysisOther] = useState('')
   const [workIdea, setWorkIdea] = useState('')
-  const [oneStep, setOneStep] = useState('')
-  const [oneStepOther, setOneStepOther] = useState('')
+  const [promptReaction, setPromptReaction] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -65,14 +69,14 @@ export function SurveyForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!aiLevel || !paralysis || !oneStep) return
+    if (!aiLevel || !workshopEffect || !paralysis || !promptReaction) return
     setLoading(true)
     setError(false)
     try {
       const res = await fetch('/api/survey/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, wasAtWorkshop, aiLevel, triggers, triggersOther, paralysis, paralysisOther, workIdea, oneStep, oneStepOther }),
+        body: JSON.stringify({ name, aiLevel, workshopEffect, triggers, triggersOther, paralysis, paralysisOther, workIdea, promptReaction }),
       })
       if (!res.ok) throw new Error('API error')
       setSubmitted(true)
@@ -101,11 +105,10 @@ export function SurveyForm() {
       sx={{ maxWidth: 600, mx: 'auto', px: 3, py: 6 }}
     >
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-        2 хвилини про AI
+        Твій досвід з AI
       </Typography>
       <Typography sx={{ color: 'text.secondary', mb: 4, fontSize: 14 }}>
-        Досліджуємо як дизайнери DataArt взаємодіють з AI у своїй роботі.
-        Анонімно, 4 питання.
+        Досліджуємо як дизайнери львівської студії DataArt використовують AI у своїй роботі.
       </Typography>
 
       {/* Name */}
@@ -124,30 +127,13 @@ export function SurveyForm() {
         </FormControl>
       </Paper>
 
-      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={wasAtWorkshop}
-              onChange={e => setWasAtWorkshop(e.target.checked)}
-              size="small"
-            />
-          }
-          label={
-            <Typography sx={{ fontSize: 14 }}>
-              Я був/ла на AI-воркшопі в офісі DataArt
-            </Typography>
-          }
-        />
-      </Paper>
-
       <Divider sx={{ mb: 3 }} />
 
       {/* Q0 — AI level */}
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth required>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
-            Де ти зараз з AI у своїй роботі?
+            Що з цього робила з AI останнього місяця?
           </FormLabel>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
             Вибери одне *
@@ -167,7 +153,31 @@ export function SurveyForm() {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Q1 — Тригер */}
+      {/* Q1 — Workshop effect */}
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <FormControl component="fieldset" fullWidth required>
+          <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
+            Чи була ти на AI-воркшопі організованому дизайнерами львівської студії DataArt?
+          </FormLabel>
+          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
+            Вибери одне *
+          </Typography>
+          <RadioGroup value={workshopEffect} onChange={e => setWorkshopEffect(e.target.value)}>
+            {WORKSHOP_OPTIONS.map(o => (
+              <FormControlLabel
+                key={o.value}
+                value={o.value}
+                control={<Radio size="small" />}
+                label={<Typography sx={{ fontSize: 14 }}>{o.label}</Typography>}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </Paper>
+
+      <Divider sx={{ mb: 3 }} />
+
+      {/* Q2 — Trigger */}
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
@@ -215,7 +225,7 @@ export function SurveyForm() {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Q2 — Barrier */}
+      {/* Q3 — Barrier */}
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth required>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
@@ -253,7 +263,7 @@ export function SurveyForm() {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Q3 — Work idea */}
+      {/* Q4 — Work idea */}
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl fullWidth>
           <FormLabel sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
@@ -276,17 +286,17 @@ export function SurveyForm() {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Q4 — Example reaction */}
+      {/* Q5 — Prompt reaction */}
       <Paper variant="outlined" sx={{ p: 3, mb: 4, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth required>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
-            Конкретний приклад "як дизайнер використовує AI в реальних задачах" для мене:
+            Якби продукт дав тобі готовий промпт під твою конкретну робочу задачу — ти б спробувала?
           </FormLabel>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
             Вибери одне *
           </Typography>
-          <RadioGroup value={oneStep} onChange={e => setOneStep(e.target.value)}>
-            {EXAMPLE_OPTIONS.map(o => (
+          <RadioGroup value={promptReaction} onChange={e => setPromptReaction(e.target.value)}>
+            {PROMPT_REACTION_OPTIONS.map(o => (
               <FormControlLabel
                 key={o.value}
                 value={o.value}
@@ -294,27 +304,13 @@ export function SurveyForm() {
                 label={<Typography sx={{ fontSize: 14 }}>{o.label}</Typography>}
               />
             ))}
-            <FormControlLabel
-              value="other"
-              control={<Radio size="small" />}
-              label={<Typography sx={{ fontSize: 14 }}>Інше</Typography>}
-            />
-            {oneStep === 'other' && (
-              <TextField
-                size="small"
-                placeholder="Напиши що саме..."
-                value={oneStepOther}
-                onChange={e => setOneStepOther(e.target.value)}
-                sx={{ mt: 0.5, ml: 4 }}
-              />
-            )}
           </RadioGroup>
         </FormControl>
       </Paper>
 
-      {(!aiLevel || !paralysis || !oneStep) && (
+      {(!aiLevel || !workshopEffect || !paralysis || !promptReaction) && (
         <Alert severity="info" sx={{ mb: 2, fontSize: 13 }}>
-          Заповни обов'язкові питання (Q0, Q2 і Q4) щоб відправити
+          Заповни обов'язкові питання (Q0, Q1, Q3 і Q5) щоб відправити
         </Alert>
       )}
 
@@ -327,7 +323,7 @@ export function SurveyForm() {
       <Button
         type="submit"
         variant="contained"
-        disabled={!aiLevel || !paralysis || !oneStep || loading}
+        disabled={!aiLevel || !workshopEffect || !paralysis || !promptReaction || loading}
         fullWidth
         size="large"
         sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
