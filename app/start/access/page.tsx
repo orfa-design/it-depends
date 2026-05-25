@@ -3,36 +3,50 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-const OPTIONS = [
-  {
-    value: 'free',
-    label: 'Безкоштовний Claude.ai',
-    sub: 'claude.ai без підписки',
-  },
-  {
-    value: 'pro',
-    label: 'Claude Pro або Team',
-    sub: 'Більше контексту, пріоритет доступу',
-  },
-  {
-    value: 'code',
-    label: 'Claude Code або Cursor',
-    sub: 'Можу запускати код в терміналі або IDE',
-  },
+const ALL_OPTIONS = [
+  { value: 'claude',      label: 'Claude.ai Free',         sub: 'claude.ai без підписки' },
+  { value: 'claude-pro',  label: 'Claude Pro або Team',    sub: 'Більше контексту, пріоритет доступу' },
+  { value: 'claude-code', label: 'Claude Code',            sub: 'CLI інструмент у терміналі' },
+  { value: 'lovable',     label: 'Lovable',                sub: 'Генерує веб-додатки з промпту' },
+  { value: 'figma-make',  label: 'Figma Make',             sub: 'AI прямо у Figma' },
+  { value: 'cursor',      label: 'Cursor',                 sub: 'IDE з вбудованим AI' },
 ]
 
+function orderedOptions(level: string) {
+  if (level === 'build') {
+    const priority = ['claude-code', 'cursor']
+    return [
+      ...ALL_OPTIONS.filter(o => priority.includes(o.value)),
+      ...ALL_OPTIONS.filter(o => !priority.includes(o.value)),
+    ]
+  }
+  const priority = ['claude', 'claude-pro']
+  return [
+    ...ALL_OPTIONS.filter(o => priority.includes(o.value)),
+    ...ALL_OPTIONS.filter(o => !priority.includes(o.value)),
+  ]
+}
+
 function AccessContent() {
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string[]>([])
   const router = useRouter()
   const searchParams = useSearchParams()
   const level = searchParams.get('level') ?? ''
   const pain  = searchParams.get('pain')  ?? ''
 
-  function handleSelect(value: string) {
-    setSelected(value)
-    setTimeout(() => {
-      router.push(`/start/steps?level=${level}&pain=${pain}&access=${value}`)
-    }, 300)
+  const options = orderedOptions(level)
+
+  function toggle(value: string) {
+    setSelected(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    )
+  }
+
+  function handleConfirm() {
+    try {
+      localStorage.setItem('itdepends_profile', JSON.stringify({ level, access: selected }))
+    } catch {}
+    router.push(`/start/steps?level=${level}&pain=${pain}&access=${selected.join(',')}`)
   }
 
   return (
@@ -52,7 +66,7 @@ function AccessContent() {
             It Depends
           </p>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[1,2,3].map(i => (
+            {[1, 2, 3].map(i => (
               <div key={i} style={{
                 width: 6, height: 6, borderRadius: '50%',
                 background: '#111',
@@ -77,39 +91,65 @@ function AccessContent() {
           color: '#888',
           marginBottom: 40,
         }}>
-          Підберемо крок під твої інструменти.
+          Вибери все що є — підберемо крок під твої інструменти.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => handleSelect(opt.value)}
-              style={{
-                width: '100%',
-                padding: '20px 24px',
-                borderRadius: 14,
-                border: `2px solid ${selected === opt.value ? '#111' : '#e5e5e5'}`,
-                background: selected === opt.value ? '#111' : '#fff',
-                color: selected === opt.value ? '#fff' : '#111',
-                textAlign: 'left',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                outline: 'none',
-              }}
-            >
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
-                {opt.label}
-              </div>
-              <div style={{
-                fontSize: 13,
-                color: selected === opt.value ? 'rgba(255,255,255,0.6)' : '#999',
-              }}>
-                {opt.sub}
-              </div>
-            </button>
-          ))}
+          {options.map(opt => {
+            const isSelected = selected.includes(opt.value)
+            return (
+              <button
+                key={opt.value}
+                onClick={() => toggle(opt.value)}
+                style={{
+                  width: '100%',
+                  padding: '20px 24px',
+                  borderRadius: 14,
+                  border: `2px solid ${isSelected ? '#111' : '#e5e5e5'}`,
+                  background: isSelected ? '#111' : '#fff',
+                  color: isSelected ? '#fff' : '#111',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  outline: 'none',
+                }}
+              >
+                <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
+                  {opt.label}
+                </div>
+                <div style={{
+                  fontSize: 13,
+                  color: isSelected ? 'rgba(255,255,255,0.6)' : '#999',
+                }}>
+                  {opt.sub}
+                </div>
+              </button>
+            )
+          })}
         </div>
+
+        {selected.length > 0 && (
+          <button
+            onClick={handleConfirm}
+            style={{
+              width: '100%',
+              marginTop: 20,
+              padding: '16px 24px',
+              borderRadius: 12,
+              border: 'none',
+              background: '#111',
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: 'pointer',
+              outline: 'none',
+              letterSpacing: 0.2,
+              transition: 'opacity 0.15s ease',
+            }}
+          >
+            Далі →
+          </button>
+        )}
 
       </div>
     </div>
