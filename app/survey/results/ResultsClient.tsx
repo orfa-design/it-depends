@@ -11,7 +11,7 @@ const PARALYSIS_LABELS: Record<string, string> = {
   'too-many-tools': 'Занадто багато інструментів',
   'no-trust': 'Не довіряю якості результатів',
   'no-need': 'Не бачу потреби',
-  'not-a-problem': 'Це вже не проблема',
+  'not-a-problem': 'Я не маю з цим проблем, часто використовую AI',
   'other': 'Інше',
 }
 

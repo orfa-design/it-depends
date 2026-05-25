@@ -38,7 +38,7 @@ const BARRIER_OPTIONS = [
   { value: 'too-many-tools', label: 'Занадто багато інструментів — важко вибрати' },
   { value: 'no-trust', label: 'Не довіряю якості результатів' },
   { value: 'no-need', label: 'Не бачу потреби' },
-  { value: 'not-a-problem', label: 'Це вже не проблема' },
+  { value: 'not-a-problem', label: 'Я не маю з цим проблем, я часто використовую AI' },
 ]
 
 const PROMPT_REACTION_OPTIONS = [
