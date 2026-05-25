@@ -4,24 +4,23 @@ import { useState } from 'react'
 import type { SurveyResponse } from '../../api/survey/submit/route'
 
 const PARALYSIS_LABELS: Record<string, string> = {
-  'where-to-start': 'Не знаю з чого почати',
-  'no-clear-use-case': 'Не розумію де AI корисний саме для мене',
-  'weak-results': 'Результати виглядали слабкими',
-  'no-time': 'Не вистачає часу розібратись',
-  'too-many-tools': 'Занадто багато інструментів',
-  'no-trust': 'Не довіряю якості результатів',
-  'no-need': 'Не бачу потреби',
-  'not-a-problem': 'Я не маю з цим проблем, часто використовую AI',
+  'where-to-start': 'Не знаю, з чого почати',
+  'no-clear-use-case': 'Поки не бачу, як AI може допомогти саме мені',
+  'weak-results': 'Результати були слабкими або дивними',
+  'no-time': 'Не вистачає часу розібратися',
+  'too-many-tools': 'Занадто багато інструментів — важко зрозуміти, що обрати',
+  'no-trust': 'Не дуже довіряю результатам',
+  'not-a-problem': 'Мені вже комфортно користуватись AI',
   'other': 'Інше',
 }
 
 const TRIGGER_LABELS: Record<string, string> = {
-  colleague: 'Приклад від колеги',
-  task: 'Конкретна задача на роботі',
-  media: 'Контент: стаття або відео',
-  team: 'Вимоги або ініціативи команди',
-  curiosity: 'Власна цікавість',
-  'nothing-yet': 'Поки не було нічого такого',
+  colleague: 'Побачив(ла), як AI використовують колеги',
+  task: 'З\'явилась конкретна задача на роботі',
+  media: 'Стаття, відео або інший контент про AI',
+  team: 'Ініціативи або очікування всередині команди',
+  curiosity: 'Власна цікавість / бажання поекспериментувати',
+  'nothing-yet': 'Поки нічого особливо не вплинуло',
   other: 'Інше',
 }
 
@@ -199,7 +198,7 @@ export function ResultsClient({ initialResponses }: { initialResponses: SurveyRe
       )}
 
       {/* Q3 — Barrier */}
-      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що зараз найбільше заважає тобі використовувати AI частіше?</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Що зараз найбільше стримує тебе від активнішого використання AI?</h2>
       <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>Q3 · один варіант</p>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 32, background: '#fff', border: '1px solid #eee', borderRadius: 10, overflow: 'hidden' }}>
         <thead><tr>

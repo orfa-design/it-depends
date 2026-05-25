@@ -22,23 +22,22 @@ const WORKSHOP_OPTIONS = [
 ]
 
 const TRIGGERS = [
-  { value: 'colleague', label: 'Побачила приклад від колеги' },
-  { value: 'task', label: 'Конкретна задача на роботі' },
-  { value: 'media', label: 'Контент: стаття або відео' },
-  { value: 'team', label: 'Вимоги або ініціативи команди' },
-  { value: 'curiosity', label: 'Власна цікавість' },
-  { value: 'nothing-yet', label: 'Поки не було нічого такого' },
+  { value: 'colleague', label: 'Побачив(ла), як AI використовують колеги' },
+  { value: 'task', label: 'З\'явилась конкретна задача на роботі' },
+  { value: 'media', label: 'Стаття, відео або інший контент про AI' },
+  { value: 'team', label: 'Ініціативи або очікування всередині команди' },
+  { value: 'curiosity', label: 'Власна цікавість / бажання поекспериментувати' },
+  { value: 'nothing-yet', label: 'Поки нічого особливо не вплинуло' },
 ]
 
 const BARRIER_OPTIONS = [
-  { value: 'where-to-start', label: 'Не знаю з чого почати' },
-  { value: 'no-clear-use-case', label: 'Не розумію де AI реально корисний саме для мене' },
-  { value: 'weak-results', label: 'Результати виглядали слабкими' },
-  { value: 'no-time', label: 'Не вистачає часу розібратись' },
-  { value: 'too-many-tools', label: 'Занадто багато інструментів — важко вибрати' },
-  { value: 'no-trust', label: 'Не довіряю якості результатів' },
-  { value: 'no-need', label: 'Не бачу потреби' },
-  { value: 'not-a-problem', label: 'Я не маю з цим проблем, я часто використовую AI' },
+  { value: 'where-to-start', label: 'Не знаю, з чого почати' },
+  { value: 'no-clear-use-case', label: 'Поки не бачу, як AI може допомогти саме в моїй роботі' },
+  { value: 'weak-results', label: 'Результати були слабкими або дивними' },
+  { value: 'no-time', label: 'Не вистачає часу розібратися' },
+  { value: 'too-many-tools', label: 'Занадто багато інструментів — важко зрозуміти, що обрати' },
+  { value: 'no-trust', label: 'Не дуже довіряю результатам' },
+  { value: 'not-a-problem', label: 'Мені вже комфортно користуватись AI' },
 ]
 
 const PROMPT_REACTION_OPTIONS = [
@@ -229,7 +228,7 @@ export function SurveyForm() {
       <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: 2 }}>
         <FormControl component="fieldset" fullWidth required>
           <FormLabel component="legend" sx={{ fontWeight: 600, color: 'text.primary', mb: 1.5 }}>
-            Що зараз найбільше заважає тобі використовувати AI частіше?
+            Що зараз найбільше стримує тебе від активнішого використання AI?
           </FormLabel>
           <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5 }}>
             Вибери одне що найближче *
