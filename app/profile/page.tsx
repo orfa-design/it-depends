@@ -34,9 +34,16 @@ function relativeDate(iso: string): string {
 }
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [builds, setBuilds]   = useState<Build[]>([])
+  const [profile, setProfile]       = useState<Profile | null>(null)
+  const [builds, setBuilds]         = useState<Build[]>([])
+  const [confirmReset, setConfirmReset] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    if (!confirmReset) return
+    const t = setTimeout(() => setConfirmReset(false), 3000)
+    return () => clearTimeout(t)
+  }, [confirmReset])
 
   useEffect(() => {
     try {
@@ -156,21 +163,22 @@ export default function ProfilePage() {
         </div>
 
         <button
-          onClick={handleReset}
+          onClick={() => confirmReset ? handleReset() : setConfirmReset(true)}
           style={{
             width: '100%',
             padding: '14px 24px',
             borderRadius: 12,
-            border: '1.5px solid #e5e5e5',
+            border: `1.5px solid ${confirmReset ? '#e55' : '#e5e5e5'}`,
             background: '#fff',
-            color: '#999',
+            color: confirmReset ? '#e55' : '#999',
             fontSize: 14,
             fontWeight: 600,
             cursor: 'pointer',
             outline: 'none',
+            transition: 'all 0.15s ease',
           }}
         >
-          Почати знову
+          {confirmReset ? 'Впевнена? Натисни ще раз ↺' : 'Почати знову'}
         </button>
 
       </div>

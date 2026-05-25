@@ -158,6 +158,19 @@ const PROMPTS: Record<string, Suggestion> = {
   },
 }
 
+const LEVEL_CONTEXT: Record<string, string> = {
+  chat: 'Чат з AI',
+  analyze: 'Аналіз документів',
+  build: 'Будую за межами чату',
+}
+
+const PAIN_CONTEXT: Record<string, string> = {
+  automate: 'автоматизувати рутину',
+  'build-tool': 'побудувати свій інструмент',
+  inspired: 'спробувати натхненне',
+  examples: 'побачити варіанти',
+}
+
 const FALLBACK: Suggestion = {
   title: 'Перший крок з AI',
   artifact: 'Готовий промпт',
@@ -220,6 +233,12 @@ function SuggestContent() {
       <div style={{ width: '100%', maxWidth: 480 }}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+          <button
+            onClick={() => router.back()}
+            style={{ fontSize: 13, color: '#888', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            ← Назад
+          </button>
           <p style={{ fontSize: 13, color: '#aaa', letterSpacing: 0.3, textTransform: 'uppercase', margin: 0 }}>
             It Depends
           </p>
@@ -260,6 +279,12 @@ function SuggestContent() {
             {s.artifact}
           </span>
         </div>
+
+        {LEVEL_CONTEXT[level] && PAIN_CONTEXT[pain] && (
+          <p style={{ fontSize: 13, color: '#aaa', marginBottom: 8 }}>
+            {LEVEL_CONTEXT[level]} · {PAIN_CONTEXT[pain]}
+          </p>
+        )}
 
         <h1 style={{
           fontSize: 22,

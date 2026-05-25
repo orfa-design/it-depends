@@ -138,6 +138,12 @@ function StepsContent() {
       <div style={{ width: '100%', maxWidth: 480 }}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+          <button
+            onClick={() => router.back()}
+            style={{ fontSize: 13, color: '#888', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            ← Назад
+          </button>
           <p style={{ fontSize: 13, color: '#aaa', letterSpacing: 0.3, textTransform: 'uppercase', margin: 0 }}>
             It Depends
           </p>
