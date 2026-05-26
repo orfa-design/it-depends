@@ -183,9 +183,15 @@ const FALLBACK: Suggestion = {
 function SuggestContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const level = searchParams.get('level') ?? ''
-  const task  = searchParams.get('task')  ?? ''
-  const pain  = searchParams.get('pain')  ?? ''
+  const stage   = searchParams.get('stage')   ?? searchParams.get('level') ?? ''
+  const blocker = searchParams.get('blocker') ?? searchParams.get('pain')  ?? ''
+  const task    = searchParams.get('task')    ?? ''
+
+  const STAGE_TO_LEVEL: Record<string, string> = {
+    experimenting: 'chat', tasks: 'chat', 'next-level': 'analyze', build: 'build',
+    chat: 'chat', analyze: 'analyze',
+  }
+  const level = STAGE_TO_LEVEL[stage] ?? stage
   const key   = `${level}/${task}`
 
   const s = PROMPTS[key] ?? FALLBACK
@@ -214,7 +220,7 @@ function SuggestContent() {
   function handleDone() {
     try {
       const builds = JSON.parse(localStorage.getItem('itdepends_builds') ?? '[]')
-      builds.push({ card: task, title: s.title, tool: s.cta, level, pain, date: new Date().toISOString() })
+      builds.push({ card: task, title: s.title, tool: s.cta, stage, blocker, date: new Date().toISOString() })
       localStorage.setItem('itdepends_builds', JSON.stringify(builds))
     } catch {}
     router.push(`/done?card=${encodeURIComponent(task)}&tool=${s.cta}&level=${level}&title=${encodeURIComponent(s.title)}`)
@@ -280,9 +286,9 @@ function SuggestContent() {
           </span>
         </div>
 
-        {LEVEL_CONTEXT[level] && PAIN_CONTEXT[pain] && (
+        {LEVEL_CONTEXT[level] && PAIN_CONTEXT[blocker] && (
           <p style={{ fontSize: 13, color: '#aaa', marginBottom: 8 }}>
-            {LEVEL_CONTEXT[level]} · {PAIN_CONTEXT[pain]}
+            {LEVEL_CONTEXT[level]} · {PAIN_CONTEXT[blocker]}
           </p>
         )}
 

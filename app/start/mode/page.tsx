@@ -4,23 +4,33 @@ import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const OPTIONS = [
-  { value: 'routine',  label: 'Швидше виконувати рутину',       sub: 'Шаблони, чекліти, повторювані задачі' },
-  { value: 'analysis', label: 'Краще думати й аналізувати',      sub: 'Дослідження, синтез, порівняння рішень' },
-  { value: 'content',  label: 'Генерувати UI або контент',        sub: 'Макети, тексти, варіанти дизайну' },
-  { value: 'flows',    label: 'Будувати власні AI flows',         sub: 'Плагіни, скрипти, автоматизація' },
+  {
+    value: 'guided',
+    label: 'Дайте мені готовий наступний крок',
+    sub: 'Запропонуйте — я спробую',
+  },
+  {
+    value: 'builder',
+    label: 'Я хочу побудувати щось своє',
+    sub: 'Маю ідею або хочу більше свободи',
+  },
 ]
 
-function AccessContent() {
+function ModeContent() {
   const [selected, setSelected] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const stage   = searchParams.get('stage')   ?? ''
-  const blocker = searchParams.get('blocker') ?? ''
+  const stage      = searchParams.get('stage')      ?? ''
+  const blocker    = searchParams.get('blocker')    ?? ''
+  const trajectory = searchParams.get('trajectory') ?? ''
 
   function handleSelect(value: string) {
     setSelected(value)
+    try {
+      localStorage.setItem('itdepends_profile', JSON.stringify({ stage, trajectory, blocker }))
+    } catch {}
     setTimeout(() => {
-      router.push(`/start/mode?stage=${stage}&blocker=${blocker}&trajectory=${value}`)
+      router.push(`/start/steps?stage=${stage}&blocker=${blocker}&trajectory=${trajectory}&mode=${value}`)
     }, 300)
   }
 
@@ -50,19 +60,19 @@ function AccessContent() {
             {[1, 2, 3, 4].map(i => (
               <div key={i} style={{
                 width: 6, height: 6, borderRadius: '50%',
-                background: i <= 3 ? '#111' : '#ddd',
-                opacity: i < 3 ? 0.4 : 1,
+                background: '#111',
+                opacity: i < 4 ? 0.4 : 1,
               }} />
             ))}
           </div>
         </div>
 
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111', marginBottom: 8, lineHeight: 1.3 }}>
-          Що тобі зараз цікавіше?
+          Як тобі зручніше?
         </h1>
 
         <p style={{ fontSize: 15, color: '#888', marginBottom: 40 }}>
-          Вибери одне — підберемо напрям.
+          Останнє питання.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -72,7 +82,7 @@ function AccessContent() {
               onClick={() => handleSelect(opt.value)}
               style={{
                 width: '100%',
-                padding: '20px 24px',
+                padding: '24px',
                 borderRadius: 14,
                 border: `2px solid ${selected === opt.value ? '#111' : '#e5e5e5'}`,
                 background: selected === opt.value ? '#111' : '#fff',
@@ -83,7 +93,7 @@ function AccessContent() {
                 outline: 'none',
               }}
             >
-              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>{opt.label}</div>
+              <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>{opt.label}</div>
               <div style={{ fontSize: 13, color: selected === opt.value ? 'rgba(255,255,255,0.6)' : '#999' }}>
                 {opt.sub}
               </div>
@@ -96,10 +106,10 @@ function AccessContent() {
   )
 }
 
-export default function AccessPage() {
+export default function ModePage() {
   return (
     <Suspense>
-      <AccessContent />
+      <ModeContent />
     </Suspense>
   )
 }

@@ -75,14 +75,35 @@ const CARDS: Record<string, Card[]> = {
   ],
 }
 
-function rankByAccess(cards: Card[], accessList: string[]): Card[] {
-  const compatible = (tool: string) =>
-    tool === 'claude' ? accessList.some(a => a === 'claude' || a === 'claude-pro')
-    : accessList.includes(tool)
-  return [
-    ...cards.filter(c => compatible(c.tool)),
-    ...cards.filter(c => !compatible(c.tool)),
-  ]
+// Map new onboarding params to CARDS keys
+const STAGE_TO_LEVEL: Record<string, string> = {
+  experimenting: 'chat',
+  tasks:         'chat',
+  'next-level':  'analyze',
+  build:         'build',
+  // legacy support
+  chat:          'chat',
+  analyze:       'analyze',
+}
+
+const BLOCKER_TO_PAIN: Record<string, string> = {
+  'no-idea':      'examples',
+  'weak-results': 'examples',
+  'no-time':      'automate',
+  'want-harder':  'build-tool',
+  'has-idea':     'inspired',
+  // legacy support
+  automate:       'automate',
+  'build-tool':   'build-tool',
+  inspired:       'inspired',
+  examples:       'examples',
+}
+
+const TRAJECTORY_TO_PAIN: Record<string, string> = {
+  routine:  'automate',
+  analysis: 'examples',
+  content:  'inspired',
+  flows:    'build-tool',
 }
 
 function ToolBadge({ tool }: { tool: 'claude' | 'claude-code' }) {
@@ -107,22 +128,38 @@ function StepsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const level  = searchParams.get('level')  ?? 'chat'
-  const pain   = searchParams.get('pain')   ?? 'examples'
-  const access = searchParams.get('access') ?? 'claude'
-  const accessList = access ? access.split(',') : ['claude']
+  const stage      = searchParams.get('stage')      ?? searchParams.get('level')   ?? 'experimenting'
+  const blocker    = searchParams.get('blocker')    ?? searchParams.get('pain')    ?? 'examples'
+  const trajectory = searchParams.get('trajectory') ?? ''
+  const mode       = searchParams.get('mode')       ?? 'guided'
 
-  const key = `${level}/${pain}`
+  const level = STAGE_TO_LEVEL[stage]   ?? 'chat'
+  const pain  = trajectory
+    ? (TRAJECTORY_TO_PAIN[trajectory] ?? BLOCKER_TO_PAIN[blocker] ?? 'examples')
+    : (BLOCKER_TO_PAIN[blocker] ?? 'examples')
+
+  const key      = `${level}/${pain}`
   const rawCards = CARDS[key] ?? CARDS[`${level}/examples`] ?? CARDS['chat/examples']
-  const cards = rankByAccess(rawCards, accessList)
+
+  // builder mode: put open-ended cards first
+  const cards = mode === 'builder'
+    ? [...rawCards].reverse()
+    : rawCards
 
   const mainCard = cards[0]
   const altCards = cards.slice(1, 3)
 
+  // Path neighbours: simpler = previous level, more advanced = next card
+  const allKeys   = Object.keys(CARDS)
+  const keyIndex  = allKeys.indexOf(key)
+  const simplerKey   = allKeys[keyIndex - 1]
+  const advancedKey  = allKeys[keyIndex + 1]
+  const simplerCard  = simplerKey  ? CARDS[simplerKey]?.[0]  : null
+  const advancedCard = advancedKey ? CARDS[advancedKey]?.[0] : null
+
   function navigate(promptKey: string) {
-    // suggest page builds key as `${level}/${task}` — pass only the suffix after level prefix
     const task = promptKey.split('/').slice(1).join('/') || promptKey
-    router.push(`/start/suggest?level=${level}&pain=${pain}&access=${access}&task=${task}`)
+    router.push(`/start/suggest?stage=${stage}&blocker=${blocker}&trajectory=${trajectory}&mode=${mode}&task=${task}`)
   }
 
   return (
@@ -148,17 +185,67 @@ function StepsContent() {
             It Depends
           </p>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i} style={{
                 width: 6, height: 6, borderRadius: '50%',
                 background: '#111',
-                opacity: i < 3 ? 0.3 : 1,
+                opacity: 1,
               }} />
             ))}
           </div>
         </div>
 
-        {/* Main card label */}
+        {/* Path context */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 20,
+          overflow: 'hidden',
+        }}>
+          {simplerCard && (
+            <button
+              onClick={() => navigate(simplerCard.promptKey)}
+              style={{
+                flex: 1,
+                padding: '10px 12px',
+                borderRadius: 10,
+                border: '1.5px solid #e5e5e5',
+                background: '#fff',
+                textAlign: 'left',
+                cursor: 'pointer',
+                outline: 'none',
+                opacity: 0.5,
+              }}
+            >
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 3 }}>← Простіше</div>
+              <div style={{ fontSize: 12, color: '#666', fontWeight: 500, lineHeight: 1.3 }}>{simplerCard.title}</div>
+            </button>
+          )}
+          <div style={{
+            width: 8, height: 8, borderRadius: '50%', background: '#111', flexShrink: 0,
+          }} />
+          {advancedCard && (
+            <button
+              onClick={() => navigate(advancedCard.promptKey)}
+              style={{
+                flex: 1,
+                padding: '10px 12px',
+                borderRadius: 10,
+                border: '1.5px solid #e5e5e5',
+                background: '#fff',
+                textAlign: 'right',
+                cursor: 'pointer',
+                outline: 'none',
+                opacity: 0.5,
+              }}
+            >
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 3 }}>Складніше →</div>
+              <div style={{ fontSize: 12, color: '#666', fontWeight: 500, lineHeight: 1.3 }}>{advancedCard.title}</div>
+            </button>
+          )}
+        </div>
+
         <p style={{ fontSize: 13, color: '#888', marginBottom: 8, fontWeight: 500 }}>
           ★ Підібрано для тебе
         </p>
@@ -198,13 +285,12 @@ function StepsContent() {
           </button>
         </div>
 
-        {/* Alternates label */}
         {altCards.length > 0 && (
           <>
             <p style={{ fontSize: 12, color: '#aaa', marginBottom: 10, fontWeight: 500 }}>
               Інші варіанти:
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {altCards.map(card => (
                 <button
                   key={card.promptKey}
@@ -228,24 +314,6 @@ function StepsContent() {
             </div>
           </>
         )}
-
-        {/* Show more — MVP placeholder */}
-        <button
-          style={{
-            width: '100%',
-            padding: '12px 24px',
-            borderRadius: 10,
-            border: '1.5px solid #e5e5e5',
-            background: 'transparent',
-            color: '#bbb',
-            fontSize: 14,
-            fontWeight: 500,
-            cursor: 'default',
-            outline: 'none',
-          }}
-        >
-          ↓ Показати більше
-        </button>
 
       </div>
     </div>

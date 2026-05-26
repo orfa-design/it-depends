@@ -4,20 +4,21 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 const RETURN_OPTIONS = [
-  { value: 'automate',   label: 'Автоматизувати щось рутинне',            sub: 'Шаблони, чекліти, workflow — один раз і реюзаєш' },
-  { value: 'build-tool', label: 'Побудувати свій інструмент',             sub: 'Плагін, скрипт, автоматизація під свій процес' },
-  { value: 'inspired',   label: 'Надихнулась чимось — хочу спробувати схоже', sub: 'Бачила результат, хочу зробити своє' },
-  { value: 'examples',   label: 'Покажи що взагалі можна зробити',        sub: 'Без конкретної задачі — хочу побачити варіанти' },
+  { value: 'no-idea',      label: 'Не знаю що саме пробувати',              sub: 'Покажіть що взагалі можливо' },
+  { value: 'want-harder',  label: 'Хочу перейти до складніших речей',        sub: 'Вже роблю базове, хочу більше' },
+  { value: 'has-idea',     label: 'Маю ідею — допоможіть реалізувати',       sub: 'Знаю що хочу, не знаю як' },
+  { value: 'no-time',      label: 'Хочу автоматизувати щось конкретне',      sub: 'Є рутина яка забирає час' },
 ]
 
 const FIRST_VISIT_OPTIONS = [
-  { value: 'chat',    label: 'Питала питання в чаті',                sub: 'ChatGPT, Claude, Gemini...' },
-  { value: 'analyze', label: 'Аналізувала документи або зображення', sub: 'Брифи, транскрипти, скріншоти...' },
-  { value: 'build',   label: 'Будувала щось за межами чату',         sub: 'Плагін, скіл, автоматизація...' },
+  { value: 'experimenting', label: 'Я тільки починаю — пробую різне',         sub: 'Ще шукаю де AI справді допомагає' },
+  { value: 'tasks',         label: 'Використовую для окремих задач',           sub: 'Чат, аналіз, підсумки — але хочу більше' },
+  { value: 'next-level',    label: 'AI вже в моїй роботі — хочу наступний рівень', sub: 'Економлю час, тепер хочу будувати' },
+  { value: 'build',         label: 'Хочу будувати власні інструменти',         sub: 'Плагіни, скрипти, автоматизація' },
 ]
 
-type Profile = { level: string; access: string[] }
-type Build   = { card: string; title: string; tool: string; level: string; pain: string; date: string }
+type Profile = { stage: string; access: string[] }
+type Build   = { card: string; title: string; tool: string; stage: string; blocker: string; date: string }
 
 export default function StartPage() {
   const [isReturn, setIsReturn]   = useState(false)
@@ -40,15 +41,14 @@ export default function StartPage() {
 
   function handleFirstVisit(value: string) {
     setSelected(value)
-    setTimeout(() => router.push(`/start/pain?level=${value}`), 300)
+    setTimeout(() => router.push(`/start/pain?stage=${value}`), 300)
   }
 
-  function handleReturn(pain: string) {
+  function handleReturn(blocker: string) {
     if (!profile) return
-    setSelected(pain)
+    setSelected(blocker)
     setTimeout(() => {
-      const access = Array.isArray(profile.access) ? profile.access.join(',') : 'claude'
-      router.push(`/start/steps?level=${profile.level}&pain=${pain}&access=${access}`)
+      router.push(`/start/steps?stage=${profile.stage}&blocker=${blocker}&trajectory=routine&mode=guided`)
     }, 300)
   }
 
@@ -85,10 +85,10 @@ export default function StartPage() {
           )}
 
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111', marginBottom: 8, lineHeight: 1.3 }}>
-            Що спробуємо цього разу?
+            Що зараз найбільше заважає рухатись далі?
           </h1>
           <p style={{ fontSize: 15, color: '#888', marginBottom: 40 }}>
-            Вибери одне — підберемо перший крок.
+            Вибери одне — підберемо наступний крок.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -139,7 +139,7 @@ export default function StartPage() {
             It Depends
           </p>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i} style={{
                 width: 6, height: 6, borderRadius: '50%',
                 background: i === 1 ? '#111' : '#ddd',
@@ -150,7 +150,7 @@ export default function StartPage() {
         </div>
 
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111', marginBottom: 8, lineHeight: 1.3 }}>
-          Що з AI робила за останній місяць?
+          Як AI зараз виглядає у твоїй роботі?
         </h1>
         <p style={{ fontSize: 15, color: '#888', marginBottom: 40 }}>
           Вибери одне — це визначить з чого почати.
