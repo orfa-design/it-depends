@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   STORIES, REACTIONS, STEPS, STEPS_EXTRA, CUR_IDX, getStatus, isDone,
-  type Story, type StepExtra,
+  type Story, type StepExtra, type Tool,
 } from '@/lib/data'
 import { saveCalibration } from '@/lib/storage'
 import './styles.css'
@@ -433,6 +433,13 @@ function MapScreen({ mapStyle, onStartPrompt }: { mapStyle: MapStyle; onStartPro
 
 const TASK_DEFAULT = `Допоможи мені зробити інтерактивний HTML-прототип за один вечір.`
 
+const TOOLS: Record<Tool, { label: string; instruction: string }> = {
+  'claude-ai':         { label: 'Claude.ai',       instruction: 'Відкрий claude.ai, встав промпт, дай чату попрацювати.' },
+  'claude-code':       { label: 'Claude Code',     instruction: 'Відкрий термінал, введи `claude`, встав промпт.' },
+  'figma-make':        { label: 'Figma Make',      instruction: 'Відкрий Figma Make, встав промпт у чат.' },
+  'google-ai-studio':  { label: 'AI Studio',       instruction: 'Відкрий Google AI Studio, встав промпт.' },
+}
+
 const PROMPT_TEXT_DEFAULT = `Ти senior frontend дев, який пише прототипи для дизайн-рев'ю.
 
 Я дизайнер без досвіду кодингу. {task}
@@ -461,6 +468,8 @@ function PromptScreen({
   const taskDefault = extra?.taskDefault ?? TASK_DEFAULT
   const stepNum     = String(stepIdx + 1).padStart(2, '0')
 
+  const recommended         = extra?.recommendedTool ?? 'claude-ai'
+  const [tool, setTool]     = useState<Tool>(recommended)
   const [task, setTask]     = useState(taskDefault)
   const [copied, setCopied] = useState(false)
 
@@ -479,12 +488,26 @@ function PromptScreen({
           <div className="eyebrow">крок {stepNum} · промпт</div>
           <div className="prompt-title">Скопіюй це в Claude.</div>
           <div className="prompt-sub">
-            Відкрий claude.ai, встав, дай чату попрацювати.
+            {TOOLS[tool].instruction}
             {isCur && ' Повернись сюди, коли матимеш Vercel-лінк.'}
           </div>
         </div>
         <button className="btn-ghost" onClick={onBack}>← закрити</button>
       </div>
+
+      <div className="tool-selector">
+        {(Object.keys(TOOLS) as Tool[]).map(t => (
+          <button
+            key={t}
+            className={`tool-btn${tool === t ? ' active' : ''}`}
+            onClick={() => setTool(t)}
+          >
+            {TOOLS[t].label}
+            {t === recommended && <span className="tool-rec">рек</span>}
+          </button>
+        ))}
+      </div>
+
       <div className="prompt-box">
         <div className="prompt-bar">
           <div className="prompt-bar-left">

@@ -18,12 +18,15 @@ export type Step = {
   current?: boolean
 }
 
+export type Tool = 'claude-ai' | 'claude-code' | 'figma-make' | 'google-ai-studio'
+
 export type StepExtra = {
   doable: string
   technical: string
   time: string
   promptText: string
   taskDefault: string
+  recommendedTool: Tool
 }
 
 export const STORIES: Story[] = [
@@ -95,6 +98,7 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     doable: 'Форма з валідацією, яка поводиться правильно. Переходи між станами без перезавантаження.',
     technical: 'Controlled inputs, error/loading/success стани, conditional rendering.',
     time: '≈60 хв',
+    recommendedTool: 'claude-ai',
     taskDefault: `Зроби HTML-прототип форми логіну з кількома станами:\n— default: поля email + password, кнопка «увійти»\n— validation error: підсвічування поля, inline текст помилки\n— loading: кнопка заблокована зі spinner\n— success: success state з переходом на dashboard (статичний екран)`,
     promptText: `Ти senior frontend дев, який пише прототипи для дизайн-рев'ю.\n\n{task}\n\nСтек: один .html файл. Tailwind CDN, vanilla JS.\nТемна тема. Шрифт — Geist.\n\nСпочатку постав мені 2-3 запитання. Тільки потім код.`,
   },
@@ -102,6 +106,7 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     doable: 'Запит до справжнього API прямо з прототипу. Скелетони, retry, обробка помилок.',
     technical: 'fetch() + async/await, loading states, error handling у UI.',
     time: '≈90 хв',
+    recommendedTool: 'claude-ai',
     taskDefault: `Зроби HTML-прототип, який тягне дані з публічного API (jsonplaceholder або HackerNews) і показує їх у картках:\n— skeleton loading поки дані завантажуються\n— список карток після відповіді\n— empty state якщо даних немає\n— error state якщо запит впав + кнопка retry`,
     promptText: `Ти senior frontend дев, який пише прототипи для дизайн-рев'ю.\n\n{task}\n\nСтек: один .html файл. Tailwind CDN, vanilla JS + fetch.\nТемна тема. Шрифт — Geist.\n\nСпочатку постав мені 2-3 запитання. Тільки потім код.`,
   },
@@ -109,6 +114,7 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     doable: 'Прототип на справжньому URL. Відправиш лінк у Slack — команда клікне й побачить живий продукт.',
     technical: 'Git basics, Vercel deploy, environment змінні.',
     time: '≈45 хв',
+    recommendedTool: 'claude-code',
     taskDefault: `Допоможи мені задеплоїти HTML-прототип на Vercel покроково:\n— створити репозиторій на GitHub з одним html файлом\n— підключити до Vercel і отримати публічний URL\n— що робити якщо щось пішло не так`,
     promptText: `Ти senior fullstack розробник, пояснюєш дизайнеру без досвіду з git.\n\n{task}\n\nФормат: numbered steps, без зайвих деталей. Починай з запитань — що тобі треба знати про мій стек і досвід.`,
   },
@@ -116,6 +122,7 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     doable: 'Прототип, яким можна пройти тільки з клавіатури. Скрінридери не зламаються.',
     technical: 'focus management, aria-* атрибути, keyboard events.',
     time: '≈60 хв',
+    recommendedTool: 'claude-ai',
     taskDefault: `У мене є HTML-прототип — [вставити код].\n\nЗнайди топ-3 проблеми з доступністю і виправ їх:\n— keyboard navigation (Tab, Enter, Escape)\n— aria-label для іконок і кнопок без тексту\n— focus visible стани`,
     promptText: `Ти accessibility інженер, пояснюєш дизайнерам.\n\n{task}\n\nПоясни кожне виправлення одним реченням — навіщо це важливо для реального юзера.`,
   },
@@ -123,6 +130,7 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     doable: 'Три варіанти одного флоу в одному файлі. Команда обирає прямо в браузері.',
     technical: 'Tweak controls, CSS custom properties, conditional rendering.',
     time: '≈75 хв',
+    recommendedTool: 'figma-make',
     taskDefault: `Зроби HTML-файл де три варіанти одного екрану переключаються кнопками зверху. Варіанти:\n— Варіант A: [описати]\n— Варіант B: [описати]\n— Варіант C: [описати]`,
     promptText: `Ти senior frontend дев, який пише прототипи для дизайн-рев'ю.\n\n{task}\n\nСтек: один .html файл. Tailwind CDN, vanilla JS.\nТемна тема. Шрифт — Geist.\n\nСпочатку постав мені 2-3 запитання. Тільки потім код.`,
   },
@@ -130,6 +138,7 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     doable: "Дрібна реальна зміна на проді. Без PR-рев'ю, без ticket, без очікування.",
     technical: 'Git branches, diff reading, merge basics.',
     time: '≈30 хв',
+    recommendedTool: 'claude-code',
     taskDefault: `Я хочу зашипити дрібну зміну: [описати зміну].`,
     promptText: `Ти senior розробник, який ментує дизайнера.\n\n{task}\n\nПокроково: як створити гілку, зробити зміну, відкрити PR, замержити. Я знаю HTML/CSS, але з git мало досвіду.\n\nФормат: numbered steps. Починай з запитань про мій досвід.`,
   },
