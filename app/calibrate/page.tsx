@@ -315,7 +315,7 @@ function StepInfo({
   return (
     <div className="step-info step-info-cur anim-in">
       <div className="eyebrow eyebrow-accent" style={{ marginBottom: 20 }}>
-        <span className="dot" /> наступний крок · {String(stepIdx + 1).padStart(2, '0')} з 10
+        <span className="dot" /> наступний крок · {String(stepIdx + 1).padStart(2, '0')} з {STEPS.length}
       </div>
       <h2 className="step-info-title">{step.title}</h2>
       <div className="step-info-grid">
@@ -362,6 +362,7 @@ function MapVertical({ selectedIdx, onSelect }: { selectedIdx: number; onSelect:
               <div className="marker" />
               <div className="node-text">
                 <div className="node-title">{s.title}</div>
+                {s.subtitle && <div className="node-subtitle">{s.subtitle}</div>}
                 {st === 'done-link' && <div className="node-meta node-meta-link">результат ↗</div>}
                 {st === 'cur'       && <div className="node-meta">наступне · ≈45 хв</div>}
               </div>
@@ -398,7 +399,10 @@ function MapTypographic({ selectedIdx, onSelect }: { selectedIdx: number; onSele
                 onClick={() => onSelect(i)}
               >
                 <div className="typo-num">{String(i + 1).padStart(2, '0')}</div>
-                <div className="typo-title">{s.title}</div>
+                <div>
+                  <div className="typo-title">{s.title}</div>
+                  {s.subtitle && <div className="typo-subtitle">{s.subtitle}</div>}
+                </div>
                 <div className="typo-meta">
                   {st === 'done-no-link' ? 'пройдено' : st === 'done-link' ? '↗' : st === 'cur' ? '≈45 хв' : ''}
                 </div>

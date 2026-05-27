@@ -12,6 +12,7 @@ export type Reaction = { v: 'wow' | 'heard' | 'have'; label: string; ic: string 
 export type Step = {
   id: string
   title: string
+  subtitle: string
   meta: string
   result?: string | null
   resultLabel?: string
@@ -71,16 +72,26 @@ export const REACTIONS: Reaction[] = [
 ]
 
 export const STEPS: Step[] = [
-  { id: 'css',       title: 'Розібратися як CSS реально працює',         meta: 'foundation', result: null },
-  { id: 'tailwind',  title: 'Tailwind — як думати, а не вгадувати',       meta: 'foundation', result: 'https://notion.so', resultLabel: 'Tailwind cheatsheet' },
-  { id: 'prompts',   title: 'Писати промпти, щоб Claude не вигадував',   meta: 'foundation', result: 'https://notion.so', resultLabel: 'Prompt library' },
-  { id: 'prototype', title: 'Інтерактивний прототип за один вечір',       meta: 'next', current: true },
-  { id: 'state',     title: 'Стани, переходи й форми, які працюють',      meta: 'soon' },
-  { id: 'real-data', title: 'Підключити справжні дані з API',              meta: 'soon' },
-  { id: 'deploy',    title: 'Запушити на Vercel, дати лінку команді',     meta: 'later' },
-  { id: 'a11y',      title: 'Прототипи, які не ламають клавіатуру',        meta: 'later' },
-  { id: 'sketch',    title: 'Три гіпотези поряд в одному HTML',            meta: 'later' },
-  { id: 'ship',      title: 'Зашипити дрібну фічу без розробника',         meta: 'later' },
+  { id: 'summary-meeting',        title: 'Саммері зустрічі',              subtitle: 'Як не відкривати нотатки після дзвінку',                      meta: 'foundation', result: null },
+  { id: 'brief-analysis',         title: 'Аналіз брифів',                 subtitle: 'Промпт для роботи з неструктурованими документами',            meta: 'foundation', result: null },
+  { id: 'transcript',             title: 'Розбір транскриптів',            subtitle: 'Витягти головне без читання повністю',                         meta: 'foundation', result: null },
+  { id: 'research-prep',          title: 'Підготовка до дослідження',      subtitle: 'Як налаштувати Claude перед початком аналізу',                 meta: 'next', current: true },
+  { id: 'competitive-analysis',   title: 'Конкурентний аналіз',            subtitle: 'Структурувати ринок без ручних таблиць',                       meta: 'soon' },
+  { id: 'working-prompt',         title: 'Робочий промпт',                 subtitle: 'Один шаблон який працює щоразу',                               meta: 'soon' },
+  { id: 'interview-analysis',     title: 'Аналіз інтерв\'ю',              subtitle: 'Постійний промпт для якісного дослідження',                    meta: 'soon' },
+  { id: 'first-code-edit',        title: 'Перша правка в коді',            subtitle: 'Змінити щось в продукті без розробника',                       meta: 'later' },
+  { id: 'live-link',              title: 'Живе посилання для команди',     subtitle: 'Поділитись роботою не через Figma',                            meta: 'later' },
+  { id: 'prototype-testing',      title: 'Прототип для тестування',        subtitle: 'Оживити дизайн за допомогою коду',                             meta: 'later' },
+  { id: 'handoff',                title: 'Хендоф розробнику',              subtitle: 'Підготувати передачу яку приймуть без питань',                 meta: 'later' },
+  { id: 'claude-projects',        title: 'Claude Projects',                subtitle: 'Налаштувати простір який пам\'ятає твій проєкт',               meta: 'later' },
+  { id: 'parallel-prototyping',   title: 'Паралельне прототипування',      subtitle: 'Три варіанти з одного промпту',                                meta: 'later' },
+  { id: 'first-live-project',     title: 'Запуск першого живого проєкту',  subtitle: 'Налаштування середовища і деплой онлайн',                      meta: 'later' },
+  { id: 'feedback-form',          title: 'Форма для фідбеку',              subtitle: 'Зібрати відповіді команди без Google Forms',                   meta: 'later' },
+  { id: 'interactive-prototype',  title: 'Інтерактивний прототип',         subtitle: 'Оживити дизайни за допомогою коду',                            meta: 'later' },
+  { id: 'feedback-automation',    title: 'Автоматизація фідбеку',          subtitle: 'Таблиця яка заповнюється сама',                                meta: 'later' },
+  { id: 'workshop-planning',      title: 'Планування воркшопу',            subtitle: 'Розробка структури і кроків разом з Claude',                   meta: 'later' },
+  { id: 'team-tool',              title: 'Командний інструмент',           subtitle: 'Побудувати щось що використовують всі',                        meta: 'later' },
+  { id: 'stakeholder-presentation', title: 'Презентація стейкхолдерам',    subtitle: 'Показати живий продукт замість слайдів',                       meta: 'later' },
 ]
 
 export const CUR_IDX = STEPS.findIndex(s => s.current) // 3
