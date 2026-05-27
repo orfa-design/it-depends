@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>It Depends — Research & Critique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e8e5df;
+    --text: #1a1916;
+    --muted: #6b6860;
+    --red: #c0392b;
+    --red-bg: #fdf2f1;
+    --red-border: #f5c6c2;
+    --yellow: #b7791f;
+    --yellow-bg: #fefce8;
+    --yellow-border: #fde68a;
+    --green: #276749;
+    --green-bg: #f0fdf4;
+    --green-border: #bbf7d0;
+    --blue: #1d4ed8;
+    --blue-bg: #eff6ff;
+    --blue-border: #bfdbfe;
+    --accent: #1a1916;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* Layout */
+  .page { max-width: 780px; margin: 0 auto; padding: 48px 24px 96px; }
+
+  /* Header */
+  .header {
+    padding: 56px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+  .header-meta {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .header .subtitle {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 560px;
+  }
+
+  /* TL;DR */
+  .tldr {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 56px;
+  }
+  .tldr-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 14px;
+  }
+  .tldr-items { display: flex; flex-direction: column; gap: 10px; }
+  .tldr-item {
+    display: flex;
+    gap: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .tldr-item .num {
+    font-weight: 700;
+    opacity: 0.4;
+    min-width: 20px;
+  }
+
+  /* Section */
+  .section { margin-bottom: 64px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .section h2 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section p {
+    color: var(--muted);
+    margin-bottom: 20px;
+    max-width: 640px;
+  }
+
+  /* Survey Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); }
+
+  /* Bar chart */
+  .bar-section { margin-bottom: 28px; }
+  .bar-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .bar-label { font-size: 12px; color: var(--muted); min-width: 260px; }
+  .bar-track {
+    flex: 1;
+    background: var(--border);
+    border-radius: 3px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+  .bar-fill.highlight { background: var(--red); }
+  .bar-fill.secondary { background: #888; }
+  .bar-pct { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; }
+  .bar-n { font-size: 11px; color: var(--muted); min-width: 20px; }
+
+  /* Callout box */
+  .callout {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 14px;
+  }
+  .callout.red { background: var(--red-bg); border: 1px solid var(--red-border); }
+  .callout.yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); }
+  .callout.green { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .callout.blue { background: var(--blue-bg); border: 1px solid var(--blue-border); }
+  .callout-icon { font-size: 18px; line-height: 1.4; flex-shrink: 0; }
+  .callout-body { flex: 1; }
+  .callout-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .callout.red .callout-title { color: var(--red); }
+  .callout.yellow .callout-title { color: var(--yellow); }
+  .callout.green .callout-title { color: var(--green); }
+  .callout.blue .callout-title { color: var(--blue); }
+  .callout-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* Assumptions table */
+  .assumption-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  .assumption-table th {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .assumption-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: top;
+  }
+  .assumption-table tr:last-child td { border-bottom: none; }
+  .assumption-table tr:hover td { background: #fafaf8; }
+  .id-cell {
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge.red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .badge.yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .badge.green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .badge.gray { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+  .badge.blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+
+  /* Evidence tags */
+  .evidence { font-size: 11px; color: var(--muted); }
+
+  /* Q4 answers */
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .answer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .answer-card .who {
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  /* Tag cluster */
+  .tag-cluster { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .tag {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .tag.bold {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+  /* Competitor card */
+  .comp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .comp-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .comp-name { font-weight: 600; font-size: 14px; }
+  .comp-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .comp-takeaway {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .comp-takeaway::before { content: "→ "; color: var(--muted); }
+
+  /* Brief matrix */
+  .matrix-table { width: 100%; border-collapse: collapse; }
+  .matrix-table th {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 8px 12px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .matrix-table td {
+    padding: 12px; border-bottom: 1px solid var(--border);
+    font-size: 13px; vertical-align: top;
+  }
+  .matrix-table td:first-child { font-weight: 500; color: var(--text); }
+  .matrix-table td:last-child { color: var(--muted); }
+
+  /* Decision block */
+  .decision-block {
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-top: 32px;
+  }
+  .decision-block h3 {
+    font-size: 18px; font-weight: 700;
+    letter-spacing: -0.01em; margin-bottom: 16px;
+  }
+  .decision-option {
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .decision-option.recommended { border-color: var(--green); background: var(--green-bg); }
+  .decision-option-label {
+    font-weight: 600; font-size: 13px; margin-bottom: 6px;
+  }
+  .decision-option.recommended .decision-option-label { color: var(--green); }
+  .decision-option-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* Footer */
+  .footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .answers-grid { grid-template-columns: 1fr; }
+    .bar-label { min-width: 160px; }
+    .header h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-meta">It Depends · Research Review · 2026-05-27</div>
+    <h1>Що ми знаємо,<br>що assumed, і що змінилось</h1>
+    <p class="subtitle">Survey data (11 відповідей) проти наших assumptions. Самокритика competitor analysis. Що це означає для продукту.</p>
+  </div>
+
+  <!-- TL;DR -->
+  <div class="tldr">
+    <div class="tldr-label">TL;DR — 3 речі</div>
+    <div class="tldr-items">
+      <div class="tldr-item"><span class="num">1.</span><span>H2 (meta-paralysis "не знаю з чого почати") не підтверджується: 0% обрали це як бар'єр. Реальна проблема — <strong>casual→power user transition</strong>, не вхід в AI.</span></div>
+      <div class="tldr-item"><span class="num">2.</span><span>H4 (work-adjacent idea) підтверджується повністю: <strong>100% назвали конкретні pain points</strong>. Документація, дизайн-система, прототипування домінують.</span></div>
+      <div class="tldr-item"><span class="num">3.</span><span>"Готовий промпт" має сильний сигнал: <strong>90% позитивно/можливо</strong>. Але "залежить від задачі" = потрібна контекстність, не universal prompt.</span></div>
+    </div>
+  </div>
+
+  <!-- Survey Data -->
+  <div class="section">
+    <div class="section-label">Секція 01</div>
+    <h2>Survey Data — 11 відповідей</h2>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">11</div>
+        <div class="stat-label">відповідей загалом</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">8</div>
+        <div class="stat-label">учасники воркшопу <span style="color:#c0392b">⚠ biased</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">0%</div>
+        <div class="stat-label">"не знаю з чого почати" як бар'єр</div>
+      </div>
+    </div>
+
+    <!-- AI Level -->
+    <div class="bar-section">
+      <div class="bar-title">Де люди зараз з AI (Q1)</div>
+      <div class="bar-row">
+        <div class="bar-label">Питала питання в чаті</div>
+        <div class="bar-track"><div class="bar-fill" style="width:45%"></div></div>
+        <div class="bar-pct">45%</div><div class="bar-n">5</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Аналізувала документи або зображення</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:27%"></div></div>
+        <div class="bar-pct">27%</div><div class="bar-n">3</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Будувала щось за межами чату</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:27%"></div></div>
+        <div class="bar-pct">27%</div><div class="bar-n">3</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Ще не пробувала</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:0%"></div></div>
+        <div class="bar-pct">0%</div><div class="bar-n">0</div>
+      </div>
+    </div>
+
+    <!-- Barriers -->
+    <div class="bar-section">
+      <div class="bar-title">Що стримує від активнішого використання (Q3) — один варіант</div>
+      <div class="bar-row">
+        <div class="bar-label">Занадто багато інструментів</div>
+        <div class="bar-track"><div class="bar-fill" style="width:27%"></div></div>
+        <div class="bar-pct">27%</div><div class="bar-n">3</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Мені вже комфортно користуватись AI</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:27%"></div></div>
+        <div class="bar-pct">27%</div><div class="bar-n">3</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Результати були слабкими або дивними</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:18%"></div></div>
+        <div class="bar-pct">18%</div><div class="bar-n">2</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Не вистачає часу розібратися</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:9%"></div></div>
+        <div class="bar-pct">9%</div><div class="bar-n">1</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Поки не бачу, як AI може допомогти саме мені</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:9%"></div></div>
+        <div class="bar-pct">9%</div><div class="bar-n">1</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="font-weight:600;color:#c0392b">Не знаю, з чого почати ← H2</div>
+        <div class="bar-track"><div class="bar-fill highlight" style="width:0%"></div></div>
+        <div class="bar-pct" style="color:#c0392b">0%</div><div class="bar-n" style="color:#c0392b">0</div>
+      </div>
+    </div>
+
+    <!-- Triggers -->
+    <div class="bar-section">
+      <div class="bar-title">Що підштовхнуло до інтересу до AI (Q2) — кілька варіантів</div>
+      <div class="bar-row">
+        <div class="bar-label">Власна цікавість / бажання поекспериментувати</div>
+        <div class="bar-track"><div class="bar-fill" style="width:82%"></div></div>
+        <div class="bar-pct">82%</div><div class="bar-n">9</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Побачив(ла), як AI використовують колеги ← U2</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:55%"></div></div>
+        <div class="bar-pct">55%</div><div class="bar-n">6</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">З'явилась конкретна задача на роботі</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:45%"></div></div>
+        <div class="bar-pct">45%</div><div class="bar-n">5</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Стаття, відео або інший контент про AI</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:45%"></div></div>
+        <div class="bar-pct">45%</div><div class="bar-n">5</div>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="bar-section">
+      <div class="bar-title">Якби продукт дав готовий промпт — ти б спробувала? (Q5)</div>
+      <div class="bar-row">
+        <div class="bar-label">Так, одразу б використала</div>
+        <div class="bar-track"><div class="bar-fill" style="width:45%"></div></div>
+        <div class="bar-pct">45%</div><div class="bar-n">5</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Можливо, залежить від задачі</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:45%"></div></div>
+        <div class="bar-pct">45%</div><div class="bar-n">5</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Ні, потрібно більше контексту спочатку</div>
+        <div class="bar-track"><div class="bar-fill secondary" style="width:9%"></div></div>
+        <div class="bar-pct">9%</div><div class="bar-n">1</div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="bar-section">
+      <div class="bar-title">Рутини які хочуть автоматизувати (Q4 — відкрита відповідь)</div>
+      <div class="tag-cluster">
+        <span class="tag bold">Документація ×5</span>
+        <span class="tag bold">Дизайн-система ×4</span>
+        <span class="tag bold">Прототипування ×2</span>
+        <span class="tag">Empty states / corner cases</span>
+        <span class="tag">Accessibility check</span>
+        <span class="tag">Хендофф</span>
+        <span class="tag">Ресерч і фідбек</span>
+        <span class="tag">Наповнення мокапів</span>
+        <span class="tag">Дизайн-критика</span>
+        <span class="tag">Генерація ідей</span>
+        <span class="tag">Ревью на консистентність</span>
+        <span class="tag">Підсумок дзвінків</span>
+      </div>
+    </div>
+
+    <div class="callout yellow">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">Sample bias</div>
+        <div class="callout-text">8 з 11 — учасники воркшопу. Це вже мотивована і activated аудиторія. Людина з реальним meta-paralysis (наша "Оксана" з user snapshot) швидше за все не взяла опитування. Дані показують тих хто вже рухається, а не тих хто застряг.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assumptions Audit -->
+  <div class="section">
+    <div class="section-label">Секція 02</div>
+    <h2>Assumptions Audit — оновлені статуси</h2>
+    <p>13 assumptions до і після даних. Жирним — ті що змінились.</p>
+
+    <div style="overflow-x:auto; margin-bottom: 20px;">
+      <table class="assumption-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Assumption</th>
+            <th>Було</th>
+            <th>Зараз</th>
+            <th>Evidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">U1</td>
+            <td style="font-size:13px"><strong>Meta-level paralysis</strong> — не знає з чого починати з AI як явищем</td>
+            <td><span class="badge red">🔴 draft</span></td>
+            <td><span class="badge red">❌ не підтв.</span></td>
+            <td class="evidence">0% обрали "не знаю з чого почати" як бар'єр. Sample biased.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">U2</td>
+            <td style="font-size:13px">Соціальний тригер — побачила колегу → paralysis</td>
+            <td><span class="badge red">🔴 draft</span></td>
+            <td><span class="badge yellow">🟡 частково</span></td>
+            <td class="evidence">6/11 (55%) обрали. Реальний, але #2, а не primary. Curiosity = #1 (82%).</td>
+          </tr>
+          <tr>
+            <td class="id-cell">U3</td>
+            <td style="font-size:13px">Поточне рішення Оксани = нічого (paralysis)</td>
+            <td><span class="badge red">🔴 draft</span></td>
+            <td><span class="badge red">❌ невірно</span></td>
+            <td class="evidence">0 "ніколи не пробувала". Всі вже в AI. 27% комфортно — не наш юзер взагалі.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">U4</td>
+            <td style="font-size:13px"><strong>Work-adjacent idea</strong> — є конкретна незручність в роботі</td>
+            <td><span class="badge red">🔴 draft</span></td>
+            <td><span class="badge green">✅ підтверд.</span></td>
+            <td class="evidence">100% назвали конкретні pain points. Ніхто не сказав "не знаю". H4 — confirmed.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">U5</td>
+            <td style="font-size:13px">Оксана впізнає себе в stories (Аня, Маша...)</td>
+            <td><span class="badge yellow">🟡 draft</span></td>
+            <td><span class="badge gray">? невід.</span></td>
+            <td class="evidence">Не тестувалось прямо. Потребує corridor test з /calibrate.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">U6</td>
+            <td style="font-size:13px">Оксана повернеться після off-app кроку</td>
+            <td><span class="badge red">🔴 draft</span></td>
+            <td><span class="badge red">❌ не знаємо</span></td>
+            <td class="evidence">Не тестувалось. Найбільша діра в flow.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">P1</td>
+            <td style="font-size:13px">Готовий промпт знижує blank slate</td>
+            <td><span class="badge red">🔴 draft</span></td>
+            <td><span class="badge green">✅ підтверд.</span></td>
+            <td class="evidence">90% позитивно/можливо. "Залежить від задачі" = треба контекстність.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">P2</td>
+            <td style="font-size:13px">Artifact-first output створює ownership ("моє")</td>
+            <td><span class="badge red">🔴 draft</span></td>
+            <td><span class="badge gray">? невід.</span></td>
+            <td class="evidence">Воркшоп-ефект (7/8 продовжили) — непряме підтвердження H3.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">P3</td>
+            <td style="font-size:13px">/calibrate stories кращі за /start task selection</td>
+            <td><span class="badge yellow">🟡 нова</span></td>
+            <td><span class="badge gray">? невід.</span></td>
+            <td class="evidence">Нова гіпотеза від Люди. Потребує A/B або corridor test.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">P5</td>
+            <td style="font-size:13px">Оксана не закриє продукт між промптом і поверненням</td>
+            <td><span class="badge red">🔴 критич.</span></td>
+            <td><span class="badge red">❌ не знаємо</span></td>
+            <td class="evidence">Найбільша UX діра. Жодних даних.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">C1</td>
+            <td style="font-size:13px">DataArt дизайнери репрезентативні для всіх mid-level</td>
+            <td><span class="badge yellow">🟡 вибір</span></td>
+            <td><span class="badge yellow">🟡 proxy ok</span></td>
+            <td class="evidence">Pain points (Q4) виглядають universal. Прийнятно як proxy.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">C2</td>
+            <td style="font-size:13px">Проблема існує в масштабі</td>
+            <td><span class="badge gray">🟢 очікув.</span></td>
+            <td><span class="badge green">✅ підтверд.</span></td>
+            <td class="evidence">Всі мають pain points. Survey підтверджує наявність ринку.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">C3</td>
+            <td style="font-size:13px">Продукт диференційований від "просто Claude"</td>
+            <td><span class="badge yellow">🟡 позиц.</span></td>
+            <td><span class="badge yellow">🟡 умовно</span></td>
+            <td class="evidence">Контекстний промпт + designer framing диференціює. Але слабкий moat.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Головний зсув після даних</div>
+        <div class="callout-text">Наш юзер — <strong>не людина яка ще не почала з AI</strong>, а людина яка <strong>вже в chat-рівні і хоче більше</strong>. Вона застрягла не до AI, а всередині нього — на переході від "питати" до "будувати". Це підтверджує pivot casual→power user який Люда зафіксувала ще 24 травня.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Competitor Self-Critique -->
+  <div class="section">
+    <div class="section-label">Секція 03</div>
+    <h2>Самокритика competitor analysis</h2>
+    <p>Що в першій версії було занадто впевнено або неправильно.</p>
+
+    <div class="callout red">
+      <div class="callout-icon">🚫</div>
+      <div class="callout-body">
+        <div class="callout-title">"Prompt generator without analog" — невірно</div>
+        <div class="callout-text">Custom GPTs, Lovable onboarding, v0 templates, Anthropic Console — всі дають prompt scaffolding. Наш реальний angle вужчий: artifact-first prompts куровані під designer pain. І навіть це не moat — це позиціонування.</div>
+      </div>
+    </div>
+
+    <div class="callout red">
+      <div class="callout-icon">🚫</div>
+      <div class="callout-body">
+        <div class="callout-title">Strava/Slack mechanic — wishful thinking</div>
+        <div class="callout-text">Соціальний тригер асиметричний: Оксана хоче бачити колег, але <em>не хоче бути побаченою</em> на цьому етапі. Symmetric share-mechanic може ламати core moment. Поточний /start без примусового share — правильний компроміс.</div>
+      </div>
+    </div>
+
+    <div class="callout red">
+      <div class="callout-icon">🚫</div>
+      <div class="callout-body">
+        <div class="callout-title">Off-app step — найбільша UX діра</div>
+        <div class="callout-text">"Скопіюй в Claude Code → повернись тиснути 'Зробила'" — кожен off-app step це нова ймовірність не повернутись. Питання яке зруйнує pitch: "А чому не зайти одразу в v0?" Треба готову відповідь.</div>
+      </div>
+    </div>
+
+    <div class="callout yellow">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">Habit loop — поза брифом</div>
+        <div class="callout-text">Бриф — про first action (intent → action), не recurring action. Habit metrics журі не бачить. Оптимізуємо для session 1, хвилина 5, перша дія.</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+    <p>Пропущені конкуренти які варто знати:</p>
+    <div class="comp-card">
+      <div class="comp-card-header"><span class="comp-name">Custom GPTs / GPT Store</span><span class="badge red">Прямий конкурент</span></div>
+      <div class="comp-text">Сотні тисяч guided AI experiences, мільйони MAU. Безкоштовно для ChatGPT Plus. Наш gap — designer-specific curation + artifact framing.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header"><span class="comp-name">Replit Agent</span><span class="badge red">Структурна загроза</span></div>
+      <div class="comp-text">Робить ВСЕ in-app, без off-app переходу. Наш найгірший конкурент по UX continuity.</div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header"><span class="comp-name">YouTube / TikTok AI tutorials</span><span class="badge yellow">Невидимий</span></div>
+      <div class="comp-text">Реальний first stop для "як почати з AI". Безкоштовно, нескінченно. 45% наших survey respondents перед продуктом дивляться саме це.</div>
+    </div>
+  </div>
+
+  <!-- Brief Alignment -->
+  <div class="section">
+    <div class="section-label">Секція 04</div>
+    <h2>Маппінг на бриф — готовий слайд</h2>
+    <p>Бриф: "Why hasn't the user acted yet — and how does your solution change that?"</p>
+
+    <div style="overflow-x:auto; margin-bottom: 24px;">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Причина з брифа</th>
+            <th>Як /start адресує</th>
+            <th>Статус</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Procrastination</td>
+            <td>3-крок flow → low time-to-first-output</td>
+            <td><span class="badge green">✅ реалізовано</span></td>
+          </tr>
+          <tr>
+            <td>Choice overload</td>
+            <td>Одна картка за раз, "Не моє — інше"</td>
+            <td><span class="badge green">✅ реалізовано</span></td>
+          </tr>
+          <tr>
+            <td>Unclear first step</td>
+            <td>Готовий промпт = literal first step</td>
+            <td><span class="badge green">✅ реалізовано</span></td>
+          </tr>
+          <tr>
+            <td>Fear / low motivation</td>
+            <td>"Я спробувала" — мікродія без оцінки</td>
+            <td><span class="badge green">✅ реалізовано</span></td>
+          </tr>
+          <tr>
+            <td>Lack of structure</td>
+            <td>Лінійний level → pain → access → suggest</td>
+            <td><span class="badge green">✅ реалізовано</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout blue">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-body">
+        <div class="callout-title">Що НЕ оптимізуємо (поза брифом)</div>
+        <div class="callout-text">Long-term retention, habit metrics, recurring action. Бриф про first action. Habit loop = v2 розмова. Для прототипу: session 1, хвилина 5, wow.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Strategic Decision -->
+  <div class="section">
+    <div class="section-label">Секція 05</div>
+    <h2>Ключове рішення після даних</h2>
+    <p>Дані змінюють хто наш юзер. Є два варіанти відповіді.</p>
+
+    <div class="decision-block">
+      <h3>Хто насправді Оксана?</h3>
+
+      <div class="decision-option">
+        <div class="decision-option-label">Варіант А — Зберегти original framing</div>
+        <div class="decision-option-text">Визнати що sample biased. Наша "Оксана з meta-paralysis" просто не взяла опитування — вона не настільки engaged. Продовжуємо з original framing, але змінюємо бар'єр з "paralysis до відкриття AI" на "confusion у виборі інструментів". Слабша позиція для журі — потребує "але наша target не в sample."</div>
+      </div>
+
+      <div class="decision-option recommended">
+        <div class="decision-option-label">Варіант Б — Pivot до даних (рекомендовано)</div>
+        <div class="decision-option-text">Прийняти що юзер — <strong>casual→power user</strong>. "Я вже в Claude, але хочу будувати речі для своєї роботи, а не просто питати." Змінити product framing відповідно. Сильніша позиція: підкріплена даними, /calibrate stories (Аня, Маша) вже показують це, H4 (конкретні pain points) підтверджується на 100%.</div>
+      </div>
+
+      <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+        <div style="font-size:12px; font-weight:600; color:var(--muted); margin-bottom:8px;">Що це означає для продукту при Варіанті Б:</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.7;">
+          — User moment: не "вперше відкрила AI", а "хочу AI для своєї дизайн-роботи, але не знаю як почати з конкретного"<br>
+          — /calibrate stories показують "що роблять дизайнери як ти" — пряме рішення<br>
+          — Pain point templates (документація, дизайн-система) = core product, не training wheels<br>
+          — Prompt generator = спосіб перейти від "знаю що хочу" до "знаю що написати"
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Questions -->
+  <div class="section">
+    <div class="section-label">Секція 06</div>
+    <h2>Відкриті питання — для дзвінку з Людою</h2>
+
+    <div class="callout yellow">
+      <div class="callout-icon">1.</div>
+      <div class="callout-body">
+        <div class="callout-title">/calibrate vs /start — який є продуктом?</div>
+        <div class="callout-text">Зараз два flow без чіткого "переможця". Яке веде з лендінгу? Журі побачить роздвоєння.</div>
+      </div>
+    </div>
+    <div class="callout yellow">
+      <div class="callout-icon">2.</div>
+      <div class="callout-body">
+        <div class="callout-title">Off-app повернення — що робимо?</div>
+        <div class="callout-text">Найбільша діра. Чи є що зробити за 6 днів? Або приймаємо як обмеження PoC і готуємо відповідь для журі?</div>
+      </div>
+    </div>
+    <div class="callout yellow">
+      <div class="callout-icon">3.</div>
+      <div class="callout-body">
+        <div class="callout-title">Prompt customization ("Моя задача") — беремо до дедлайну?</div>
+        <div class="callout-text">Ідея Люди в thinking: поле для редагування задачі з live update промпту. Прямо закриває H4 і "залежить від задачі" з Q5. Scope-able за 1-2 дні?</div>
+      </div>
+    </div>
+    <div class="callout yellow">
+      <div class="callout-icon">4.</div>
+      <div class="callout-body">
+        <div class="callout-title">Маппінг 5 причин з брифа — кладемо в presentation deck?</div>
+        <div class="callout-text">Таблиця з секції 05 — готовий слайд. Прямо відповідає на guiding question журі.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>It Depends · Vlad · 2026-05-27</span>
+    <span>docs/research/analysis.html</span>
+  </div>
+</div>
+</body>
+</html>
