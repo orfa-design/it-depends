@@ -50,7 +50,8 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement
       if (/^(INPUT|TEXTAREA)$/.test(t.tagName)) return
-      if (e.key === 'Enter' || e.key === ' ') onStart()
+      if (e.key === ' ') { e.preventDefault(); onStart(); return }
+      if (e.key === 'Enter') onStart()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -537,7 +538,7 @@ function StepModal({
 
 // ── CompleteScreen ────────────────────────────────────────────────────────────
 
-function CompleteScreen({ onReset }: { onReset: () => void }) {
+function CompleteScreen({ onGoToMap }: { onGoToMap: () => void }) {
   const [url, setUrl] = useState('')
   const [committed, setCommitted] = useState('')
   const [shared, setShared] = useState(false)
@@ -618,7 +619,7 @@ function CompleteScreen({ onReset }: { onReset: () => void }) {
               <button className="btn btn-primary" onClick={share}>
                 {shared ? 'скопійовано' : 'share →'}
               </button>
-              <button className="btn" onClick={onReset}>зробити ще один</button>
+              <button className="btn" onClick={onGoToMap}>зробити ще один</button>
             </div>
             <div className="meta">шерить твою роботу, не цей продукт.</div>
           </div>
@@ -689,7 +690,7 @@ export default function CalibratePage() {
         </>
       )}
 
-      {phase === 'complete' && <CompleteScreen onReset={reset} />}
+      {phase === 'complete' && <CompleteScreen onGoToMap={() => setPhase('map')} />}
     </div>
   )
 }
