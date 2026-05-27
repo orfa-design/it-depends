@@ -348,13 +348,6 @@ function MapVertical({ selectedIdx, onSelect }: { selectedIdx: number; onSelect:
         const sel = i === selectedIdx
         return (
           <div key={s.id}>
-            {i === CUR_IDX + 1 && (
-              <div className="level-hint">
-                <span>складніше</span>
-                <span className="level-hint-dot">·</span>
-                <span>краще після кроку 04</span>
-              </div>
-            )}
             <div
               className={`node ${st}${sel ? ' selected' : ''}`}
               onClick={() => onSelect(i)}
@@ -364,7 +357,7 @@ function MapVertical({ selectedIdx, onSelect }: { selectedIdx: number; onSelect:
                 <div className="node-title">{s.title}</div>
                 {s.subtitle && <div className="node-subtitle">{s.subtitle}</div>}
                 {st === 'done-link' && <div className="node-meta node-meta-link">результат ↗</div>}
-                {st === 'cur'       && <div className="node-meta">наступне · ≈45 хв</div>}
+                {st === 'cur'       && <div className="node-meta">рекомендований крок · ≈45 хв</div>}
               </div>
               {sel && st === 'cur' && <div className="node-cta">→</div>}
             </div>
@@ -387,13 +380,6 @@ function MapTypographic({ selectedIdx, onSelect }: { selectedIdx: number; onSele
           const sel = i === selectedIdx
           return (
             <div key={s.id}>
-              {i === CUR_IDX + 1 && (
-                <div className="typo-level-hint">
-                  <span>складніше</span>
-                  <span className="level-hint-dot">·</span>
-                  <span>краще після кроку 04</span>
-                </div>
-              )}
               <div
                 className={`typo-row ${st}${sel ? ' selected' : ''}`}
                 onClick={() => onSelect(i)}
