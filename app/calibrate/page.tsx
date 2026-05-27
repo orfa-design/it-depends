@@ -275,37 +275,29 @@ function StepInfo({
       <div className="step-info step-info-future anim-in">
         <div className="future-badge">складніше</div>
         <h2 className="step-info-title">{step.title}</h2>
-        {extra ? (
-          <>
-            <div className="step-info-grid">
-              <div className="step-info-block">
-                <div className="label">що ти зможеш</div>
-                <div className="value">{extra.doable}</div>
-              </div>
-              <div className="step-info-block">
-                <div className="label">що вивчиш технічно</div>
-                <div className="value">{extra.technical}</div>
-              </div>
+        {extra && (
+          <div className="step-info-grid">
+            <div className="step-info-block">
+              <div className="label">що ти зможеш</div>
+              <div className="value">{extra.doable}</div>
             </div>
-            <div className="step-info-foot">
-              <div className="detail-time">
-                {extra.time} · легше після{' '}
-                <button className="inline-link" onClick={() => onSelect(CUR_IDX)}>кроку 04</button>
-              </div>
-              <button className="btn btn-primary" onClick={() => onStart(stepIdx)}>
-                отримати промпт →
-              </button>
+            <div className="step-info-block">
+              <div className="label">що вивчиш технічно</div>
+              <div className="value">{extra.technical}</div>
             </div>
-          </>
-        ) : (
-          <p className="step-info-note">
-            Легше дасться після{' '}
-            <button className="inline-link" onClick={() => onSelect(CUR_IDX)}>
-              {STEPS[CUR_IDX].title.toLowerCase()}
-            </button>
-            {' '}— але нічого не зупиняє розібратись зараз.
-          </p>
+          </div>
         )}
+        <div className="step-info-foot">
+          {extra && (
+            <div className="detail-time">
+              {extra.time} · легше після{' '}
+              <button className="inline-link" onClick={() => onSelect(CUR_IDX)}>кроку 04</button>
+            </div>
+          )}
+          <button className="btn btn-primary" onClick={() => onStart(stepIdx)}>
+            отримати промпт →
+          </button>
+        </div>
       </div>
     )
   }
