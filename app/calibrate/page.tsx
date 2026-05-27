@@ -543,14 +543,10 @@ function PromptScreen({
         />
       </div>
       <div className="prompt-foot">
-        {isCur ? (
-          <>
-            <div className="meta">коли матимеш робочий прототип — повернись сюди.</div>
-            <button className="btn btn-primary" onClick={onDone}>я зробила — далі</button>
-          </>
-        ) : (
-          <div className="meta">зроби — і повернись позначити крок виконаним.</div>
-        )}
+        <div className="meta">
+          {isCur ? 'коли матимеш робочий прототип — повернись сюди.' : 'зроби — і повернись позначити крок виконаним.'}
+        </div>
+        <button className="btn btn-primary" onClick={onDone}>я зробила — далі</button>
       </div>
     </div>
   )
@@ -673,17 +669,17 @@ function CompleteScreen({ onGoToMap }: { onGoToMap: () => void }) {
           </div>
         )}
 
-        {committed && (
-          <div className="complete-foot anim-in">
-            <div style={{ display: 'flex', gap: 10 }}>
+        <div className="complete-foot anim-in">
+          <div style={{ display: 'flex', gap: 10 }}>
+            {committed && (
               <button className="btn btn-primary" onClick={share}>
                 {shared ? 'скопійовано' : 'share →'}
               </button>
-              <button className="btn" onClick={onGoToMap}>зробити ще один</button>
-            </div>
-            <div className="meta">шерить твою роботу, не цей продукт.</div>
+            )}
+            <button className="btn" onClick={onGoToMap}>зробити ще один</button>
           </div>
-        )}
+          {committed && <div className="meta">шерить твою роботу, не цей продукт.</div>}
+        </div>
       </div>
     </div>
   )
