@@ -925,9 +925,7 @@ a { color: inherit; }
   color: var(--text) !important;
   margin-bottom: 6px;
 }
-.node.done-no-link.selected .node-title, .node.done-link.selected .node-title { color: var(--text-dim) !important; }
 .node.future.selected { opacity: 0.9 !important; }
-.node.future.selected .node-title { color: var(--text-dim) !important; }
 /* cur + selected = full glowing marker */
 .node.cur.selected .marker {
   width: 22px; height: 22px;
