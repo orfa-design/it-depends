@@ -238,6 +238,9 @@ function StepInfo({
             {STEPS[CUR_IDX].title.toLowerCase()}
           </button>
         </p>
+        <div className="step-info-foot">
+          <button className="btn" onClick={() => onStart(stepIdx)}>спробувати ще раз →</button>
+        </div>
       </div>
     )
   }
@@ -253,12 +256,15 @@ function StepInfo({
             {STEPS[CUR_IDX].title.toLowerCase()}
           </button>
         </p>
-        {step.result && (
-          <a href={step.result} target="_blank" rel="noopener noreferrer" className="result-btn">
-            <span className="result-btn-label">{step.resultLabel ?? 'переглянути результат'}</span>
-            <span className="result-btn-arrow">↗</span>
-          </a>
-        )}
+        <div className="step-info-foot">
+          {step.result && (
+            <a href={step.result} target="_blank" rel="noopener noreferrer" className="result-btn">
+              <span className="result-btn-label">{step.resultLabel ?? 'переглянути результат'}</span>
+              <span className="result-btn-arrow">↗</span>
+            </a>
+          )}
+          <button className="btn" onClick={() => onStart(stepIdx)}>спробувати ще раз →</button>
+        </div>
       </div>
     )
   }
