@@ -431,9 +431,11 @@ function MapScreen({ mapStyle, onStartPrompt }: { mapStyle: MapStyle; onStartPro
 
 // ── PromptScreen (inside modal) ──────────────────────────────────────────────
 
+const TASK_DEFAULT = `Допоможи мені зробити інтерактивний HTML-прототип за один вечір.`
+
 const PROMPT_TEXT_DEFAULT = `Ти senior frontend дев, який пише прототипи для дизайн-рев'ю.
 
-Я дизайнер без досвіду кодингу. Допоможи мені зробити інтерактивний HTML-прототип за один вечір.
+Я дизайнер без досвіду кодингу. {task}
 
 Правила:
 — один .html файл, нульові залежності
@@ -452,16 +454,20 @@ function PromptScreen({
   onDone: () => void
   onBack: () => void
 }) {
-  const step    = STEPS[stepIdx]
-  const extra   = STEPS_EXTRA[step.id]
-  const isCur   = stepIdx === CUR_IDX
-  const text    = extra?.promptText ?? PROMPT_TEXT_DEFAULT
-  const stepNum = String(stepIdx + 1).padStart(2, '0')
+  const step        = STEPS[stepIdx]
+  const extra       = STEPS_EXTRA[step.id]
+  const isCur       = stepIdx === CUR_IDX
+  const template    = extra?.promptText ?? PROMPT_TEXT_DEFAULT
+  const taskDefault = extra?.taskDefault ?? TASK_DEFAULT
+  const stepNum     = String(stepIdx + 1).padStart(2, '0')
 
+  const [task, setTask]     = useState(taskDefault)
   const [copied, setCopied] = useState(false)
 
+  const prompt = template.replace('{task}', task.trim() || taskDefault)
+
   async function copy() {
-    try { await navigator.clipboard.writeText(text) } catch {}
+    try { await navigator.clipboard.writeText(prompt) } catch {}
     setCopied(true)
     setTimeout(() => setCopied(false), 1800)
   }
@@ -485,13 +491,24 @@ function PromptScreen({
             <span className="ic" />
             <span>prompt-{stepNum}-{step.id}.txt</span>
             <span className="sep">·</span>
-            <span style={{ color: 'var(--text-faint)' }}>{text.length} символів</span>
+            <span style={{ color: 'var(--text-faint)' }}>{prompt.length} символів</span>
           </div>
           <button className={`copy-btn${copied ? ' copied' : ''}`} onClick={copy}>
             {copied ? 'скопійовано' : 'copy'}
           </button>
         </div>
-        <div className="prompt-body">{text}</div>
+        <div className="prompt-body">{prompt}</div>
+      </div>
+      <div className="prompt-task">
+        <label className="prompt-task-label eyebrow">моя задача</label>
+        <textarea
+          className="prompt-task-input"
+          value={task}
+          onChange={e => setTask(e.target.value)}
+          onBlur={e => { if (!e.target.value.trim()) setTask(taskDefault) }}
+          rows={3}
+          spellCheck={false}
+        />
       </div>
       <div className="prompt-foot">
         {isCur ? (
