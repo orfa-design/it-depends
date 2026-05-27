@@ -808,6 +808,9 @@ a { color: inherit; }
   grid-template-columns: 380px 1fr;
   min-height: calc(100vh - 88px);
   padding-top: 88px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
 }
 .map-nav-col {
   border-right: 1px solid var(--border);
