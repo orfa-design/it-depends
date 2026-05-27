@@ -508,14 +508,23 @@ function PromptScreen({
         ))}
       </div>
 
-      <div className="prompt-box">
+      <div className={`prompt-box${tool === 'claude-code' ? ' terminal' : ''}`}>
         <div className="prompt-bar">
-          <div className="prompt-bar-left">
-            <span className="ic" />
-            <span>prompt-{stepNum}-{step.id}.txt</span>
-            <span className="sep">·</span>
-            <span style={{ color: 'var(--text-faint)' }}>{prompt.length} символів</span>
-          </div>
+          {tool === 'claude-code' ? (
+            <div className="prompt-bar-left">
+              <span className="term-dots">
+                <span className="dot-r" /><span className="dot-y" /><span className="dot-g" />
+              </span>
+              <span>claude-prompt.txt</span>
+            </div>
+          ) : (
+            <div className="prompt-bar-left">
+              <span className="ic" />
+              <span>prompt-{stepNum}-{step.id}.txt</span>
+              <span className="sep">·</span>
+              <span style={{ color: 'var(--text-faint)' }}>{prompt.length} символів</span>
+            </div>
+          )}
           <button className={`copy-btn${copied ? ' copied' : ''}`} onClick={copy}>
             {copied ? 'скопійовано' : 'copy'}
           </button>

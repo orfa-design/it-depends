@@ -610,6 +610,13 @@ a { color: inherit; }
   background: var(--bg-elev);
   overflow: hidden;
 }
+.prompt-box.terminal { border-radius: 10px; }
+.term-dots { display: flex; gap: 6px; align-items: center; }
+.term-dots span { width: 12px; height: 12px; border-radius: 50%; }
+.dot-r { background: #ff5f57; }
+.dot-y { background: #febc2e; }
+.dot-g { background: #28c840; }
+
 .prompt-bar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 18px;
