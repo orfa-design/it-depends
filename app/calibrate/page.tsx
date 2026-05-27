@@ -21,13 +21,20 @@ function parseTime(s: string) {
 
 // ── Chrome ──────────────────────────────────────────────────────────────────
 
-function Chrome({ phase, storyIdx }: { phase: Phase; storyIdx: number }) {
+function Chrome({
+  phase, storyIdx, onLogoClick, onMapClick,
+}: {
+  phase: Phase
+  storyIdx: number
+  onLogoClick: () => void
+  onMapClick: () => void
+}) {
   return (
     <header className="chrome">
       <div className="wordmark">
         <span className="dot" />
-        <b>It Depends</b>
-        <span>· ai skills map</span>
+        <button className="wordmark-btn" onClick={onLogoClick}>It Depends</button>
+        <button className="wordmark-btn" onClick={onMapClick}>· ai skills map</button>
       </div>
       {phase === 'story' && (
         <div className="counter">{storyIdx + 1} / {STORIES.length}</div>
@@ -655,7 +662,12 @@ export default function CalibratePage() {
 
   return (
     <div className="app">
-      <Chrome phase={phase} storyIdx={storyIdx} />
+      <Chrome
+        phase={phase}
+        storyIdx={storyIdx}
+        onLogoClick={() => setPhase('intro')}
+        onMapClick={() => setPhase('map')}
+      />
 
       {phase === 'intro'    && <IntroScreen onStart={() => setPhase('story')} />}
       {phase === 'story'    && <StoryScreen idx={storyIdx} onPick={pickReaction} />}
