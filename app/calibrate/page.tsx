@@ -88,13 +88,20 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 function StoryScreen({ idx, onPick }: { idx: number; onPick: (v: string) => void }) {
   const story = STORIES[idx]
   const time = parseTime(story.time)
+  const [picking, setPicking] = useState<string | null>(null)
+
+  function handlePick(v: string) {
+    if (picking) return
+    setPicking(v)
+    setTimeout(() => { setPicking(null); onPick(v) }, 150)
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement
       if (/^(INPUT|TEXTAREA)$/.test(t.tagName)) return
       const i = ['1', '2', '3'].indexOf(e.key)
-      if (i >= 0) onPick(REACTIONS[i].v)
+      if (i >= 0) handlePick(REACTIONS[i].v)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -149,7 +156,7 @@ function StoryScreen({ idx, onPick }: { idx: number; onPick: (v: string) => void
           </div>
           <div className="react-row">
             {REACTIONS.map((r, i) => (
-              <button key={r.v} className="react-card" onClick={() => onPick(r.v)}>
+              <button key={r.v} className={`react-card${picking === r.v ? ' picking' : ''}`} onClick={() => handlePick(r.v)}>
                 <span className="react-num">0{i + 1}</span>
                 <span className="react-text">{r.label}</span>
                 <span className="react-ic">{r.ic} →</span>
@@ -170,8 +177,7 @@ function AnalysisScreen({ reactions, onDone }: { reactions: string[]; onDone: ()
   useEffect(() => {
     const t1 = setTimeout(() => setStep(1), 900)
     const t2 = setTimeout(() => setStep(2), 2200)
-    const t3 = setTimeout(onDone, 3200)
-    return () => [t1, t2, t3].forEach(clearTimeout)
+    return () => [t1, t2].forEach(clearTimeout)
   }, [onDone])
 
   const labels: Record<string, string> = { wow: 'нова територія', heard: 'на радарі', have: 'у мене є' }
@@ -199,6 +205,11 @@ function AnalysisScreen({ reactions, onDone }: { reactions: string[]; onDone: ()
           </div>
           <div className="analysis-status eyebrow">{statusText[step]}</div>
         </div>
+        {step === 2 && (
+          <button className="btn btn-primary anim-in" onClick={onDone}>
+            подивитися карту →
+          </button>
+        )}
       </div>
     </div>
   )

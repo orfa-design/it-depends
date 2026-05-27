@@ -1212,6 +1212,7 @@ body[data-typo="editorial"] .stat-num { letter-spacing: -0.04em; }
   transform: translateY(-1px);
 }
 .react-card:active { transform: translateY(0); }
+.react-card.picking { background: var(--bg-elev-2); border-color: var(--accent); }
 .react-num {
   font-family: var(--font-mono);
   font-size: 10px;
