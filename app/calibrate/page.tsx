@@ -22,12 +22,14 @@ function parseTime(s: string) {
 // ── Chrome ──────────────────────────────────────────────────────────────────
 
 function Chrome({
-  phase, storyIdx, onLogoClick, onMapClick,
+  phase, storyIdx, onLogoClick, onMapClick, theme, onThemeToggle,
 }: {
   phase: Phase
   storyIdx: number
   onLogoClick: () => void
   onMapClick: () => void
+  theme: 'dark' | 'light'
+  onThemeToggle: () => void
 }) {
   return (
     <header className="chrome">
@@ -36,9 +38,14 @@ function Chrome({
         <button className="wordmark-btn" onClick={onLogoClick}>It Depends</button>
         <button className="wordmark-btn" onClick={onMapClick}>· ai skills map</button>
       </div>
-      {phase === 'story' && (
-        <div className="counter">{storyIdx + 1} / {STORIES.length}</div>
-      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {phase === 'story' && (
+          <div className="counter">{storyIdx + 1} / {STORIES.length}</div>
+        )}
+        <button className="theme-toggle" onClick={onThemeToggle} aria-label="toggle theme">
+          {theme === 'dark' ? '☀' : '☾'}
+        </button>
+      </div>
     </header>
   )
 }
@@ -681,6 +688,20 @@ export default function CalibratePage() {
   const [reactions, setReactions] = useState<string[]>([])
   const [modal, setModal]         = useState<number | null>(null) // null or stepIdx
   const [mapStyle]                = useState<MapStyle>('vertical')
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('itdepends_theme')
+      if (saved === 'light') setTheme('light')
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    document.body.classList.toggle('theme-light', theme === 'light')
+    try { localStorage.setItem('itdepends_theme', theme) } catch {}
+    return () => { document.body.classList.remove('theme-light') }
+  }, [theme])
 
   const pickReaction = useCallback((v: string) => {
     const next = [...reactions, v]
@@ -712,6 +733,8 @@ export default function CalibratePage() {
         storyIdx={storyIdx}
         onLogoClick={() => setPhase('intro')}
         onMapClick={() => setPhase('map')}
+        theme={theme}
+        onThemeToggle={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
       />
 
       {phase === 'intro'    && <IntroScreen onStart={() => setPhase('story')} />}
