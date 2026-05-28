@@ -688,9 +688,14 @@ export default function CalibratePage() {
   const [reactions, setReactions] = useState<string[]>([])
   const [modal, setModal]         = useState<number | null>(null) // null or stepIdx
   const [mapStyle]                = useState<MapStyle>('vertical')
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    try { return (localStorage.getItem('itdepends_theme') as 'dark' | 'light') || 'dark' } catch { return 'dark' }
-  })
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('itdepends_theme')
+      if (saved === 'light') setTheme('light')
+    } catch {}
+  }, [])
 
   useEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light')
