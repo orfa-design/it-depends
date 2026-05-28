@@ -63,8 +63,9 @@ body.theme-light .inline-link:hover {
 }
 
 body.theme-light .btn-primary:hover {
-  background: #2d2a26;
-  border-color: #2d2a26;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 body[data-typo="geometric"] {
