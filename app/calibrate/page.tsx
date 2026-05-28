@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   STORIES, REACTIONS, STEPS, STEPS_EXTRA, CUR_IDX, getStatus, isDone,
-  type Story, type StepExtra, type Tool,
+  type Story, type StepExtra, type Tool, type StepCategory, type Step,
 } from '@/lib/data'
 import { saveCalibration } from '@/lib/storage'
 import './styles.css'
@@ -401,10 +401,124 @@ function MapTypographic({ selectedIdx, onSelect }: { selectedIdx: number; onSele
   )
 }
 
+// ── Gallery ───────────────────────────────────────────────────────────────────
+
+const CATEGORY_LABELS: Record<StepCategory | 'all', string> = {
+  all: 'Всі', research: 'Дослідження', prototyping: 'Прототипування',
+  code: 'Код', planning: 'Планування', workflow: 'Воркфлоу',
+}
+
+const TOOL_LABELS: Record<Tool | 'all', string> = {
+  all: 'Всі', 'claude-ai': 'Claude.ai', 'claude-code': 'Claude Code',
+  'figma-make': 'Figma Make', 'google-ai-studio': 'AI Studio',
+}
+
+function GalleryCard({
+  step, extra, status, stepIdx, onOpenPrompt,
+}: {
+  step: Step
+  extra: StepExtra | undefined
+  status: string
+  stepIdx: number
+  onOpenPrompt: (idx: number) => void
+}) {
+  const done = isDone(status)
+  return (
+    <div className={`gallery-card${done ? ' done' : ''}`}>
+      <div className="gallery-card-header">
+        <div className="gallery-card-title">{step.title}</div>
+        <div className="gallery-card-badges">
+          {extra && <span className="badge">{extra.time}</span>}
+          {extra && <span className={`badge badge-tool badge-${extra.recommendedTool}`}>{TOOLS[extra.recommendedTool].label}</span>}
+        </div>
+      </div>
+      <div className="gallery-card-subtitle">{step.subtitle}</div>
+      {extra && <div className="gallery-card-body">{extra.doable}</div>}
+      <div className="gallery-card-footer">
+        {done && <span className="done-badge">✓ зроблено</span>}
+        {extra
+          ? <button className="btn btn-ghost gallery-card-cta" onClick={() => onOpenPrompt(stepIdx)}>Скопіювати промпт</button>
+          : <span className="meta gallery-card-soon">скоро</span>
+        }
+      </div>
+    </div>
+  )
+}
+
+function GalleryScreen({ onOpenPrompt }: { onOpenPrompt: (idx: number) => void }) {
+  const [activeTool, setActiveTool]         = useState<Tool | 'all'>('all')
+  const [activeCategory, setActiveCategory] = useState<StepCategory | 'all'>('all')
+
+  const filtered = STEPS
+    .map((step, idx) => ({ step, idx }))
+    .filter(({ step }) => {
+      const extra = STEPS_EXTRA[step.id]
+      if (activeCategory !== 'all' && step.category !== activeCategory) return false
+      if (activeTool !== 'all' && extra?.recommendedTool !== activeTool) return false
+      return true
+    })
+
+  return (
+    <div className="gallery-layout">
+      <div className="gallery-filters">
+        <div className="filter-chips">
+          {(Object.keys(CATEGORY_LABELS) as (StepCategory | 'all')[]).map(cat => (
+            <button key={cat} className={`filter-chip${activeCategory === cat ? ' active' : ''}`} onClick={() => setActiveCategory(cat)}>
+              {CATEGORY_LABELS[cat]}
+            </button>
+          ))}
+        </div>
+        <div className="filter-chips">
+          {(Object.keys(TOOL_LABELS) as (Tool | 'all')[]).map(t => (
+            <button key={t} className={`filter-chip${activeTool === t ? ' active' : ''}`} onClick={() => setActiveTool(t)}>
+              {TOOL_LABELS[t]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="gallery-grid">
+        {filtered.map(({ step, idx }) => (
+          <GalleryCard
+            key={step.id}
+            step={step}
+            extra={STEPS_EXTRA[step.id]}
+            status={getStatus(idx)}
+            stepIdx={idx}
+            onOpenPrompt={onOpenPrompt}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── MapScreen ────────────────────────────────────────────────────────────────
 
-function MapScreen({ mapStyle, onStartPrompt }: { mapStyle: MapStyle; onStartPrompt: (idx: number) => void }) {
+function MapScreen({
+  mapStyle, onStartPrompt, viewMode, onViewModeChange,
+}: {
+  mapStyle: MapStyle
+  onStartPrompt: (idx: number) => void
+  viewMode: 'map' | 'gallery'
+  onViewModeChange: (v: 'map' | 'gallery') => void
+}) {
   const [selectedIdx, setSelectedIdx] = useState(CUR_IDX)
+
+  const toggle = (
+    <div className="view-toggle">
+      <button className={viewMode === 'map' ? 'active' : ''} onClick={() => onViewModeChange('map')}>Шлях</button>
+      <button className={viewMode === 'gallery' ? 'active' : ''} onClick={() => onViewModeChange('gallery')}>Галерея</button>
+    </div>
+  )
+
+  if (viewMode === 'gallery') {
+    return (
+      <div className="gallery-page">
+        <div className="gallery-page-header">{toggle}</div>
+        <GalleryScreen onOpenPrompt={onStartPrompt} />
+      </div>
+    )
+  }
 
   return (
     <div className="map-layout">
@@ -413,6 +527,7 @@ function MapScreen({ mapStyle, onStartPrompt }: { mapStyle: MapStyle; onStartPro
           <div className="eyebrow">your map</div>
           <div className="map-title">Ось де ти зараз.</div>
           <div className="map-sub">10 кроків. Карта росте, поки ти йдеш.</div>
+          {toggle}
         </div>
         {mapStyle === 'vertical'    && <MapVertical    selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
         {mapStyle === 'typographic' && <MapTypographic selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
@@ -688,6 +803,7 @@ export default function CalibratePage() {
   const [reactions, setReactions] = useState<string[]>([])
   const [modal, setModal]         = useState<number | null>(null) // null or stepIdx
   const [mapStyle]                = useState<MapStyle>('vertical')
+  const [viewMode, setViewMode]   = useState<'map' | 'gallery'>('map')
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
@@ -746,6 +862,8 @@ export default function CalibratePage() {
           <MapScreen
             mapStyle={mapStyle}
             onStartPrompt={(idx) => setModal(idx)}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
           {modal !== null && (
             <StepModal
