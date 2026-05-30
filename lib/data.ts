@@ -17,8 +17,8 @@ export type Step = {
   subtitle: string
   meta: string
   category: StepCategory
-  result?: string | null
-  resultLabel?: string
+  layer: 0 | 1 | 2 | 3 | 4
+  results?: { url: string; label: string }[]
   current?: boolean
 }
 
@@ -75,26 +75,26 @@ export const REACTIONS: Reaction[] = [
 ]
 
 export const STEPS: Step[] = [
-  { id: 'summary-meeting',        title: 'Саммері зустрічі',              subtitle: 'Як не відкривати нотатки після дзвінку',                      meta: 'foundation', category: 'research',     result: null },
-  { id: 'brief-analysis',         title: 'Аналіз брифів',                 subtitle: 'Промпт для роботи з неструктурованими документами',            meta: 'foundation', category: 'research',     result: null },
-  { id: 'transcript',             title: 'Розбір транскриптів',            subtitle: 'Витягти головне без читання повністю',                         meta: 'foundation', category: 'research'  },
-  { id: 'research-prep',          title: 'Підготовка до дослідження',      subtitle: 'Як налаштувати Claude перед початком аналізу',                 meta: 'next',       category: 'research',     current: true },
-  { id: 'competitive-analysis',   title: 'Конкурентний аналіз',            subtitle: 'Структурувати ринок без ручних таблиць',                       meta: 'soon',       category: 'planning'  },
-  { id: 'working-prompt',         title: 'Робочий промпт',                 subtitle: 'Один шаблон який працює щоразу',                               meta: 'soon',       category: 'workflow'  },
-  { id: 'interview-analysis',     title: 'Аналіз інтерв\'ю',              subtitle: 'Постійний промпт для якісного дослідження',                    meta: 'soon',       category: 'research'  },
-  { id: 'first-code-edit',        title: 'Перша правка в коді',            subtitle: 'Змінити щось в продукті без розробника',                       meta: 'later',      category: 'code'      },
-  { id: 'live-link',              title: 'Живе посилання для команди',     subtitle: 'Поділитись роботою не через Figma',                            meta: 'later',      category: 'code'      },
-  { id: 'prototype-testing',      title: 'Прототип для тестування',        subtitle: 'Оживити дизайн за допомогою коду',                             meta: 'later',      category: 'prototyping' },
-  { id: 'handoff',                title: 'Хендоф розробнику',              subtitle: 'Підготувати передачу яку приймуть без питань',                 meta: 'later',      category: 'workflow'  },
-  { id: 'claude-projects',        title: 'Claude Projects',                subtitle: 'Налаштувати простір який пам\'ятає твій проєкт',               meta: 'later',      category: 'workflow'  },
-  { id: 'parallel-prototyping',   title: 'Паралельне прототипування',      subtitle: 'Три варіанти з одного промпту',                                meta: 'later',      category: 'prototyping' },
-  { id: 'first-live-project',     title: 'Запуск першого живого проєкту',  subtitle: 'Налаштування середовища і деплой онлайн',                      meta: 'later',      category: 'code'      },
-  { id: 'feedback-form',          title: 'Форма для фідбеку',              subtitle: 'Зібрати відповіді команди без Google Forms',                   meta: 'later',      category: 'code'      },
-  { id: 'interactive-prototype',  title: 'Інтерактивний прототип',         subtitle: 'Оживити дизайни за допомогою коду',                            meta: 'later',      category: 'prototyping' },
-  { id: 'feedback-automation',    title: 'Автоматизація фідбеку',          subtitle: 'Таблиця яка заповнюється сама',                                meta: 'later',      category: 'code'      },
-  { id: 'workshop-planning',      title: 'Планування воркшопу',            subtitle: 'Розробка структури і кроків разом з Claude',                   meta: 'later',      category: 'planning'  },
-  { id: 'team-tool',              title: 'Командний інструмент',           subtitle: 'Побудувати щось що використовують всі',                        meta: 'later',      category: 'workflow'  },
-  { id: 'stakeholder-presentation', title: 'Презентація стейкхолдерам',    subtitle: 'Показати живий продукт замість слайдів',                       meta: 'later',      category: 'planning'  },
+  { id: 'summary-meeting',        title: 'Саммері зустрічі',              subtitle: 'Як не відкривати нотатки після дзвінку',                      meta: 'foundation', layer: 3, category: 'research',     results: [{ url: 'https://it-depends.vercel.app', label: 'Зустріч з клієнтом' }, { url: 'https://it-depends.vercel.app', label: 'Брейнштормінг' }, { url: 'https://it-depends.vercel.app', label: 'Ретро команди' }] },
+  { id: 'brief-analysis',         title: 'Аналіз брифів',                 subtitle: 'Промпт для роботи з неструктурованими документами',            meta: 'foundation', layer: 0, category: 'research',     results: [{ url: 'https://it-depends.vercel.app', label: 'Проект DataArt' }, { url: 'https://it-depends.vercel.app', label: 'Хакатон 2026' }] },
+  { id: 'transcript',             title: 'Розбір транскриптів',            subtitle: 'Витягти головне без читання повністю',                         meta: 'foundation', layer: 0, category: 'research' },
+  { id: 'research-prep',          title: 'Підготовка до дослідження',      subtitle: 'Як налаштувати Claude перед початком аналізу',                 meta: 'next',       layer: 0, category: 'research',     current: true },
+  { id: 'competitive-analysis',   title: 'Конкурентний аналіз',            subtitle: 'Структурувати ринок без ручних таблиць',                       meta: 'soon',       layer: 1, category: 'planning'  },
+  { id: 'working-prompt',         title: 'Робочий промпт',                 subtitle: 'Один шаблон який працює щоразу',                               meta: 'soon',       layer: 1, category: 'workflow'  },
+  { id: 'interview-analysis',     title: 'Аналіз інтерв\'ю',              subtitle: 'Постійний промпт для якісного дослідження',                    meta: 'soon',       layer: 1, category: 'research'  },
+  { id: 'first-code-edit',        title: 'Перша правка в коді',            subtitle: 'Змінити щось в продукті без розробника',                       meta: 'later',      layer: 2, category: 'code'      },
+  { id: 'live-link',              title: 'Живе посилання для команди',     subtitle: 'Поділитись роботою не через Figma',                            meta: 'later',      layer: 2, category: 'code'      },
+  { id: 'prototype-testing',      title: 'Прототип для тестування',        subtitle: 'Оживити дизайн за допомогою коду',                             meta: 'later',      layer: 2, category: 'prototyping' },
+  { id: 'handoff',                title: 'Хендоф розробнику',              subtitle: 'Підготувати передачу яку приймуть без питань',                 meta: 'later',      layer: 2, category: 'workflow'  },
+  { id: 'claude-projects',        title: 'Claude Projects',                subtitle: 'Налаштувати простір який пам\'ятає твій проєкт',               meta: 'later',      layer: 1, category: 'workflow'  },
+  { id: 'parallel-prototyping',   title: 'Паралельне прототипування',      subtitle: 'Три варіанти з одного промпту',                                meta: 'later',      layer: 2, category: 'prototyping' },
+  { id: 'first-live-project',     title: 'Запуск першого живого проєкту',  subtitle: 'Налаштування середовища і деплой онлайн',                      meta: 'later',      layer: 3, category: 'code'      },
+  { id: 'feedback-form',          title: 'Форма для фідбеку',              subtitle: 'Зібрати відповіді команди без Google Forms',                   meta: 'later',      layer: 3, category: 'code'      },
+  { id: 'interactive-prototype',  title: 'Інтерактивний прототип',         subtitle: 'Оживити дизайни за допомогою коду',                            meta: 'later',      layer: 3, category: 'prototyping' },
+  { id: 'feedback-automation',    title: 'Автоматизація фідбеку',          subtitle: 'Таблиця яка заповнюється сама',                                meta: 'later',      layer: 4, category: 'code'      },
+  { id: 'workshop-planning',      title: 'Планування воркшопу',            subtitle: 'Розробка структури і кроків разом з Claude',                   meta: 'later',      layer: 3, category: 'planning'  },
+  { id: 'team-tool',              title: 'Командний інструмент',           subtitle: 'Побудувати щось що використовують всі',                        meta: 'later',      layer: 4, category: 'workflow'  },
+  { id: 'stakeholder-presentation', title: 'Презентація стейкхолдерам',    subtitle: 'Показати живий продукт замість слайдів',                       meta: 'later',      layer: 4, category: 'planning'  },
 ]
 
 export const CUR_IDX = STEPS.findIndex(s => s.current) // 3
@@ -102,7 +102,7 @@ export const CUR_IDX = STEPS.findIndex(s => s.current) // 3
 export const getStatus = (i: number): 'cur' | 'future' | 'done-link' | 'done-no-link' => {
   if (i === CUR_IDX) return 'cur'
   if (i > CUR_IDX)   return 'future'
-  return STEPS[i].result ? 'done-link' : 'done-no-link'
+  return STEPS[i].results?.length ? 'done-link' : 'done-no-link'
 }
 
 export const isDone = (st: string) => st === 'done-link' || st === 'done-no-link'

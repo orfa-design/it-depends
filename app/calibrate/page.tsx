@@ -7,6 +7,7 @@ import {
 } from '@/lib/data'
 import { saveCalibration } from '@/lib/storage'
 import './styles.css'
+import GraphView from './graph-view'
 
 type Phase = 'intro' | 'story' | 'analysis' | 'map' | 'complete'
 type MapStyle = 'vertical' | 'typographic'
@@ -52,7 +53,7 @@ function Chrome({
 
 // ── IntroScreen ─────────────────────────────────────────────────────────────
 
-function IntroScreen({ onStart }: { onStart: () => void }) {
+function IntroScreen({ onStart, onSkip }: { onStart: () => void; onSkip: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement
@@ -84,6 +85,9 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
             почати →
           </button>
           <span className="intro-hint">або Enter</span>
+        </div>
+        <div className="intro-skip anim-in delay-3">
+          <button className="intro-skip-btn" onClick={onSkip}>пропустити → одразу до галереї</button>
         </div>
       </div>
     </div>
@@ -234,42 +238,46 @@ function StepInfo({
   const step = STEPS[stepIdx]
   const st   = getStatus(stepIdx)
 
-  if (st === 'done-no-link') {
-    return (
-      <div className="step-info step-info-done anim-in">
-        <div className="done-badge done-badge-plain">виконано</div>
-        <h2 className="step-info-title">{step.title}</h2>
-        <p className="step-info-note">
-          ти вже це вмієш. наступний крок —{' '}
-          <button className="inline-link" onClick={() => onSelect(CUR_IDX)}>
-            {STEPS[CUR_IDX].title.toLowerCase()}
-          </button>
-        </p>
-        <div className="step-info-foot">
-          <button className="btn" onClick={() => onStart(stepIdx)}>спробувати ще раз →</button>
+  if (st === 'done-no-link' || st === 'done-link') {
+    const extra: StepExtra | undefined = STEPS_EXTRA[step.id]
+    const extraGrid = extra && (
+      <div className="step-info-grid">
+        <div className="step-info-block">
+          <div className="label">що ти зможеш</div>
+          <div className="value">{extra.doable}</div>
+        </div>
+        <div className="step-info-block">
+          <div className="label">що вивчиш технічно</div>
+          <div className="value">{extra.technical}</div>
         </div>
       </div>
     )
-  }
-
-  if (st === 'done-link') {
     return (
       <div className="step-info step-info-done anim-in">
-        <div className="done-badge done-badge-link">виконано · є результат</div>
+        {st === 'done-link'
+          ? <div className="done-badge done-badge-link">виконано · є результат</div>
+          : <div className="done-badge done-badge-plain">виконано</div>
+        }
         <h2 className="step-info-title">{step.title}</h2>
+        {extraGrid}
         <p className="step-info-note">
           ти вже це вмієш. наступний крок —{' '}
           <button className="inline-link" onClick={() => onSelect(CUR_IDX)}>
             {STEPS[CUR_IDX].title.toLowerCase()}
           </button>
         </p>
+        {st === 'done-link' && step.results && step.results.length > 0 && (
+          <div className="results-list">
+            <div className="results-list-label">результати</div>
+            {step.results.map((r, i) => (
+              <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="result-row">
+                <span className="result-row-arrow">↗</span>
+                <span>{r.label}</span>
+              </a>
+            ))}
+          </div>
+        )}
         <div className="step-info-foot">
-          {step.result && (
-            <a href={step.result} target="_blank" rel="noopener noreferrer" className="result-btn">
-              <span className="result-btn-label">{step.resultLabel ?? 'переглянути результат'}</span>
-              <span className="result-btn-arrow">↗</span>
-            </a>
-          )}
           <button className="btn" onClick={() => onStart(stepIdx)}>спробувати ще раз →</button>
         </div>
       </div>
@@ -413,6 +421,11 @@ const TOOL_LABELS: Record<Tool | 'all', string> = {
   'figma-make': 'Figma Make', 'google-ai-studio': 'AI Studio',
 }
 
+const CAT_COLORS_MAP: Record<StepCategory, string> = {
+  research: '#1D9E75', planning: '#7F77DD',
+  prototyping: '#D85A30', code: '#378ADD', workflow: '#BA7517',
+}
+
 function GalleryCard({
   step, extra, status, stepIdx, onOpenPrompt,
 }: {
@@ -423,21 +436,34 @@ function GalleryCard({
   onOpenPrompt: (idx: number) => void
 }) {
   const done = isDone(status)
+  const isCur = status === 'cur'
   return (
-    <div className={`gallery-card${done ? ' done' : ''}`}>
-      <div className="gallery-card-header">
-        <div className="gallery-card-title">{step.title}</div>
-        <div className="gallery-card-badges">
+    <div className={`gnode-card gnode-card-gallery${done ? ' done' : ''}${isCur ? ' cur' : ''}`}>
+      <div className="gnode-header">
+        <span className="gnode-cat" style={{ color: CAT_COLORS_MAP[step.category] }}>
+          {CATEGORY_LABELS[step.category]}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {extra && <span className="badge">{extra.time}</span>}
           {extra && <span className={`badge badge-tool badge-${extra.recommendedTool}`}>{TOOLS[extra.recommendedTool].label}</span>}
+          {done && <span className="gnode-status-dot done-dot" />}
+          {isCur && <span className="gnode-status-dot cur-dot" />}
         </div>
       </div>
-      <div className="gallery-card-subtitle">{step.subtitle}</div>
-      {extra && <div className="gallery-card-body">{extra.doable}</div>}
-      <div className="gallery-card-footer">
-        {done && <span className="done-badge">✓ зроблено</span>}
+      <div className="gnode-title">{step.title}</div>
+      <div className="gnode-sub">{step.subtitle}</div>
+      {extra && <div className="gnode-doable">{extra.doable}</div>}
+      <div className="gnode-layer">
+        {[0,1,2,3,4].map(i => (
+          <span key={i} className={`gnode-layer-dot${i <= step.layer ? ' filled' : ''}`} />
+        ))}
+      </div>
+      <div className="gnode-footer">
+        {status === 'done-link' && step.results?.map((r, i) => (
+          <a key={i} className="btn btn-ghost gallery-card-cta" href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.label}</a>
+        ))}
         {extra
-          ? <button className="btn btn-ghost gallery-card-cta" onClick={() => onOpenPrompt(stepIdx)}>Скопіювати промпт</button>
+          ? <button className="btn btn-ghost gallery-card-cta" onClick={() => onOpenPrompt(stepIdx)}>отримати промпт →</button>
           : <span className="meta gallery-card-soon">скоро</span>
         }
       </div>
@@ -499,8 +525,8 @@ function MapScreen({
 }: {
   mapStyle: MapStyle
   onStartPrompt: (idx: number) => void
-  viewMode: 'map' | 'gallery'
-  onViewModeChange: (v: 'map' | 'gallery') => void
+  viewMode: 'map' | 'gallery' | 'graph'
+  onViewModeChange: (v: 'map' | 'gallery' | 'graph') => void
 }) {
   const [selectedIdx, setSelectedIdx] = useState(CUR_IDX)
 
@@ -508,6 +534,7 @@ function MapScreen({
     <div className="view-toggle">
       <button className={viewMode === 'map' ? 'active' : ''} onClick={() => onViewModeChange('map')}>Шлях</button>
       <button className={viewMode === 'gallery' ? 'active' : ''} onClick={() => onViewModeChange('gallery')}>Галерея</button>
+      <button className={viewMode === 'graph' ? 'active' : ''} onClick={() => onViewModeChange('graph')}>Зв'язки</button>
     </div>
   )
 
@@ -520,14 +547,33 @@ function MapScreen({
     )
   }
 
+  if (viewMode === 'graph') {
+    return (
+      <div className="gallery-page">
+        <div className="gallery-page-header">{toggle}</div>
+        <GraphView
+          onOpenPrompt={onStartPrompt}
+          renderDetail={(idx) => (
+            <StepInfo
+              key={idx}
+              stepIdx={idx}
+              onStart={onStartPrompt}
+              onSelect={() => {}}
+            />
+          )}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="map-layout">
       <div className="map-nav-col">
         <div className="map-header">
+          {toggle}
           <div className="eyebrow">your map</div>
           <div className="map-title">Ось де ти зараз.</div>
           <div className="map-sub">10 кроків. Карта росте, поки ти йдеш.</div>
-          {toggle}
         </div>
         {mapStyle === 'vertical'    && <MapVertical    selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
         {mapStyle === 'typographic' && <MapTypographic selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
@@ -803,7 +849,7 @@ export default function CalibratePage() {
   const [reactions, setReactions] = useState<string[]>([])
   const [modal, setModal]         = useState<number | null>(null) // null or stepIdx
   const [mapStyle]                = useState<MapStyle>('vertical')
-  const [viewMode, setViewMode]   = useState<'map' | 'gallery'>('map')
+  const [viewMode, setViewMode]   = useState<'map' | 'gallery' | 'graph'>('map')
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
@@ -853,7 +899,7 @@ export default function CalibratePage() {
         onThemeToggle={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
       />
 
-      {phase === 'intro'    && <IntroScreen onStart={() => setPhase('story')} />}
+      {phase === 'intro'    && <IntroScreen onStart={() => setPhase('story')} onSkip={() => { setViewMode('gallery'); setPhase('map') }} />}
       {phase === 'story'    && <StoryScreen idx={storyIdx} onPick={pickReaction} />}
       {phase === 'analysis' && <AnalysisScreen reactions={reactions} onDone={handleAnalysisDone} />}
 
