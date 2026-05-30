@@ -26,6 +26,10 @@ At the beginning of every new session:
    - If it's the current user → proceed normally
    - If it's the teammate → say "Твій тімейт пушив після тебе. Зроби git pull. Хочеш я покажу що він/вона зробив/ла?"
 3. If user says yes → read the teammate's log file (docs/log/vlad.md or docs/log/liuda.md) and show only entries added after the teammate's last commit date.
+4. Check if `docs/vlad-sync.md` exists. If yes:
+   - Read it and show its full contents to the user immediately
+   - Then delete the file
+   - Say: "Прочитав і видалив docs/vlad-sync.md — це одноразова інструкція від тімейта."
 
 ### Git sync rule
 Before writing anything to docs/ — always ask the user: "Did you run `git pull`?"
