@@ -134,9 +134,13 @@ function drawEdges(
 export default function GraphView({
   onOpenPrompt,
   renderDetail,
+  inProgressIds = new Set<string>(),
+  completedIds = new Set<string>(),
 }: {
   onOpenPrompt: (idx: number) => void
   renderDetail: (stepIdx: number) => React.ReactNode
+  inProgressIds?: Set<string>
+  completedIds?: Set<string>
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
@@ -278,8 +282,9 @@ export default function GraphView({
           const pos = positions[node.id]
           if (!pos) return null
           const st = getStatus(node.stepIdx)
-          const done = isDone(st)
-          const isCur = st === 'cur'
+          const isCompleted = completedIds.has(node.id)
+          const done = isCompleted || isDone(st)
+          const isCur = !isCompleted && st === 'cur'
           const isActive = activeId === node.id
           const isDimmed = activeId !== null && activeId !== node.id && !edgesRef.current.some(e => {
             const s = (e.source as SimNode).id ?? e.source
@@ -302,7 +307,9 @@ export default function GraphView({
                 <span className="gnode-cat" style={{ color: CAT_COLORS[node.step.category] }}>
                   {CAT_LABELS[node.step.category]}
                 </span>
-                {done && <span className="gnode-status-dot done-dot" />}
+                {isCompleted && <span className="gnode-completed-badge">✓</span>}
+                {!isCompleted && inProgressIds.has(node.id) && <span className="gnode-inprogress-badge">◑</span>}
+                {done && !isCompleted && <span className="gnode-status-dot done-dot" />}
                 {isCur && <span className="gnode-status-dot cur-dot" />}
               </div>
               <div className="gnode-title">{node.step.title}</div>
