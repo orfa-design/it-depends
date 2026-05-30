@@ -41,6 +41,9 @@ export type StepExtra = {
   recommendedTool: Tool
   stages?: Stage[]
   levelUp?: string[]
+  // build-флоу: кожна фаза має власний послідовний промпт (напр. збірка інструмента в Claude Code).
+  // Інакше — один головний промпт + роадмеп фаз як інфо з чекпоінтами.
+  buildFlow?: boolean
 }
 
 export const STORIES: Story[] = [
@@ -507,6 +510,7 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     technical: 'Однофайловий HTML/CSS/JS інструмент, стан-обʼєкт, деплой на Pages.',
     time: '≈60-90 хв',
     recommendedTool: 'claude-code',
+    buildFlow: true,
     taskDefault: `Допоможи зібрати параметричний плейграунд для [артефакт, напр. банер].\n\nЩо варіюється:\n— розміри / формати: [напр. mobile / desktop]\n— контент: [заголовок, опис, CTA...]\n— візуал: [кольори, завантаження ассетів]`,
     promptText: `Ти senior frontend дев який будує інструменти для дизайнерів.\n\n{task}\n\nЗбери один .html файл (HTML+CSS+vanilla JS, без build): ліва панель контролів, жива область превʼю, стан в одному JS-обʼєкті, рендер як функція від стану. Спочатку 2-3 параметри end-to-end, тоді решта.`,
     stages: [

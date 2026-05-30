@@ -319,6 +319,9 @@ function StepInfo({
 
   if (st === 'avail') {
     const extra: StepExtra | undefined = STEPS_EXTRA[step.id]
+    if (extra?.stages?.length) {
+      return <StagedInstruction key={stepIdx} stepIdx={stepIdx} inline />
+    }
     return (
       <div className="step-info step-info-future anim-in">
         <div className="future-badge avail-badge">можна почати</div>
@@ -329,22 +332,8 @@ function StepInfo({
               <div className="label">що ти зможеш</div>
               <div className="value">{extra.doable}</div>
             </div>
-            <div className="step-info-block">
-              <div className="label">що вивчиш технічно</div>
-              <div className="value">{extra.technical}</div>
-            </div>
           </div>
         )}
-        <div className="step-info-foot">
-          {extra && (
-            <div className="detail-time">
-              {extra.time}{extra.stages?.length ? ` · ${extra.stages.length} етапів` : ''}
-            </div>
-          )}
-          <button className="btn btn-primary" onClick={() => onStart(stepIdx)}>
-            відкрити інструкцію →
-          </button>
-        </div>
       </div>
     )
   }
@@ -646,117 +635,150 @@ const PROMPT_TEXT_DEFAULT = `Ти senior frontend дев, який пише пр
 // ── StagedInstruction (accordions) ───────────────────────────────────────────
 
 function StagedInstruction({
-  stepIdx, onDone, onBack,
+  stepIdx, onDone, onBack, inline = false,
 }: {
   stepIdx: number
-  onDone: () => void
-  onBack: () => void
+  onDone?: () => void
+  onBack?: () => void
+  inline?: boolean
 }) {
   const step        = STEPS[stepIdx]
   const extra       = STEPS_EXTRA[step.id]!
-  const stages: Stage[] = extra.stages ?? []
+  const phases: Stage[] = extra.stages ?? []
   const levelUp     = extra.levelUp ?? []
-  const stepNum     = String(stepIdx + 1).padStart(2, '0')
   const taskDefault = extra.taskDefault
-  const taskStage   = stages.findIndex(s => s.prompt?.includes('{task}'))
-  const lvlIdx      = stages.length
+  const isBuild     = !!extra.buildFlow
+  const recommended = extra.recommendedTool
+  const taskPhase   = phases.findIndex(s => s.prompt?.includes('{task}'))
 
   const [task, setTask]         = useState(taskDefault)
-  const [openIdx, setOpenIdx]   = useState(0)
-  const [copiedIdx, setCopied]  = useState<number | null>(null)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [openPhase, setOpenPhase] = useState(isBuild ? 0 : -1)
+  const [showLevel, setShowLevel] = useState(false)
 
   const fill = (p?: string) => (p ?? '').replace('{task}', task.trim() || taskDefault)
+  const mainPrompt = fill(extra.promptText)
 
-  async function copyStage(i: number, text: string) {
+  async function copy(key: string, text: string) {
     try { await navigator.clipboard.writeText(text) } catch {}
-    setCopied(i)
-    setTimeout(() => setCopied(c => (c === i ? null : c)), 1600)
+    setCopiedKey(key)
+    setTimeout(() => setCopiedKey(k => (k === key ? null : k)), 1600)
   }
 
-  return (
-    <div className="prompt-inner anim-in">
-      <div className="prompt-head">
-        <div>
-          <div className="eyebrow">крок {stepNum} · покрокова інструкція</div>
-          <div className="prompt-title">{step.title}</div>
-          <div className="prompt-sub">{stages.length} етапів · {extra.doable}</div>
+  const TaskInput = (
+    <div className="prompt-task">
+      <label className="prompt-task-label eyebrow">моя задача</label>
+      <textarea
+        className="prompt-task-input"
+        value={task}
+        onChange={e => setTask(e.target.value)}
+        onBlur={e => { if (!e.target.value.trim()) setTask(taskDefault) }}
+        rows={3}
+        spellCheck={false}
+      />
+    </div>
+  )
+
+  const PromptBox = ({ label, text, ck }: { label: string; text: string; ck: string }) => (
+    <div className="prompt-box guide-prompt-box">
+      <div className="prompt-bar">
+        <div className="prompt-bar-left">
+          <span className="ic" />
+          <span>{label}</span>
+          <span className="sep">·</span>
+          <span style={{ color: 'var(--text-faint)' }}>{text.length} символів</span>
         </div>
-        <button className="btn-ghost" onClick={onBack}>← закрити</button>
+        <button className={`copy-btn${copiedKey === ck ? ' copied' : ''}`} onClick={e => { e.stopPropagation(); copy(ck, text) }}>
+          {copiedKey === ck ? 'скопійовано' : 'copy'}
+        </button>
+      </div>
+      <div className="prompt-body">{text}</div>
+    </div>
+  )
+
+  return (
+    <div className={`guide anim-in${inline ? ' guide-inline' : ''}`}>
+      <div className="guide-head">
+        <div>
+          {inline
+            ? <div className="future-badge avail-badge">можна почати</div>
+            : <div className="eyebrow">покрокова інструкція</div>}
+          <h2 className="guide-title">{step.title}</h2>
+          <div className="guide-sub">{extra.doable}</div>
+        </div>
+        {!inline && onBack && <button className="btn-ghost" onClick={onBack}>← закрити</button>}
       </div>
 
-      <div className="stage-list">
-        {stages.map((s, i) => {
-          const open = openIdx === i
-          const p    = fill(s.prompt)
-          return (
-            <div className={`stage${open ? ' open' : ''}`} key={i}>
-              <button className="stage-head" onClick={() => setOpenIdx(open ? -1 : i)}>
-                <span className="stage-num">{i + 1}</span>
-                <span className="stage-title">{s.title}</span>
-                {s.tool && <span className={`badge badge-tool badge-${s.tool}`}>{TOOLS[s.tool].label}</span>}
-                <span className="stage-chev">{open ? '−' : '+'}</span>
-              </button>
-              {open && (
-                <div className="stage-body">
-                  <div className="stage-action">{s.action}</div>
-                  {i === taskStage && (
-                    <div className="prompt-task stage-task">
-                      <label className="prompt-task-label eyebrow">моя задача</label>
-                      <textarea
-                        className="prompt-task-input"
-                        value={task}
-                        onChange={e => setTask(e.target.value)}
-                        onBlur={e => { if (!e.target.value.trim()) setTask(taskDefault) }}
-                        rows={3}
-                        spellCheck={false}
-                      />
+      <div className="guide-metarow">
+        <span className="badge">{extra.time}</span>
+        <span className={`badge badge-tool badge-${recommended}`}>{TOOLS[recommended].label}</span>
+        <span className="badge">{phases.length} фаз</span>
+      </div>
+
+      {!isBuild && (
+        <div className="guide-prompt">
+          {TaskInput}
+          <PromptBox label="промпт" text={mainPrompt} ck="main" />
+        </div>
+      )}
+
+      <div className="roadmap">
+        <div className="roadmap-label eyebrow">{isBuild ? 'кроки збірки' : 'як це піде'}</div>
+        <ol className="roadmap-list">
+          {phases.map((s, i) => {
+            const open      = openPhase === i
+            const hasPrompt = isBuild && !!s.prompt
+            return (
+              <li className={`phase${hasPrompt ? ' has-prompt' : ''}${open ? ' open' : ''}`} key={i}>
+                <div
+                  className="phase-row"
+                  onClick={hasPrompt ? () => setOpenPhase(open ? -1 : i) : undefined}
+                  role={hasPrompt ? 'button' : undefined}
+                >
+                  <span className="phase-num">{i + 1}</span>
+                  <div className="phase-main">
+                    <div className="phase-title">
+                      {s.title}
+                      {s.tool && <span className={`badge badge-tool badge-${s.tool}`}>{TOOLS[s.tool].label}</span>}
                     </div>
-                  )}
-                  {s.prompt && (
-                    <div className="prompt-box stage-prompt">
-                      <div className="prompt-bar">
-                        <div className="prompt-bar-left">
-                          <span className="ic" />
-                          <span>етап {i + 1} · промпт</span>
-                          <span className="sep">·</span>
-                          <span style={{ color: 'var(--text-faint)' }}>{p.length} символів</span>
-                        </div>
-                        <button className={`copy-btn${copiedIdx === i ? ' copied' : ''}`} onClick={() => copyStage(i, p)}>
-                          {copiedIdx === i ? 'скопійовано' : 'copy'}
-                        </button>
-                      </div>
-                      <div className="prompt-body">{p}</div>
-                    </div>
-                  )}
-                  <div className="stage-check"><span className="stage-check-tick">✓</span> {s.checkpoint}</div>
+                    <div className="phase-action">{s.action}</div>
+                    <div className="phase-check"><span className="phase-check-tick">✓</span> {s.checkpoint}</div>
+                  </div>
+                  {hasPrompt && <span className="phase-chev">{open ? '−' : '+'}</span>}
                 </div>
-              )}
-            </div>
-          )
-        })}
-
-        {levelUp.length > 0 && (
-          <div className={`stage stage-levelup${openIdx === lvlIdx ? ' open' : ''}`}>
-            <button className="stage-head" onClick={() => setOpenIdx(openIdx === lvlIdx ? -1 : lvlIdx)}>
-              <span className="stage-num stage-num-lvl">⚡</span>
-              <span className="stage-title">Далі: потужніший шлях</span>
-              <span className="stage-chev">{openIdx === lvlIdx ? '−' : '+'}</span>
-            </button>
-            {openIdx === lvlIdx && (
-              <div className="stage-body">
-                <ul className="levelup-list">
-                  {levelUp.map((x, i) => <li key={i}>{x}</li>)}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
+                {hasPrompt && open && (
+                  <div className="phase-prompt">
+                    {i === taskPhase && TaskInput}
+                    <PromptBox label={`промпт фази ${i + 1}`} text={fill(s.prompt)} ck={`p${i}`} />
+                  </div>
+                )}
+              </li>
+            )
+          })}
+        </ol>
       </div>
 
-      <div className="prompt-foot">
-        <div className="meta">зроби по етапах — і повернись позначити крок виконаним.</div>
-        <button className="btn btn-primary" onClick={onDone}>я зробила — далі</button>
-      </div>
+      {levelUp.length > 0 && (
+        <div className="guide-levelup">
+          <button className="guide-levelup-toggle" onClick={() => setShowLevel(v => !v)}>
+            <span className="lvl-bolt">⚡</span>
+            <span>Далі: потужніший шлях</span>
+            <span className="lvl-chev">{showLevel ? '−' : '+'}</span>
+          </button>
+          {showLevel && (
+            <ul className="levelup-list">
+              {levelUp.map((x, i) => <li key={i}>{x}</li>)}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {onDone && (
+        <div className="prompt-foot">
+          <div className="meta">зроби — і повернись позначити крок виконаним.</div>
+          <button className="btn btn-primary" onClick={onDone}>я зробила — далі</button>
+        </div>
+      )}
     </div>
   )
 }
