@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import {
   STORIES, REACTIONS, STEPS, STEPS_EXTRA, CUR_IDX, getStatus, isDone,
   type Story, type StepExtra, type Tool, type StepCategory, type Step,
 } from '@/lib/data'
-import { saveCalibration } from '@/lib/storage'
+import { saveCalibration, getInProgress, addInProgress, removeInProgress, getDraft, saveDraft, clearDraft, getCompletedSteps, markStepDone, type InProgressItem } from '@/lib/storage'
 import './styles.css'
 import GraphView from './graph-view'
 
@@ -23,7 +24,7 @@ function parseTime(s: string) {
 // ── Chrome ──────────────────────────────────────────────────────────────────
 
 function Chrome({
-  phase, storyIdx, onLogoClick, onMapClick, theme, onThemeToggle,
+  phase, storyIdx, onLogoClick, onMapClick, theme, onThemeToggle, inProgressCount,
 }: {
   phase: Phase
   storyIdx: number
@@ -31,6 +32,7 @@ function Chrome({
   onMapClick: () => void
   theme: 'dark' | 'light'
   onThemeToggle: () => void
+  inProgressCount: number
 }) {
   return (
     <header className="chrome">
@@ -39,9 +41,15 @@ function Chrome({
         <button className="wordmark-btn" onClick={onLogoClick}>It Depends</button>
         <button className="wordmark-btn" onClick={onMapClick}>· ai skills map</button>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {phase === 'story' && (
           <div className="counter">{storyIdx + 1} / {STORIES.length}</div>
+        )}
+        {inProgressCount > 0 && (
+          <a href="/active" className="chrome-active-link">
+            Активні задачі
+            <span className="chrome-active-badge">{inProgressCount}</span>
+          </a>
         )}
         <button className="theme-toggle" onClick={onThemeToggle} aria-label="toggle theme">
           {theme === 'dark' ? '☀' : '☾'}
@@ -229,14 +237,15 @@ function AnalysisScreen({ reactions, onDone }: { reactions: string[]; onDone: ()
 // ── StepInfo ────────────────────────────────────────────────────────────────
 
 function StepInfo({
-  stepIdx, onStart, onSelect,
+  stepIdx, onStart, onSelect, completedUrl,
 }: {
   stepIdx: number
   onStart: (idx: number) => void
   onSelect: (idx: number) => void
+  completedUrl?: string
 }) {
   const step = STEPS[stepIdx]
-  const st   = getStatus(stepIdx)
+  const st   = completedUrl !== undefined ? 'done-link' : getStatus(stepIdx)
 
   if (st === 'done-no-link' || st === 'done-link') {
     const extra: StepExtra | undefined = STEPS_EXTRA[step.id]
@@ -266,10 +275,15 @@ function StepInfo({
             {STEPS[CUR_IDX].title.toLowerCase()}
           </button>
         </p>
-        {st === 'done-link' && step.results && step.results.length > 0 && (
+        {st === 'done-link' && (
           <div className="results-list">
             <div className="results-list-label">результати</div>
-            {step.results.map((r, i) => (
+            {completedUrl ? (
+              <a href={completedUrl} target="_blank" rel="noopener noreferrer" className="result-row">
+                <span className="result-row-arrow">↗</span>
+                <span>твій результат</span>
+              </a>
+            ) : step.results?.map((r, i) => (
               <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="result-row">
                 <span className="result-row-arrow">↗</span>
                 <span>{r.label}</span>
@@ -347,11 +361,12 @@ function StepInfo({
 
 // ── MapVertical ──────────────────────────────────────────────────────────────
 
-function MapVertical({ selectedIdx, onSelect }: { selectedIdx: number; onSelect: (i: number) => void }) {
+function MapVertical({ selectedIdx, onSelect, completedMap }: { selectedIdx: number; onSelect: (i: number) => void; completedMap: Map<string, string> }) {
   return (
     <div className="path">
       {STEPS.map((s, i) => {
-        const st  = getStatus(i)
+        const userUrl = completedMap.get(s.id)
+        const st = completedMap.has(s.id) ? (userUrl ? 'done-link' : 'done-no-link') : getStatus(i)
         const sel = i === selectedIdx
         return (
           <div key={s.id}>
@@ -378,12 +393,12 @@ function MapVertical({ selectedIdx, onSelect }: { selectedIdx: number; onSelect:
 
 // ── MapTypographic ───────────────────────────────────────────────────────────
 
-function MapTypographic({ selectedIdx, onSelect }: { selectedIdx: number; onSelect: (i: number) => void }) {
+function MapTypographic({ selectedIdx, onSelect, completedMap }: { selectedIdx: number; onSelect: (i: number) => void; completedMap: Map<string, string> }) {
   return (
     <div>
       <div className="typo-list">
         {STEPS.map((s, i) => {
-          const st  = getStatus(i)
+          const st  = completedMap.has(s.id) ? (completedMap.get(s.id) ? 'done-link' : 'done-no-link') : getStatus(i)
           const sel = i === selectedIdx
           return (
             <div key={s.id}>
@@ -427,18 +442,21 @@ const CAT_COLORS_MAP: Record<StepCategory, string> = {
 }
 
 function GalleryCard({
-  step, extra, status, stepIdx, onOpenPrompt,
+  step, extra, status, stepIdx, onOpenPrompt, isInProgress, completedUrl,
 }: {
   step: Step
   extra: StepExtra | undefined
   status: string
   stepIdx: number
   onOpenPrompt: (idx: number) => void
+  isInProgress?: boolean
+  completedUrl?: string
 }) {
-  const done = isDone(status)
-  const isCur = status === 'cur'
+  const isCompleted = completedUrl !== undefined
+  const done = isCompleted || isDone(status)
+  const isCur = !isCompleted && status === 'cur'
   return (
-    <div className={`gnode-card gnode-card-gallery${done ? ' done' : ''}${isCur ? ' cur' : ''}`}>
+    <div className={`gnode-card gnode-card-gallery${done ? ' done' : ''}${isCur ? ' cur' : ''}${isInProgress ? ' in-progress' : ''}`}>
       <div className="gnode-header">
         <span className="gnode-cat" style={{ color: CAT_COLORS_MAP[step.category] }}>
           {CATEGORY_LABELS[step.category]}
@@ -446,7 +464,9 @@ function GalleryCard({
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {extra && <span className="badge">{extra.time}</span>}
           {extra && <span className={`badge badge-tool badge-${extra.recommendedTool}`}>{TOOLS[extra.recommendedTool].label}</span>}
-          {done && <span className="gnode-status-dot done-dot" />}
+          {isCompleted && <span className="gnode-completed-badge">✓ виконано</span>}
+          {isInProgress && !isCompleted && <span className="gnode-inprogress-badge">◑ в роботі</span>}
+          {done && !isCompleted && <span className="gnode-status-dot done-dot" />}
           {isCur && <span className="gnode-status-dot cur-dot" />}
         </div>
       </div>
@@ -459,7 +479,10 @@ function GalleryCard({
         ))}
       </div>
       <div className="gnode-footer">
-        {status === 'done-link' && step.results?.map((r, i) => (
+        {isCompleted && completedUrl && (
+          <a className="btn btn-ghost gallery-card-cta" href={completedUrl} target="_blank" rel="noopener noreferrer">↗ результат</a>
+        )}
+        {!isCompleted && status === 'done-link' && step.results?.map((r, i) => (
           <a key={i} className="btn btn-ghost gallery-card-cta" href={r.url} target="_blank" rel="noopener noreferrer">↗ {r.label}</a>
         ))}
         {extra
@@ -471,9 +494,10 @@ function GalleryCard({
   )
 }
 
-function GalleryScreen({ onOpenPrompt }: { onOpenPrompt: (idx: number) => void }) {
+function GalleryScreen({ onOpenPrompt, inProgress, completedMap }: { onOpenPrompt: (idx: number) => void; inProgress: InProgressItem[]; completedMap: Map<string, string> }) {
   const [activeTool, setActiveTool]         = useState<Tool | 'all'>('all')
   const [activeCategory, setActiveCategory] = useState<StepCategory | 'all'>('all')
+  const inProgressIds = new Set(inProgress.map(i => i.id))
 
   const filtered = STEPS
     .map((step, idx) => ({ step, idx }))
@@ -511,6 +535,8 @@ function GalleryScreen({ onOpenPrompt }: { onOpenPrompt: (idx: number) => void }
             status={getStatus(idx)}
             stepIdx={idx}
             onOpenPrompt={onOpenPrompt}
+            isInProgress={inProgressIds.has(step.id)}
+            completedUrl={completedMap.get(step.id)}
           />
         ))}
       </div>
@@ -521,12 +547,14 @@ function GalleryScreen({ onOpenPrompt }: { onOpenPrompt: (idx: number) => void }
 // ── MapScreen ────────────────────────────────────────────────────────────────
 
 function MapScreen({
-  mapStyle, onStartPrompt, viewMode, onViewModeChange,
+  mapStyle, onStartPrompt, viewMode, onViewModeChange, inProgress, completedMap,
 }: {
   mapStyle: MapStyle
   onStartPrompt: (idx: number) => void
   viewMode: 'map' | 'gallery' | 'graph'
   onViewModeChange: (v: 'map' | 'gallery' | 'graph') => void
+  inProgress: InProgressItem[]
+  completedMap: Map<string, string>
 }) {
   const [selectedIdx, setSelectedIdx] = useState(CUR_IDX)
 
@@ -542,7 +570,7 @@ function MapScreen({
     return (
       <div className="gallery-page">
         <div className="gallery-page-header">{toggle}</div>
-        <GalleryScreen onOpenPrompt={onStartPrompt} />
+        <GalleryScreen onOpenPrompt={onStartPrompt} inProgress={inProgress} completedMap={completedMap} />
       </div>
     )
   }
@@ -553,12 +581,15 @@ function MapScreen({
         <div className="gallery-page-header">{toggle}</div>
         <GraphView
           onOpenPrompt={onStartPrompt}
+          inProgressIds={new Set(inProgress.map(i => i.id))}
+          completedIds={new Set(completedMap.keys())}
           renderDetail={(idx) => (
             <StepInfo
               key={idx}
               stepIdx={idx}
               onStart={onStartPrompt}
               onSelect={() => {}}
+              completedUrl={completedMap.get(STEPS[idx].id)}
             />
           )}
         />
@@ -568,6 +599,20 @@ function MapScreen({
 
   return (
     <div className="map-layout">
+      {inProgress.length > 0 && (
+        <div className="active-plashka">
+          <span className="active-plashka-label">◑ в роботі</span>
+          {inProgress.map(item => (
+            <button
+              key={item.id}
+              className="active-plashka-item"
+              onClick={() => onStartPrompt(item.stepIdx)}
+            >
+              {item.title}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="map-nav-col">
         <div className="map-header">
           {toggle}
@@ -575,11 +620,11 @@ function MapScreen({
           <div className="map-title">Ось де ти зараз.</div>
           <div className="map-sub">10 кроків. Карта росте, поки ти йдеш.</div>
         </div>
-        {mapStyle === 'vertical'    && <MapVertical    selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
-        {mapStyle === 'typographic' && <MapTypographic selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
+        {mapStyle === 'vertical'    && <MapVertical    selectedIdx={selectedIdx} onSelect={setSelectedIdx} completedMap={completedMap} />}
+        {mapStyle === 'typographic' && <MapTypographic selectedIdx={selectedIdx} onSelect={setSelectedIdx} completedMap={completedMap} />}
       </div>
       <div className="map-info-col">
-        <StepInfo key={selectedIdx} stepIdx={selectedIdx} onStart={onStartPrompt} onSelect={setSelectedIdx} />
+        <StepInfo key={selectedIdx} stepIdx={selectedIdx} onStart={onStartPrompt} onSelect={setSelectedIdx} completedUrl={completedMap.get(STEPS[selectedIdx].id)} />
       </div>
     </div>
   )
@@ -611,11 +656,12 @@ const PROMPT_TEXT_DEFAULT = `Ти senior frontend дев, який пише пр
 Спочатку постав мені 2-3 запитання про що саме я хочу прототипувати. Тільки потім код.`
 
 function PromptScreen({
-  stepIdx, onDone, onBack,
+  stepIdx, onDone, onBack, onInProgressChange,
 }: {
   stepIdx: number
   onDone: () => void
   onBack: () => void
+  onInProgressChange?: () => void
 }) {
   const step        = STEPS[stepIdx]
   const extra       = STEPS_EXTRA[step.id]
@@ -624,12 +670,31 @@ function PromptScreen({
   const taskDefault = extra?.taskDefault ?? TASK_DEFAULT
   const stepNum     = String(stepIdx + 1).padStart(2, '0')
 
-  const recommended         = extra?.recommendedTool ?? 'claude-ai'
-  const [tool, setTool]     = useState<Tool>(recommended)
-  const [task, setTask]     = useState(taskDefault)
-  const [copied, setCopied] = useState(false)
+  const recommended           = extra?.recommendedTool ?? 'claude-ai'
+  const [tool, setTool]       = useState<Tool>(recommended)
+  const [task, setTask]       = useState(() => getDraft(step.id) ?? taskDefault)
+  const [copied, setCopied]   = useState(false)
+  const [tookOn, setTookOn]   = useState(() => getInProgress().some(i => i.id === step.id))
 
   const prompt = template.replace('{task}', task.trim() || taskDefault)
+
+  function handleTaskChange(val: string) {
+    setTask(val)
+    saveDraft(step.id, val)
+  }
+
+  function takeOn() {
+    addInProgress({ stepIdx, id: step.id, title: step.title, subtitle: step.subtitle, task, date: new Date().toISOString() })
+    setTookOn(true)
+    onInProgressChange?.()
+  }
+
+  function removeFromActive() {
+    removeInProgress(step.id)
+    clearDraft(step.id)
+    setTookOn(false)
+    onInProgressChange?.()
+  }
 
   async function copy() {
     try { await navigator.clipboard.writeText(prompt) } catch {}
@@ -692,8 +757,8 @@ function PromptScreen({
         <textarea
           className="prompt-task-input"
           value={task}
-          onChange={e => setTask(e.target.value)}
-          onBlur={e => { if (!e.target.value.trim()) setTask(taskDefault) }}
+          onChange={e => handleTaskChange(e.target.value)}
+          onBlur={e => { if (!e.target.value.trim()) handleTaskChange(taskDefault) }}
           rows={3}
           spellCheck={false}
         />
@@ -702,7 +767,17 @@ function PromptScreen({
         <div className="meta">
           {isCur ? 'коли матимеш робочий прототип — повернись сюди.' : 'зроби — і повернись позначити крок виконаним.'}
         </div>
-        <button className="btn btn-primary" onClick={onDone}>я зробила — далі</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {!tookOn ? (
+            <button className="btn" onClick={takeOn}>Взяла в роботу</button>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="prompt-inprogress-badge">◑ в роботі</span>
+              <button className="btn-ghost" style={{ fontSize: 12, color: 'var(--text-faint)' }} onClick={removeFromActive}>зняти</button>
+            </div>
+          )}
+          <button className="btn btn-primary" onClick={onDone}>я зробила — далі</button>
+        </div>
       </div>
     </div>
   )
@@ -711,11 +786,12 @@ function PromptScreen({
 // ── StepModal ────────────────────────────────────────────────────────────────
 
 function StepModal({
-  stepIdx, onClose, onDone,
+  stepIdx, onClose, onDone, onInProgressChange,
 }: {
   stepIdx: number
   onClose: () => void
   onDone: () => void
+  onInProgressChange?: () => void
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -741,7 +817,7 @@ function StepModal({
           </button>
         </div>
         <div className="modal-body">
-          <PromptScreen stepIdx={stepIdx} onDone={onDone} onBack={onClose} />
+          <PromptScreen stepIdx={stepIdx} onDone={onDone} onBack={onClose} onInProgressChange={onInProgressChange} />
         </div>
       </div>
     </>
@@ -750,10 +826,46 @@ function StepModal({
 
 // ── CompleteScreen ────────────────────────────────────────────────────────────
 
-function CompleteScreen({ onGoToMap }: { onGoToMap: () => void }) {
+const SHARE_CHANNELS = [
+  {
+    label: 'WhatsApp',
+    open: (text: string) => window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'),
+  },
+  {
+    label: 'Telegram',
+    open: (text: string, url: string) => window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank'),
+  },
+]
+
+function CompleteScreen({ stepIdx, onGoToMap, onDone }: { stepIdx: number | null; onGoToMap: () => void; onDone?: () => void }) {
+  const step = stepIdx !== null ? STEPS[stepIdx] : null
   const [url, setUrl] = useState('')
   const [committed, setCommitted] = useState('')
-  const [shared, setShared] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [elapsed, setElapsed] = useState('≈45 хвилин')
+  const [shareMsg, setShareMsg] = useState('')
+  const shareInitialized = useRef(false)
+
+  useEffect(() => {
+    try {
+      const start = localStorage.getItem('itdepends_calibrate_start')
+      if (start) {
+        const mins = Math.round((Date.now() - new Date(start).getTime()) / 60000)
+        if (mins >= 1 && mins < 300) setElapsed(`≈${mins} хвилин`)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (committed && !shareInitialized.current) {
+      const what = step ? step.title : 'перший інтерактивний прототип'
+      setShareMsg(`Зробила "${what}" з Claude. Буду вдячна якщо поділитесь думками чи досвідом 🙂`)
+      shareInitialized.current = true
+    }
+  }, [committed, step])
+
+  const fullShareText = `${shareMsg}\n${committed}`
 
   const valid =
     /^https?:\/\/.+/.test(url) ||
@@ -767,9 +879,30 @@ function CompleteScreen({ onGoToMap }: { onGoToMap: () => void }) {
     setCommitted(v)
   }
 
-  function share() {
-    setShared(true)
-    setTimeout(() => setShared(false), 2000)
+  function copyShareText() {
+    navigator.clipboard.writeText(fullShareText).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {})
+  }
+
+  function shareLinkedIn() {
+    copyShareText()
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(committed)}`, '_blank')
+  }
+
+  function saveToHistory() {
+    if (step) {
+      markStepDone({ id: step.id, url: committed, shareText: fullShareText })
+      removeInProgress(step.id)
+      clearDraft(step.id)
+    }
+    try {
+      localStorage.setItem('itdepends_prototype', JSON.stringify({ url: committed, shareText: fullShareText, date: new Date().toISOString() }))
+    } catch {}
+    setSaved(true)
+    onDone?.()
+    setTimeout(() => onGoToMap(), 1500)
   }
 
   const display = committed
@@ -784,12 +917,19 @@ function CompleteScreen({ onGoToMap }: { onGoToMap: () => void }) {
           <div className="eyebrow eyebrow-accent anim-in delay-0" style={{ marginBottom: 28 }}>
             <span className="dot" /> shipped
           </div>
+          {step && (
+            <div className="complete-step-context anim-in delay-0">
+              <span className="complete-step-num">крок {(stepIdx ?? 0) + 1}</span>
+              <span className="complete-step-title">{step.title}</span>
+              {step.subtitle && <span className="complete-step-sub">{step.subtitle}</span>}
+            </div>
+          )}
           <h1 className="complete-display anim-in delay-1">
-            ти зробила свій<br />
-            <span className="accent">перший прототип.</span>
+            ти зробила<br />
+            <span className="accent">{step ? step.title.toLowerCase() + '.' : 'перший крок.'}</span>
           </h1>
           <div className="complete-sub anim-in delay-2">
-            ≈45 хвилин тому ти не знала, що це можливо.<br />
+            {elapsed} тому ти не знала, що це можливо.<br />
             тепер є лінк, який можна показати.
           </div>
         </div>
@@ -810,31 +950,60 @@ function CompleteScreen({ onGoToMap }: { onGoToMap: () => void }) {
         </div>
 
         {committed && (
-          <div className="preview anim-in">
-            <div className="og">
-              <div className="og-meta">
-                <span>{projectName || 'prototype'}</span>
-                <span className="live">live</span>
+          <>
+            <div className="preview anim-in">
+              <div className="og">
+                <div className="og-meta">
+                  <span>{projectName || 'prototype'}</span>
+                  <span className="live">live</span>
+                </div>
+                <div className="og-title">Прототип, який клікається.</div>
               </div>
-              <div className="og-title">Прототип, який клікається.</div>
+              <div className="preview-meta">
+                <span className="url">{display}</span>
+                <span className="site">vercel</span>
+              </div>
             </div>
-            <div className="preview-meta">
-              <span className="url">{display}</span>
-              <span className="site">vercel</span>
+
+            <div className="share-text-block anim-in">
+              <div className="eyebrow">текст для поста</div>
+              <textarea
+                className="share-textarea"
+                value={shareMsg}
+                onChange={e => setShareMsg(e.target.value)}
+                rows={3}
+                spellCheck={false}
+              />
+              <div className="share-url-chip">{display}</div>
+              <div className="share-actions">
+                {SHARE_CHANNELS.map(ch => (
+                  <button key={ch.label} className="btn btn-ghost" onClick={() => ch.open(fullShareText, committed)}>
+                    {ch.label}
+                  </button>
+                ))}
+                <button className="btn btn-ghost" onClick={shareLinkedIn}>LinkedIn</button>
+                <button
+                  className={`btn btn-ghost${copied ? ' copied' : ''}`}
+                  onClick={copyShareText}
+                >
+                  {copied ? 'скопійовано ✓' : 'копіювати'}
+                </button>
+              </div>
+              <div className="meta">шерить твою роботу, не цей продукт.</div>
             </div>
-          </div>
+          </>
         )}
 
         <div className="complete-foot anim-in">
-          <div style={{ display: 'flex', gap: 10 }}>
-            {committed && (
-              <button className="btn btn-primary" onClick={share}>
-                {shared ? 'скопійовано' : 'share →'}
-              </button>
-            )}
-            <button className="btn" onClick={onGoToMap}>зробити ще один</button>
-          </div>
-          {committed && <div className="meta">шерить твою роботу, не цей продукт.</div>}
+          {committed && (
+            <button
+              className={`btn btn-primary${saved ? ' copied' : ''}`}
+              onClick={saveToHistory}
+            >
+              {saved ? 'збережено ✓' : 'Зберегти посилання в задачу'}
+            </button>
+          )}
+          <button className="btn" onClick={onGoToMap}>перейти до всіх проєктів</button>
         </div>
       </div>
     </div>
@@ -843,14 +1012,38 @@ function CompleteScreen({ onGoToMap }: { onGoToMap: () => void }) {
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
-export default function CalibratePage() {
+function CalibratePageInner() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [phase, setPhase]         = useState<Phase>('intro')
   const [storyIdx, setStoryIdx]   = useState(0)
   const [reactions, setReactions] = useState<string[]>([])
-  const [modal, setModal]         = useState<number | null>(null) // null or stepIdx
+  const [modal, setModal]         = useState<number | null>(null)
+  const [completedIdx, setCompletedIdx] = useState<number | null>(null)
   const [mapStyle]                = useState<MapStyle>('vertical')
   const [viewMode, setViewMode]   = useState<'map' | 'gallery' | 'graph'>('map')
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [theme, setTheme]         = useState<'dark' | 'light'>('dark')
+  const [inProgress, setInProgress] = useState<InProgressItem[]>([])
+  const [completedMap, setCompletedMap] = useState<Map<string, string>>(new Map())
+
+  useEffect(() => {
+    setInProgress(getInProgress())
+    setCompletedMap(new Map(getCompletedSteps().map(s => [s.id, s.url ?? ''])))
+  }, [])
+
+  useEffect(() => {
+    const raw = searchParams.get('openStep')
+    if (raw === null) return
+    const idx = Number(raw)
+    if (!isNaN(idx) && idx >= 0 && idx < STEPS.length) {
+      setPhase('map')
+      setModal(idx)
+    }
+    router.replace('/calibrate')
+  }, [searchParams, router])
+
+  function refreshInProgress() { setInProgress(getInProgress()) }
+  function refreshCompleted() { setCompletedMap(new Map(getCompletedSteps().map(s => [s.id, s.url ?? '']))) }
 
   useEffect(() => {
     try {
@@ -858,6 +1051,16 @@ export default function CalibratePage() {
       if (saved === 'light') setTheme('light')
     } catch {}
   }, [])
+
+  useEffect(() => {
+    if (phase === 'map') {
+      try {
+        if (!localStorage.getItem('itdepends_calibrate_start')) {
+          localStorage.setItem('itdepends_calibrate_start', new Date().toISOString())
+        }
+      } catch {}
+    }
+  }, [phase])
 
   useEffect(() => {
     document.body.classList.toggle('theme-light', theme === 'light')
@@ -897,6 +1100,7 @@ export default function CalibratePage() {
         onMapClick={() => setPhase('map')}
         theme={theme}
         onThemeToggle={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+        inProgressCount={inProgress.length}
       />
 
       {phase === 'intro'    && <IntroScreen onStart={() => setPhase('story')} onSkip={() => { setViewMode('gallery'); setPhase('map') }} />}
@@ -910,18 +1114,29 @@ export default function CalibratePage() {
             onStartPrompt={(idx) => setModal(idx)}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            inProgress={inProgress}
+            completedMap={completedMap}
           />
           {modal !== null && (
             <StepModal
               stepIdx={modal}
               onClose={() => setModal(null)}
-              onDone={() => { setModal(null); setPhase('complete') }}
+              onDone={() => { setCompletedIdx(modal); setModal(null); setPhase('complete') }}
+              onInProgressChange={refreshInProgress}
             />
           )}
         </>
       )}
 
-      {phase === 'complete' && <CompleteScreen onGoToMap={() => setPhase('map')} />}
+      {phase === 'complete' && <CompleteScreen stepIdx={completedIdx} onGoToMap={() => setPhase('map')} onDone={() => { refreshCompleted(); refreshInProgress() }} />}
     </div>
+  )
+}
+
+export default function CalibratePage() {
+  return (
+    <Suspense>
+      <CalibratePageInner />
+    </Suspense>
   )
 }

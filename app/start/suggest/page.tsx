@@ -58,10 +58,10 @@ function SuggestContent() {
   function handleDone() {
     try {
       const builds = JSON.parse(localStorage.getItem('itdepends_builds') ?? '[]')
-      builds.push({ card: task, title: s.title, tool: s.cta, stage, blocker, date: new Date().toISOString() })
+      builds.push({ card: task, title: s.title, artifact: s.artifact, tool: s.cta, stage, blocker, date: new Date().toISOString() })
       localStorage.setItem('itdepends_builds', JSON.stringify(builds))
     } catch {}
-    router.push(`/done?card=${encodeURIComponent(task)}&tool=${s.cta}&level=${level}&title=${encodeURIComponent(s.title)}`)
+    router.push(`/done?card=${encodeURIComponent(task)}&tool=${s.cta}&level=${level}&title=${encodeURIComponent(s.title)}&artifact=${encodeURIComponent(s.artifact)}`)
   }
 
   return (
