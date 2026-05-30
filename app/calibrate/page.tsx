@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   STORIES, REACTIONS, STEPS, STEPS_EXTRA, CUR_IDX, getStatus, isDone,
-  type Story, type StepExtra, type Tool, type StepCategory, type Step,
+  type Story, type StepExtra, type Tool, type StepCategory, type Step, type Stage,
 } from '@/lib/data'
 import { saveCalibration } from '@/lib/storage'
 import './styles.css'
@@ -317,6 +317,38 @@ function StepInfo({
     )
   }
 
+  if (st === 'avail') {
+    const extra: StepExtra | undefined = STEPS_EXTRA[step.id]
+    return (
+      <div className="step-info step-info-future anim-in">
+        <div className="future-badge avail-badge">можна почати</div>
+        <h2 className="step-info-title">{step.title}</h2>
+        {extra && (
+          <div className="step-info-grid">
+            <div className="step-info-block">
+              <div className="label">що ти зможеш</div>
+              <div className="value">{extra.doable}</div>
+            </div>
+            <div className="step-info-block">
+              <div className="label">що вивчиш технічно</div>
+              <div className="value">{extra.technical}</div>
+            </div>
+          </div>
+        )}
+        <div className="step-info-foot">
+          {extra && (
+            <div className="detail-time">
+              {extra.time}{extra.stages?.length ? ` · ${extra.stages.length} етапів` : ''}
+            </div>
+          )}
+          <button className="btn btn-primary" onClick={() => onStart(stepIdx)}>
+            відкрити інструкцію →
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // current
   const extra = STEPS_EXTRA['prototype'] ?? STEPS_EXTRA[step.id]
   return (
@@ -365,8 +397,9 @@ function MapVertical({ selectedIdx, onSelect }: { selectedIdx: number; onSelect:
                 {s.subtitle && <div className="node-subtitle">{s.subtitle}</div>}
                 {st === 'done-link' && <div className="node-meta node-meta-link">результат ↗</div>}
                 {st === 'cur'       && <div className="node-meta">рекомендований крок · ≈45 хв</div>}
+                {st === 'avail'     && <div className="node-meta node-meta-avail">{STEPS_EXTRA[s.id]?.time ?? ''}{STEPS_EXTRA[s.id]?.stages?.length ? ` · ${STEPS_EXTRA[s.id]!.stages!.length} етапів` : ''}</div>}
               </div>
-              {sel && st === 'cur' && <div className="node-cta">→</div>}
+              {sel && (st === 'cur' || st === 'avail') && <div className="node-cta">→</div>}
             </div>
           </div>
         )
@@ -528,7 +561,7 @@ function MapScreen({
   viewMode: 'map' | 'gallery' | 'graph'
   onViewModeChange: (v: 'map' | 'gallery' | 'graph') => void
 }) {
-  const [selectedIdx, setSelectedIdx] = useState(CUR_IDX)
+  const [selectedIdx, setSelectedIdx] = useState(0)
 
   const toggle = (
     <div className="view-toggle">
@@ -573,7 +606,7 @@ function MapScreen({
           {toggle}
           <div className="eyebrow">your map</div>
           <div className="map-title">Ось де ти зараз.</div>
-          <div className="map-sub">10 кроків. Карта росте, поки ти йдеш.</div>
+          <div className="map-sub">{STEPS.length} кроків. Карта росте, поки ти йдеш.</div>
         </div>
         {mapStyle === 'vertical'    && <MapVertical    selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
         {mapStyle === 'typographic' && <MapTypographic selectedIdx={selectedIdx} onSelect={setSelectedIdx} />}
@@ -610,6 +643,126 @@ const PROMPT_TEXT_DEFAULT = `Ти senior frontend дев, який пише пр
 
 Спочатку постав мені 2-3 запитання про що саме я хочу прототипувати. Тільки потім код.`
 
+// ── StagedInstruction (accordions) ───────────────────────────────────────────
+
+function StagedInstruction({
+  stepIdx, onDone, onBack,
+}: {
+  stepIdx: number
+  onDone: () => void
+  onBack: () => void
+}) {
+  const step        = STEPS[stepIdx]
+  const extra       = STEPS_EXTRA[step.id]!
+  const stages: Stage[] = extra.stages ?? []
+  const levelUp     = extra.levelUp ?? []
+  const stepNum     = String(stepIdx + 1).padStart(2, '0')
+  const taskDefault = extra.taskDefault
+  const taskStage   = stages.findIndex(s => s.prompt?.includes('{task}'))
+  const lvlIdx      = stages.length
+
+  const [task, setTask]         = useState(taskDefault)
+  const [openIdx, setOpenIdx]   = useState(0)
+  const [copiedIdx, setCopied]  = useState<number | null>(null)
+
+  const fill = (p?: string) => (p ?? '').replace('{task}', task.trim() || taskDefault)
+
+  async function copyStage(i: number, text: string) {
+    try { await navigator.clipboard.writeText(text) } catch {}
+    setCopied(i)
+    setTimeout(() => setCopied(c => (c === i ? null : c)), 1600)
+  }
+
+  return (
+    <div className="prompt-inner anim-in">
+      <div className="prompt-head">
+        <div>
+          <div className="eyebrow">крок {stepNum} · покрокова інструкція</div>
+          <div className="prompt-title">{step.title}</div>
+          <div className="prompt-sub">{stages.length} етапів · {extra.doable}</div>
+        </div>
+        <button className="btn-ghost" onClick={onBack}>← закрити</button>
+      </div>
+
+      <div className="stage-list">
+        {stages.map((s, i) => {
+          const open = openIdx === i
+          const p    = fill(s.prompt)
+          return (
+            <div className={`stage${open ? ' open' : ''}`} key={i}>
+              <button className="stage-head" onClick={() => setOpenIdx(open ? -1 : i)}>
+                <span className="stage-num">{i + 1}</span>
+                <span className="stage-title">{s.title}</span>
+                {s.tool && <span className={`badge badge-tool badge-${s.tool}`}>{TOOLS[s.tool].label}</span>}
+                <span className="stage-chev">{open ? '−' : '+'}</span>
+              </button>
+              {open && (
+                <div className="stage-body">
+                  <div className="stage-action">{s.action}</div>
+                  {i === taskStage && (
+                    <div className="prompt-task stage-task">
+                      <label className="prompt-task-label eyebrow">моя задача</label>
+                      <textarea
+                        className="prompt-task-input"
+                        value={task}
+                        onChange={e => setTask(e.target.value)}
+                        onBlur={e => { if (!e.target.value.trim()) setTask(taskDefault) }}
+                        rows={3}
+                        spellCheck={false}
+                      />
+                    </div>
+                  )}
+                  {s.prompt && (
+                    <div className="prompt-box stage-prompt">
+                      <div className="prompt-bar">
+                        <div className="prompt-bar-left">
+                          <span className="ic" />
+                          <span>етап {i + 1} · промпт</span>
+                          <span className="sep">·</span>
+                          <span style={{ color: 'var(--text-faint)' }}>{p.length} символів</span>
+                        </div>
+                        <button className={`copy-btn${copiedIdx === i ? ' copied' : ''}`} onClick={() => copyStage(i, p)}>
+                          {copiedIdx === i ? 'скопійовано' : 'copy'}
+                        </button>
+                      </div>
+                      <div className="prompt-body">{p}</div>
+                    </div>
+                  )}
+                  <div className="stage-check"><span className="stage-check-tick">✓</span> {s.checkpoint}</div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+
+        {levelUp.length > 0 && (
+          <div className={`stage stage-levelup${openIdx === lvlIdx ? ' open' : ''}`}>
+            <button className="stage-head" onClick={() => setOpenIdx(openIdx === lvlIdx ? -1 : lvlIdx)}>
+              <span className="stage-num stage-num-lvl">⚡</span>
+              <span className="stage-title">Далі: потужніший шлях</span>
+              <span className="stage-chev">{openIdx === lvlIdx ? '−' : '+'}</span>
+            </button>
+            {openIdx === lvlIdx && (
+              <div className="stage-body">
+                <ul className="levelup-list">
+                  {levelUp.map((x, i) => <li key={i}>{x}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="prompt-foot">
+        <div className="meta">зроби по етапах — і повернись позначити крок виконаним.</div>
+        <button className="btn btn-primary" onClick={onDone}>я зробила — далі</button>
+      </div>
+    </div>
+  )
+}
+
+// ── PromptScreen (inside modal) ──────────────────────────────────────────────
+
 function PromptScreen({
   stepIdx, onDone, onBack,
 }: {
@@ -619,6 +772,9 @@ function PromptScreen({
 }) {
   const step        = STEPS[stepIdx]
   const extra       = STEPS_EXTRA[step.id]
+  if (extra?.stages?.length) {
+    return <StagedInstruction stepIdx={stepIdx} onDone={onDone} onBack={onBack} />
+  }
   const isCur       = stepIdx === CUR_IDX
   const template    = extra?.promptText ?? PROMPT_TEXT_DEFAULT
   const taskDefault = extra?.taskDefault ?? TASK_DEFAULT

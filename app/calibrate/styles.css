@@ -2012,3 +2012,130 @@ body[data-typo="editorial"] .stat-num { letter-spacing: -0.04em; }
   padding-top: 4px;
   border-top: 1px solid var(--border);
 }
+
+/* ── Staged instruction (accordions) ───────────────────────────────────────── */
+
+.stage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 20px;
+}
+
+.stage {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+  overflow: hidden;
+  transition: border-color .15s ease;
+}
+.stage.open { border-color: var(--border-strong); }
+
+.stage-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  font-family: var(--font-body);
+}
+.stage-head:hover { background: rgba(var(--accent-rgb), .04); }
+
+.stage-num {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.stage.open .stage-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.stage-num-lvl { font-size: 12px; }
+
+.stage-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.stage-chev {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--text-faint);
+  width: 16px;
+  text-align: center;
+}
+
+.stage-body {
+  padding: 2px 14px 16px 46px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stage-action {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.stage-prompt { margin: 0; }
+
+.stage-check {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-dim);
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), .06);
+}
+.stage-check-tick { color: var(--accent); font-weight: 700; flex: none; }
+
+.stage-task { margin: 0; }
+
+.stage-levelup .stage-num {
+  border-style: dashed;
+  background: none;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.levelup-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.levelup-list li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* ── Available step (new steps shown first in Path) ───────────────────────── */
+
+.node.avail .marker {
+  border-color: var(--accent);
+  background: var(--bg);
+}
+.node-meta-avail { color: var(--accent); }
+.avail-badge {
+  background: rgba(var(--accent-rgb), .1);
+  color: var(--accent);
+}

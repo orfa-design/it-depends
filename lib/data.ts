@@ -24,6 +24,14 @@ export type Step = {
 
 export type Tool = 'claude-ai' | 'claude-code' | 'figma-make' | 'google-ai-studio'
 
+export type Stage = {
+  title: string
+  action: string
+  prompt?: string
+  checkpoint: string
+  tool?: Tool
+}
+
 export type StepExtra = {
   doable: string
   technical: string
@@ -31,6 +39,8 @@ export type StepExtra = {
   promptText: string
   taskDefault: string
   recommendedTool: Tool
+  stages?: Stage[]
+  levelUp?: string[]
 }
 
 export const STORIES: Story[] = [
@@ -75,6 +85,12 @@ export const REACTIONS: Reaction[] = [
 ]
 
 export const STEPS: Step[] = [
+  { id: 'realistic-content',      title: 'Реалістичний контент',           subtitle: 'дані і edge-кейси замість lorem ipsum',                        meta: 'next',       layer: 1, category: 'prototyping' },
+  { id: 'accessibility-review',   title: 'Accessibility-ревʼю',            subtitle: 'перевірка екрана за WCAG',                                     meta: 'next',       layer: 1, category: 'workflow'    },
+  { id: 'component-docs',         title: 'Документація компонента',        subtitle: 'props, стани і usage без ручної писанини',                     meta: 'next',       layer: 1, category: 'workflow'    },
+  { id: 'design-critique',        title: 'Дизайн-критика',                 subtitle: 'структурований евристичний аудит',                             meta: 'next',       layer: 2, category: 'research'    },
+  { id: 'component-states',       title: 'Стани компонента',               subtitle: 'усі варіанти + живий превʼю',                                  meta: 'next',       layer: 2, category: 'prototyping' },
+  { id: 'parametric-design',      title: 'Параметричний дизайн',           subtitle: 'плейграунд варіантів дизайну',                                 meta: 'next',       layer: 3, category: 'code'       },
   { id: 'summary-meeting',        title: 'Саммері зустрічі',              subtitle: 'Як не відкривати нотатки після дзвінку',                      meta: 'foundation', layer: 3, category: 'research',     results: [{ url: 'https://it-depends.vercel.app', label: 'Зустріч з клієнтом' }, { url: 'https://it-depends.vercel.app', label: 'Брейнштормінг' }, { url: 'https://it-depends.vercel.app', label: 'Ретро команди' }] },
   { id: 'brief-analysis',         title: 'Аналіз брифів',                 subtitle: 'Промпт для роботи з неструктурованими документами',            meta: 'foundation', layer: 0, category: 'research',     results: [{ url: 'https://it-depends.vercel.app', label: 'Проект DataArt' }, { url: 'https://it-depends.vercel.app', label: 'Хакатон 2026' }] },
   { id: 'transcript',             title: 'Розбір транскриптів',            subtitle: 'Витягти головне без читання повністю',                         meta: 'foundation', layer: 0, category: 'research' },
@@ -95,17 +111,20 @@ export const STEPS: Step[] = [
   { id: 'workshop-planning',      title: 'Планування воркшопу',            subtitle: 'Розробка структури і кроків разом з Claude',                   meta: 'later',      layer: 3, category: 'planning'  },
   { id: 'team-tool',              title: 'Командний інструмент',           subtitle: 'Побудувати щось що використовують всі',                        meta: 'later',      layer: 4, category: 'workflow'  },
   { id: 'stakeholder-presentation', title: 'Презентація стейкхолдерам',    subtitle: 'Показати живий продукт замість слайдів',                       meta: 'later',      layer: 4, category: 'planning'  },
-  { id: 'component-docs',         title: 'Документація компонента',        subtitle: 'props, стани і usage без ручної писанини',                     meta: 'later',      layer: 1, category: 'workflow'    },
-  { id: 'realistic-content',      title: 'Реалістичний контент',           subtitle: 'дані і edge-кейси замість lorem ipsum',                        meta: 'later',      layer: 1, category: 'prototyping' },
-  { id: 'accessibility-review',   title: 'Accessibility-ревʼю',            subtitle: 'перевірка екрана за WCAG',                                     meta: 'later',      layer: 1, category: 'workflow'    },
-  { id: 'component-states',       title: 'Стани компонента',               subtitle: 'усі варіанти + живий превʼю',                                  meta: 'later',      layer: 2, category: 'prototyping' },
-  { id: 'design-critique',        title: 'Дизайн-критика',                 subtitle: 'структурований евристичний аудит',                             meta: 'later',      layer: 2, category: 'research'    },
-  { id: 'parametric-design',      title: 'Параметричний дизайн',           subtitle: 'плейграунд варіантів дизайну',                                 meta: 'later',      layer: 3, category: 'code'       },
 ]
 
-export const CUR_IDX = STEPS.findIndex(s => s.current) // 3
+export const CUR_IDX = STEPS.findIndex(s => s.current)
 
-export const getStatus = (i: number): 'cur' | 'future' | 'done-link' | 'done-no-link' => {
+// Нові стадійні кроки — показуються першими у Шляху як «доступні» (не виконані, не поточний).
+export const NEW_STEP_IDS = new Set([
+  'realistic-content', 'accessibility-review', 'component-docs',
+  'design-critique', 'component-states', 'parametric-design',
+])
+
+export type StepStatus = 'avail' | 'cur' | 'future' | 'done-link' | 'done-no-link'
+
+export const getStatus = (i: number): StepStatus => {
+  if (NEW_STEP_IDS.has(STEPS[i].id)) return 'avail'
   if (i === CUR_IDX) return 'cur'
   if (i > CUR_IDX)   return 'future'
   return STEPS[i].results?.length ? 'done-link' : 'done-no-link'
@@ -281,6 +300,41 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     recommendedTool: 'claude-ai',
     taskDefault: `Задокументуй цей компонент:\n[вставити скрін + назву]\n\nПотрібно:\n— призначення (1-2 речення)\n— props (назва / тип / дефолт / опис)\n— variants і стани (default, hover, focus, disabled, error, loading, empty)\n— when to use / not, do / donʼt\n— a11y-нотатки`,
     promptText: `Ти технічний райтер дизайн-системи.\n\n{task}\n\nТільки те що випливає з контексту. Де не впевнений — постав [?] і запитай, не вигадуй.`,
+    stages: [
+      {
+        title: 'Зібрати контекст',
+        tool: 'claude-ai',
+        action: 'Скрін компонента (усі варіанти) + назва і де використовується.',
+        prompt: `Ти технічний райтер дизайн-системи.\n\n{task}\n\nСпочатку постав 3 запитання про призначення і межі компонента. Тільки потім далі.`,
+        checkpoint: 'Claude поставив запитання про межі, ти відповіла — контекст є.',
+      },
+      {
+        title: 'Структура доки',
+        tool: 'claude-ai',
+        action: 'Попроси структуровану специфікацію.',
+        prompt: `Згенеруй документацію в markdown: призначення, anatomy, props (назва / тип / дефолт / опис), variants, states (default, hover, focus, active, disabled, error, loading, empty), розміри. Де не знаєш — постав [?].`,
+        checkpoint: 'Таблиця props + повний список станів; невідоме позначено [?].',
+      },
+      {
+        title: 'Usage, do / donʼt, rationale',
+        tool: 'claude-ai',
+        action: 'Додай людську частину — коли застосовувати і чому.',
+        prompt: `Додай: When to use / not, Do / Donʼt (3-4 приклади з контексту), a11y-нотатки (контраст, фокус, клавіатура, aria-label), Rationale (1 абзац). Коротко й конкретно.`,
+        checkpoint: 'Do / Donʼt конкретні (не «використовуйте правильно»), є a11y-нотатки.',
+      },
+      {
+        title: 'Тон і збереження',
+        tool: 'claude-ai',
+        action: 'Уточни тон команди, винеси в постійне місце.',
+        prompt: `Приведи весь текст до єдиного тону: [короткий / формальний / дружній]. Прибери повтори. Дай фінальний markdown одним блоком.`,
+        checkpoint: 'Готовий markdown для Notion / Figma / репозиторію.',
+      },
+    ],
+    levelUp: [
+      'Figma Make → AI Component Documentation Generator: props / states / edge cases + інтерактивні приклади поруч з артефактом.',
+      'zeroheight / Supernova — синхронізують доку з бібліотекою автоматично.',
+      'Figma MCP-агент — описи проперті + флаг неконсистентного неймингу.',
+    ],
   },
   'realistic-content': {
     doable: 'Правдоподібний контент і крайні випадки що ламають верстку. Ловиш проблеми до розробки.',
@@ -289,6 +343,39 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     recommendedTool: 'claude-ai',
     taskDefault: `Згенеруй контент для цього екрана.\n\nЕкран: [назва]\nПоля: [перелік]\nРинок / аудиторія: [хто]\n\nСпочатку 8 реалістичних записів. Потім окремо — крайні випадки: дуже довге імʼя, порожні значення, велике число, найдовший статус, текст empty- і error-стану.`,
     promptText: `Ти дизайнер який тестує макет на реальних даних.\n\n{task}\n\nДані мають виглядати справжніми для вказаного ринку — реальні патерни імен, валют, дат. Без жартівливих значень.`,
+    stages: [
+      {
+        title: 'Описати екран і поля',
+        tool: 'claude-ai',
+        action: 'Назви екран, поля / слоти, вкажи ринок (для імен, валют, дат).',
+        prompt: `Я наповнюю макет реалістичним контентом замість lorem ipsum.\n\n{task}\n\nЯкщо структура полів незрозуміла — перепитай перед генерацією.`,
+        checkpoint: 'Claude зрозумів поля і ринок.',
+      },
+      {
+        title: '«Золотий» реалістичний набір',
+        tool: 'claude-ai',
+        action: 'Згенеруй нормальний правдоподібний датасет.',
+        prompt: `Згенеруй 8 реалістичних записів (таблиця або JSON). Дані мають виглядати справжніми для вказаного ринку: реальні патерни імен, правдоподібні суми, коректні формати дат і статусів. Без жартівливих значень — це піде в демо.`,
+        checkpoint: 'Дані виглядають як справжні; формати під ринок.',
+      },
+      {
+        title: 'Edge / empty / error',
+        tool: 'claude-ai',
+        action: 'Окремо згенеруй те, що ламає верстку — головна цінність.',
+        prompt: `Тепер крайні випадки: дуже довге імʼя (40+ символів), порожнє / коротке значення, велике число і нуль, найдовший і найкоротший статус, спецсимволи / емодзі. Плюс тексти для empty-стану і error-стану. Для кожного — рядок, що саме він перевіряє.`,
+        checkpoint: 'Є «зламуючі» значення + тексти empty / error.',
+      },
+      {
+        title: 'Залити в макет',
+        action: 'Перенеси дані у Figma — плагіном Content Reel (свій контент) або вручну.',
+        checkpoint: 'Макет заповнений; видно чи витримує довгі й порожні значення.',
+      },
+    ],
+    levelUp: [
+      'Figma AI test generator — генерує error / empty states за секунди.',
+      'Figma agent (2026) — заповнює реальним контентом масово по канвасу.',
+      'Content Reel — вбудовані набори імен / адрес / аватарів для чернеток.',
+    ],
   },
   'accessibility-review': {
     doable: 'Список a11y-проблем екрана з фіксами за severity. Контраст, ієрархія, тач-таргети, alt-text.',
@@ -297,6 +384,41 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     recommendedTool: 'claude-ai',
     taskDefault: `Зроби accessibility-ревʼю цього екрана за WCAG 2.2 AA.\n\n[вставити скрін]\nКонтекст: [для кого, мобільний / десктоп]\n\nПеревір: контраст (4.5:1, великий текст 3:1), ієрархію, тач-таргети 44×44, фокус, alt-text, чи не лише кольором передається сенс.`,
     promptText: `Ти accessibility-спеціаліст.\n\n{task}\n\nСпочатку перелічи що бачиш на екрані — я звірю. Потім зведи у таблицю: проблема | severity | критерій | фікс. Точний контраст познач «перевірити в плагіні» — зі скріна неточно.`,
+    stages: [
+      {
+        title: 'Підготувати екран',
+        tool: 'claude-ai',
+        action: 'Встав скрін + вкажи аудиторію і платформу.',
+        prompt: `Ти accessibility-спеціаліст. Зроби a11y-ревʼю екрана за WCAG 2.2 AA.\n\n{task}\n\nСпочатку перелічи що бачиш на екрані — я звірю. Тільки потім аналіз.`,
+        checkpoint: 'Claude правильно перелічив елементи екрана.',
+      },
+      {
+        title: 'Контраст і колір',
+        tool: 'claude-ai',
+        action: 'Перевір контрастні пари (точні числа звір плагіном).',
+        prompt: `Перевір контраст тексту й фону. Пороги: звичайний текст AA 4.5:1, великий (≥24px / ≥19px bold) 3:1, AAA 7:1. Для кожної пари — приблизний коефіцієнт і pass / fail. Сумнівні познач «перевірити в плагіні».`,
+        checkpoint: 'Список пар з вердиктами; сумнівні позначені.',
+      },
+      {
+        title: 'Ієрархія, тач-таргети, alt-text',
+        tool: 'claude-ai',
+        action: 'Контекстні перевірки — тут AI найсильніший.',
+        prompt: `Перевір: візуальну ієрархію і порядок читання; тач-таргети (мінімум 44×44px); видимість фокусу для клавіатури; alt-text для кожного значущого зображення; чи не передається сенс лише кольором.`,
+        checkpoint: 'Зауваження по кожному пункту + запропоновані alt-тексти.',
+      },
+      {
+        title: 'Фікс-ліст за severity',
+        tool: 'claude-ai',
+        action: 'Зведи в пріоритезовану таблицю.',
+        prompt: `Зведи знахідки в таблицю: Проблема | Severity (blocker / major / minor) | WCAG-критерій | Конкретний фікс. Відсортуй за severity. Прибери все, в чому не впевнений.`,
+        checkpoint: 'Таблиця фіксів, blockerʼи зверху.',
+      },
+    ],
+    levelUp: [
+      'Stark (Figma plugin) — контраст, симуляція зору, alt-text, focus order, WCAG 2.1 / 2.2.',
+      'Contrast / Corpowid — легші плагіни тільки на контраст.',
+      'Власний a11y-плагін на Claude — детерміновані перевірки + контекстний аналіз.',
+    ],
   },
   'component-states': {
     doable: 'Усі стани компонента + живий HTML-превʼю де вони перемикаються. Замість годин variants у Figma.',
@@ -305,6 +427,39 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     recommendedTool: 'claude-ai',
     taskDefault: `Згенеруй усі стани цього компонента.\n\nКомпонент: [назва]\n[вставити скрін або опис]\n\nДля кожного стану (default, hover, focus, active, disabled, error, loading, empty, filled): що змінюється візуально, тригер, мікрокопі для error/empty.`,
     promptText: `Ти senior frontend дев який робить прототипи станів.\n\n{task}\n\nПотім зроби один .html файл (Tailwind CDN, vanilla JS), де стани перемикаються кнопками зверху. Loading — з анімацією. Спочатку один стан, перевір, тоді решта.`,
+    stages: [
+      {
+        title: 'Описати базовий компонент',
+        tool: 'claude-ai',
+        action: 'Скрін або опис базового стану + поведінка.',
+        prompt: `Я хочу згенерувати всі стани компонента.\n\n{task}\n\nЯкі стани цьому компоненту потрібні? Запропонуй повний список з обґрунтуванням навіщо кожен.`,
+        checkpoint: 'Перелік станів з обґрунтуванням (не загальний шаблон).',
+      },
+      {
+        title: 'Матриця станів',
+        tool: 'claude-ai',
+        action: 'Опиши кожен стан конкретно.',
+        prompt: `Для кожного стану (default, hover, focus, active, disabled, error, loading, empty, filled): що змінюється візуально, тригер, мікрокопі для error / empty. Формат — таблиця. Токени познач [token] якщо не дам.`,
+        checkpoint: 'Таблиця станів; для error / empty є конкретний текст.',
+      },
+      {
+        title: 'Живий HTML-превʼю',
+        tool: 'claude-ai',
+        action: 'Файл, де стани перемикаються.',
+        prompt: `Зроби один .html файл (Tailwind CDN, vanilla JS, нульові залежності, світла й темна тема), де всі стани перемикаються кнопками зверху. Loading — з реальною анімацією, error / empty — з текстом зі специфікації. Спочатку один стан, перевір, тоді решта.`,
+        checkpoint: 'HTML відкривається, кнопки перемикають стани, loading анімується.',
+      },
+      {
+        title: 'У Figma / в код',
+        action: 'Відтвори як variants або віддай HTML як живий референс розробнику.',
+        checkpoint: 'Набір variants у Figma або лінк на HTML як референс (як зробила Аня).',
+      },
+    ],
+    levelUp: [
+      'Figma Make — будує інтерактивні стани прямо в Figma з документацією поведінки.',
+      'AI Component Documentation Generator — драфтить стани як частину доки.',
+      'Figma variants + агент — розкладає стани по properties.',
+    ],
   },
   'design-critique': {
     doable: 'Структурований евристичний аудит екрана як стартова точка для твого судження. Не вердикт AI.',
@@ -313,6 +468,39 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     recommendedTool: 'claude-ai',
     taskDefault: `Зроби евристичну оцінку цього екрана.\n\n[вставити скрін]\nЗавдання користувача: [що людина має зробити]\n\nПрогони по 10 евристиках Нільсена: для кожної — чи є проблема, severity (blocker/major/minor), конкретна пропозиція.`,
     promptText: `Ти UX-експерт який робить евристичну оцінку.\n\n{task}\n\nБудь стриманим: якщо не впевнений — «потребує перевірки», не вигадуй. Ти бачиш лише один екран, не флоу — познач де робиш припущення про поведінку.`,
+    stages: [
+      {
+        title: 'Звіритись по екрану',
+        tool: 'claude-ai',
+        action: 'Скрін + завдання користувача на цьому екрані.',
+        prompt: `Я роблю евристичну оцінку екрана.\n\n{task}\n\nОпиши що бачиш і основний шлях користувача. Я підтверджу перед аналізом.`,
+        checkpoint: 'Claude правильно зрозумів екран і ціль користувача.',
+      },
+      {
+        title: '10 евристик Нільсена',
+        tool: 'claude-ai',
+        action: 'Структурований прогін по евристиках.',
+        prompt: `Прогони екран по 10 евристиках Нільсена. Для кожної: чи є проблема (так / ні / н.д.), severity (blocker / major / minor), конкретна пропозиція. Евристики: 1) видимість статусу 2) відповідність реальному світу 3) контроль і свобода 4) консистентність 5) запобігання помилкам 6) розпізнавання замість згадування 7) гнучкість 8) мінімалізм 9) допомога з помилками 10) документація. Не впевнений — пиши «потребує перевірки».`,
+        checkpoint: 'Таблиця по 10 евристиках; сумнівне позначено.',
+      },
+      {
+        title: 'Валідація людиною',
+        action: 'Сама відсій галюцинації. AI зі скрінів ловить ~24% проблем і не бачить флоу між екранами — це гіпотези, не вердикт.',
+        prompt: `Постав під сумнів кожну знахідку: які ти вивів зі скріна напевно, а які — припущення про невидиму поведінку? Познач другу групу окремо.`,
+        checkpoint: 'Лишились лише підтверджені знахідки; решта — гіпотези для тесту.',
+      },
+      {
+        title: 'Командний чеклист',
+        tool: 'claude-ai',
+        action: 'Зведи валідоване у чеклист для дизайн-ревʼю.',
+        prompt: `Зведи підтверджені знахідки у короткий чеклист для дизайн-ревʼю: пункт + чому важливо.`,
+        checkpoint: 'Чеклист, який можна винести на ревʼю.',
+      },
+    ],
+    levelUp: [
+      'Heurio (Chrome extension) — командна евристика на живому продукті, візуальні коментарі.',
+      'Парний user testing — евристика + 3-5 живих тестів ловить набагато більше за AI самого (NN/g).',
+    ],
   },
   'parametric-design': {
     doable: 'Плейграунд де параметри (розмір, копі, тема, контент) перемикаються живими контролами. Усі варіанти одразу.',
@@ -321,5 +509,47 @@ export const STEPS_EXTRA: Record<string, StepExtra> = {
     recommendedTool: 'claude-code',
     taskDefault: `Допоможи зібрати параметричний плейграунд для [артефакт, напр. банер].\n\nЩо варіюється:\n— розміри / формати: [напр. mobile / desktop]\n— контент: [заголовок, опис, CTA...]\n— візуал: [кольори, завантаження ассетів]`,
     promptText: `Ти senior frontend дев який будує інструменти для дизайнерів.\n\n{task}\n\nЗбери один .html файл (HTML+CSS+vanilla JS, без build): ліва панель контролів, жива область превʼю, стан в одному JS-обʼєкті, рендер як функція від стану. Спочатку 2-3 параметри end-to-end, тоді решта.`,
+    stages: [
+      {
+        title: 'Простір параметрів',
+        tool: 'claude-code',
+        action: 'Випиши, що варіюється і в яких межах — міні-PRD інструмента.',
+        prompt: `Я хочу зібрати параметричний плейграунд.\n\n{task}\n\nЦе POC-інструмент, не продакшн. Спочатку запропонуй найпростішу архітектуру (один файл? стек?) і постав запитання, де межі параметрів неясні.`,
+        checkpoint: 'Список параметрів з межами + проста архітектура (один HTML-файл).',
+      },
+      {
+        title: 'Кістяк плейграунда',
+        tool: 'claude-code',
+        action: 'Робочий однофайловий інструмент з контролами.',
+        prompt: `Збери один HTML-файл (HTML+CSS+vanilla JS, без build): ліва панель контролів (слайдери / інпути / сегменти), жива область превʼю праворуч, стан в одному JS-обʼєкті, рендер як функція від стану. Спочатку 2-3 базові параметри end-to-end, покажи що оновлюється, тоді решта.`,
+        checkpoint: 'Файл відкривається; зміна контрола одразу змінює превʼю.',
+      },
+      {
+        title: '«Розумні» параметри',
+        tool: 'claude-code',
+        action: 'Поведінка, що робить інструмент справді корисним.',
+        prompt: `Додай: типографіку, що адаптується під довжину контенту (clamp() з min / max); завантаження ассетів (FileReader) + редактор (fit, масштаб, позиція X / Y); теми / кольори фону (solid + gradient); перемикач вьюпорта / девайса з ре-скейлом. Кожну фічу окремо, давай перевіряти перед наступною.`,
+        checkpoint: 'Довгий текст не ламає верстку; ассети вантажаться; вьюпорт перемикається.',
+      },
+      {
+        title: 'Стрес-тест реальним контентом',
+        tool: 'claude-code',
+        action: 'Прожени через реальні дані й крайні випадки (звʼязок з «Реалістичним контентом»).',
+        prompt: `Дай швидко прогнати крайні випадки: найдовший заголовок, порожні поля, велике число, найкоротший CTA, кілька варіантів одразу. Де ламається — запропонуй fix параметра, не хардкод.`,
+        checkpoint: 'Видно що ламається; фікс через параметр, не милицю.',
+      },
+      {
+        title: 'Збереження і деплой',
+        tool: 'claude-code',
+        action: 'Збереження пресетів + публічний лінк.',
+        prompt: `Додай збереження / завантаження стану (localStorage + export / import JSON) і підготуй до деплою на GitHub Pages. За потреби — простий клієнтський пароль-гейт.`,
+        checkpoint: 'Публічний лінк, стан зберігається між сесіями, можна шерити.',
+      },
+    ],
+    levelUp: [
+      'Пресети-вертикалі — окремий стан параметрів під кожен контекст (як casino / sportsbook) з резолвером cfg().',
+      'Page context — скріни оточення, щоб бачити артефакт у реальному середовищі.',
+      'Baked default state — зашити дефолтний стан з base64-ассетами прямо у файл.',
+    ],
   },
 }
