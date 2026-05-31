@@ -2222,6 +2222,42 @@ body[data-typo="editorial"] .stat-num { letter-spacing: -0.04em; }
 }
 .levelup-list li { font-size: 13px; line-height: 1.5; color: var(--text-dim); }
 
+/* ── Expect list (simple cases — read-only «як це піде») ──────────────────── */
+
+.prompt-expect { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.expect-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  counter-reset: expect;
+}
+.expect-list li {
+  position: relative;
+  padding-left: 24px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  counter-increment: expect;
+}
+.expect-list li::before {
+  content: counter(expect);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--text-faint);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Available step (new steps shown first in Path) ───────────────────────── */
 
 .node.avail .marker {

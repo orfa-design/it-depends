@@ -333,21 +333,13 @@ function StepInfo({
 
   if (st === 'avail') {
     const extra: StepExtra | undefined = STEPS_EXTRA[step.id]
-    if (extra?.stages?.length) {
+    if (extra) {
       return <StagedInstruction key={stepIdx} stepIdx={stepIdx} inline />
     }
     return (
       <div className="step-info step-info-future anim-in">
         <div className="future-badge avail-badge">можна почати</div>
         <h2 className="step-info-title">{step.title}</h2>
-        {extra && (
-          <div className="step-info-grid">
-            <div className="step-info-block">
-              <div className="label">що ти зможеш</div>
-              <div className="value">{extra.doable}</div>
-            </div>
-          </div>
-        )}
       </div>
     )
   }
@@ -401,7 +393,7 @@ function MapVertical({ selectedIdx, onSelect, completedMap }: { selectedIdx: num
                 {s.subtitle && <div className="node-subtitle">{s.subtitle}</div>}
                 {st === 'done-link' && <div className="node-meta node-meta-link">результат ↗</div>}
                 {st === 'cur'       && <div className="node-meta">рекомендований крок · ≈45 хв</div>}
-                {st === 'avail'     && <div className="node-meta node-meta-avail">{STEPS_EXTRA[s.id]?.time ?? ''}{STEPS_EXTRA[s.id]?.stages?.length ? ` · ${STEPS_EXTRA[s.id]!.stages!.length} етапів` : ''}</div>}
+                {st === 'avail'     && <div className="node-meta node-meta-avail">{STEPS_EXTRA[s.id]?.time ?? ''}{STEPS_EXTRA[s.id]?.kind === 'build' && STEPS_EXTRA[s.id]?.stages?.length ? ` · ${STEPS_EXTRA[s.id]!.stages!.length} фаз` : ''}</div>}
               </div>
               {sel && (st === 'cur' || st === 'avail') && <div className="node-cta">→</div>}
             </div>
@@ -692,7 +684,8 @@ function StagedInstruction({
   const phases: Stage[] = extra.stages ?? []
   const levelUp     = extra.levelUp ?? []
   const taskDefault = extra.taskDefault
-  const isBuild     = !!extra.buildFlow
+  const expect      = extra.expect ?? []
+  const isBuild     = extra.kind === 'build'
   const recommended = extra.recommendedTool
   const taskPhase   = phases.findIndex(s => s.prompt?.includes('{task}'))
 
@@ -757,7 +750,7 @@ function StagedInstruction({
       <div className="guide-metarow">
         <span className="badge">{extra.time}</span>
         <span className={`badge badge-tool badge-${recommended}`}>{TOOLS[recommended].label}</span>
-        <span className="badge">{phases.length} фаз</span>
+        {isBuild && <span className="badge">{phases.length} фаз</span>}
       </div>
 
       {!isBuild && (
@@ -767,8 +760,18 @@ function StagedInstruction({
         </div>
       )}
 
+      {!isBuild && expect.length > 0 && (
+        <div className="roadmap">
+          <div className="roadmap-label eyebrow">як це піде</div>
+          <ul className="expect-list">
+            {expect.map((x, i) => <li key={i}>{x}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {isBuild && (
       <div className="roadmap">
-        <div className="roadmap-label eyebrow">{isBuild ? 'кроки збірки' : 'як це піде'}</div>
+        <div className="roadmap-label eyebrow">кроки збірки</div>
         <ol className="roadmap-list">
           {phases.map((s, i) => {
             const open      = openPhase === i
@@ -802,6 +805,7 @@ function StagedInstruction({
           })}
         </ol>
       </div>
+      )}
 
       {levelUp.length > 0 && (
         <div className="guide-levelup">
@@ -840,7 +844,7 @@ function PromptScreen({
 }) {
   const step        = STEPS[stepIdx]
   const extra       = STEPS_EXTRA[step.id]
-  if (extra?.stages?.length) {
+  if (extra?.kind === 'build') {
     return <StagedInstruction stepIdx={stepIdx} onDone={onDone} onBack={onBack} />
   }
   const isCur       = stepIdx === CUR_IDX
@@ -941,6 +945,14 @@ function PromptScreen({
           spellCheck={false}
         />
       </div>
+      {extra?.expect?.length ? (
+        <div className="prompt-expect">
+          <div className="roadmap-label eyebrow">як це піде</div>
+          <ul className="expect-list">
+            {extra.expect.map((x, i) => <li key={i}>{x}</li>)}
+          </ul>
+        </div>
+      ) : null}
       <div className="prompt-foot">
         <div className="meta">
           {isCur ? 'коли матимеш робочий прототип — повернись сюди.' : 'зроби — і повернись позначити крок виконаним.'}
