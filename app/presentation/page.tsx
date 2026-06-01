@@ -173,6 +173,9 @@ export default function PresentationPage() {
             що це не для&nbsp;мене.»
           </blockquote>
           <p className="kicker-note reveal d4">Не «вивчити AI». Перестати почуватись виключеним.</p>
+          <p className="kicker-note reveal d4" style={{ marginTop: '0.6em', color: 'var(--faint)' }}>
+            Чому працює: петлю замкнено трьома моделями&nbsp;— BJ&nbsp;Fogg Tiny&nbsp;Habits · Hook&nbsp;Model · Fogg&nbsp;B=MAP.
+          </p>
         </div>
       </section>
 
@@ -202,7 +205,8 @@ export default function PresentationPage() {
             </div>
           </div>
           <p className="iter-foot reveal d4">
-            І так&nbsp;— частину гіпотез ми по дорозі <span className="hi">вбили</span>. Це нормально.
+            Чотири гіпотези: щось <span className="hi">підтвердили</span> опитуванням, щось&nbsp;—
+            <span className="hi"> вбили</span>. Гіпотези в нас не прикраса.
           </p>
         </div>
       </section>
