@@ -3,14 +3,16 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './presentation.css';
 
+// Scroll order mirrors the live running order:
+// Problem → Hypothesis → Research → Team → Tools → Flow → Prototype(→demo) → Closing
 const RAIL = [
   { id: 'problem', label: '01 · Проблема' },
   { id: 'hypothesis', label: '02 · Гіпотеза' },
-  { id: 'flow', label: '03 · Як працює' },
-  { id: 'prototype', label: '04 · Прототип' },
+  { id: 'journey', label: '03 · Дослідження' },
+  { id: 'team', label: '04 · Команда' },
   { id: 'tools', label: '05 · Інструменти' },
-  { id: 'team', label: '06 · Команда' },
-  { id: 'journey', label: '07 · Як ми дійшли' },
+  { id: 'flow', label: '06 · Як працює' },
+  { id: 'prototype', label: '07 · Прототип' },
 ];
 
 export default function PresentationPage() {
@@ -174,52 +176,62 @@ export default function PresentationPage() {
         </div>
       </section>
 
-      {/* ---------- 03 User Flow ---------- */}
-      <section className="sec" id="flow" data-snap data-idx={2}>
+      {/* ---------- 03 Research / iteration journey ---------- */}
+      <section className="sec" id="journey" data-snap data-idx={2}>
         <div className="sec-inner">
-          <span className="eyebrow reveal"><span className="dot" /><span className="num">03</span> Як це працює</span>
-          <h2 className="h-display reveal d1">Від тертя до дії&nbsp;— за один&nbsp;крок.</h2>
-          <div className="flow">
-            <div className="flow-step reveal d1">
-              <span className="n">1</span>
-              <span className="t">Реагуєш на картки колег: <b>«о, круто» / «це я знаю» / «не моє»</b>.</span>
+          <span className="eyebrow reveal"><span className="dot" /><span className="num">03</span> Дослідження</span>
+          <h2 className="h-display reveal d1">Рішення вистраждане, не&nbsp;вгадане.</h2>
+          <p className="lead dim reveal d2">
+            1 глибинне інтервʼю · опитування 10 · конкурентний аналіз. Що це змінило:
+          </p>
+          <div className="iters">
+            <div className="iter reveal d1">
+              <div className="ba before"><span className="tag">БУЛО</span><span className="v">Страх настає, коли відкрив інструмент.</span></div>
+              <span className="sep">→</span>
+              <div className="ba after"><span className="tag">СТАЛО</span><span className="v">Набагато раніше&nbsp;— і тригер соціальний.</span></div>
             </div>
-            <div className="flow-step reveal d2">
-              <span className="n">2</span>
-              <span className="t">Збирається персональний маршрут&nbsp;— <b>активний крок завжди один</b>.</span>
+            <div className="iter reveal d2">
+              <div className="ba before"><span className="tag">БУЛО</span><span className="v">Продукт для новачка в&nbsp;AI.</span></div>
+              <span className="sep">→</span>
+              <div className="ba after"><span className="tag">СТАЛО</span><span className="v">Не новачок. І часто не бачить, що AI взагалі вміє&nbsp;— показуємо можливе.</span></div>
             </div>
-            <div className="flow-step reveal d3">
-              <span className="n">3</span>
-              <span className="t">Готовий промпт, який інструмент відкрити, і як зрозуміти, що вийшло.</span>
-            </div>
-            <div className="flow-step reveal d4">
-              <span className="n">4</span>
-              <span className="t">Зробив → результат-посилання → кидаєш колезі → <b>петля замикається</b>.</span>
+            <div className="iter reveal d3">
+              <div className="ba before"><span className="tag">БУЛО</span><span className="v">«Немає ідей.»</span></div>
+              <span className="sep">→</span>
+              <div className="ba after"><span className="tag">СТАЛО</span><span className="v">Тут же називає 3 конкретні автоматизації. Не питаємо «що хочеш»&nbsp;— показуємо можливе.</span></div>
             </div>
           </div>
-          <p className="kicker-note reveal d4">
-            Не питаємо «що хочеш зробити». Показуємо, що&nbsp;можливо.
+          <p className="iter-foot reveal d4">
+            І так&nbsp;— частину гіпотез ми по дорозі <span className="hi">вбили</span>. Це нормально.
           </p>
         </div>
       </section>
 
-      {/* ---------- 04 Prototype ---------- */}
-      <section className="sec" id="prototype" data-snap data-idx={3}>
+      {/* ---------- 04 Team / collaboration ---------- */}
+      <section className="sec" id="team" data-snap data-idx={3}>
         <div className="sec-inner">
-          <span className="eyebrow reveal"><span className="dot" /><span className="num">04</span> Прототип</span>
-          <h2 className="h-display reveal d1">Це не макет. Воно&nbsp;<span className="accent">живе</span>.</h2>
+          <span className="eyebrow reveal"><span className="dot" /><span className="num">04</span> Команда</span>
+          <h2 className="h-display reveal d1">Процес теж <span className="accent">інженерія</span>.</h2>
           <p className="lead dim reveal d2">
-            Справжній застосунок: калібрування реакцією на колег → персональний маршрут →
-            один крок → живий результат.
+            Двоє людей, дві окремі сесії Claude, один репозиторій як спільний мозок.
           </p>
-          <a className="proto-cta reveal d2" href="/v2">
-            Відкрити прототип <span className="arrow">→</span>
-          </a>
-          <div className="shots">
-            <div className="shot reveal d2"><span className="label">screenshot: /v2 калібрування</span><span className="sub">картки колег · wow / heard / skip</span></div>
-            <div className="shot reveal d3"><span className="label">screenshot: /v2 мапа</span><span className="sub">маршрут · активний вузол</span></div>
-            <div className="shot reveal d4"><span className="label">screenshot: /v2 крок → done</span><span className="sub">результат + share</span></div>
+          <div className="tool-cols">
+            <div className="tool-card reveal d1">
+              <h3><span className="i">①</span>Спільний мозок</h3>
+              <p>Гілки, мерджі, авто-деплій на Vercel при кожному пуші. Живий лінк&nbsp;— завжди.</p>
+            </div>
+            <div className="tool-card reveal d2">
+              <h3><span className="i">②</span>Робот-тімейт</h3>
+              <p>Не дає правити спільне на застарілій версії, переказує, що напарник зробив, нагадує оновити журнал.</p>
+            </div>
+            <div className="tool-card reveal d3">
+              <h3><span className="i">③</span>Думання ≠ рішення</h3>
+              <p>Сирі ідеї&nbsp;— окремо. Синтез&nbsp;— разом. Узгоджене&nbsp;— стає рішенням у документації.</p>
+            </div>
           </div>
+          <p className="kicker-note reveal d4">
+            Правила&nbsp;— це наміри. <span className="hi" style={{ color: 'var(--primary)' }}>Автоматика&nbsp;— це гарантії.</span>
+          </p>
         </div>
       </section>
 
@@ -260,59 +272,52 @@ export default function PresentationPage() {
         </div>
       </section>
 
-      {/* ---------- 06 Team / collaboration ---------- */}
-      <section className="sec" id="team" data-snap data-idx={5}>
+      {/* ---------- 06 User Flow ---------- */}
+      <section className="sec" id="flow" data-snap data-idx={5}>
         <div className="sec-inner">
-          <span className="eyebrow reveal"><span className="dot" /><span className="num">06</span> Команда</span>
-          <h2 className="h-display reveal d1">Процес теж <span className="accent">інженерія</span>.</h2>
-          <p className="lead dim reveal d2">
-            Двоє людей, дві окремі сесії Claude, один репозиторій як спільний мозок.
-          </p>
-          <div className="tool-cols">
-            <div className="tool-card reveal d1">
-              <h3><span className="i">①</span>Спільний мозок</h3>
-              <p>Гілки, мерджі, авто-деплій на Vercel при кожному пуші. Живий лінк&nbsp;— завжди.</p>
+          <span className="eyebrow reveal"><span className="dot" /><span className="num">06</span> Як це працює</span>
+          <h2 className="h-display reveal d1">Від тертя до дії&nbsp;— за один&nbsp;крок.</h2>
+          <div className="flow">
+            <div className="flow-step reveal d1">
+              <span className="n">1</span>
+              <span className="t">Реагуєш на картки колег: <b>«о, круто» / «це я знаю» / «не моє»</b>.</span>
             </div>
-            <div className="tool-card reveal d2">
-              <h3><span className="i">②</span>Робот-тімейт</h3>
-              <p>Не дає правити спільне на застарілій версії, переказує, що напарник зробив, нагадує оновити журнал.</p>
+            <div className="flow-step reveal d2">
+              <span className="n">2</span>
+              <span className="t">Збирається персональний маршрут&nbsp;— <b>активний крок завжди один</b>.</span>
             </div>
-            <div className="tool-card reveal d3">
-              <h3><span className="i">③</span>Думання ≠ рішення</h3>
-              <p>Сирі ідеї&nbsp;— окремо. Синтез&nbsp;— разом. Узгоджене&nbsp;— стає рішенням у документації.</p>
+            <div className="flow-step reveal d3">
+              <span className="n">3</span>
+              <span className="t">Готовий промпт, який інструмент відкрити, і як зрозуміти, що вийшло.</span>
+            </div>
+            <div className="flow-step reveal d4">
+              <span className="n">4</span>
+              <span className="t">Зробив → результат-посилання → кидаєш колезі → <b>петля замикається</b>.</span>
             </div>
           </div>
           <p className="kicker-note reveal d4">
-            Правила&nbsp;— це наміри. <span className="hi" style={{ color: 'var(--primary)' }}>Автоматика&nbsp;— це гарантії.</span>
+            Не питаємо «що хочеш зробити». Показуємо, що&nbsp;можливо.
           </p>
         </div>
       </section>
 
-      {/* ---------- 07 Iteration Journey ---------- */}
-      <section className="sec" id="journey" data-snap data-idx={6}>
+      {/* ---------- 07 Prototype (демо-лаунчпад) ---------- */}
+      <section className="sec" id="prototype" data-snap data-idx={6}>
         <div className="sec-inner">
-          <span className="eyebrow reveal"><span className="dot" /><span className="num">07</span> Як ми дійшли</span>
-          <h2 className="h-display reveal d1">Процес важливіший за&nbsp;фасад.</h2>
-          <div className="iters">
-            <div className="iter reveal d1">
-              <div className="ba before"><span className="tag">БУЛО</span><span className="v">Страх настає, коли відкрив інструмент.</span></div>
-              <span className="sep">→</span>
-              <div className="ba after"><span className="tag">СТАЛО</span><span className="v">Набагато раніше&nbsp;— і тригер соціальний.</span></div>
-            </div>
-            <div className="iter reveal d2">
-              <div className="ba before"><span className="tag">БУЛО</span><span className="v">Продукт для новачка в&nbsp;AI.</span></div>
-              <span className="sep">→</span>
-              <div className="ba after"><span className="tag">СТАЛО</span><span className="v">Не новачок. І часто не бачить, що AI взагалі вміє&nbsp;— показуємо можливе.</span></div>
-            </div>
-            <div className="iter reveal d3">
-              <div className="ba before"><span className="tag">БУЛО</span><span className="v">«Рівно один крок, жодних списків.»</span></div>
-              <span className="sep">→</span>
-              <div className="ba after"><span className="tag">СТАЛО</span><span className="v">Один активний крок у видимому маршруті. Принцип лишився, форма&nbsp;дозріла.</span></div>
-            </div>
-          </div>
-          <p className="iter-foot reveal d4">
-            І так&nbsp;— частину гіпотез ми по дорозі <span className="hi">вбили</span>. Це нормально.
+          <span className="eyebrow reveal"><span className="dot" /><span className="num">07</span> Прототип</span>
+          <h2 className="h-display reveal d1">Це не макет. Воно&nbsp;<span className="accent">живе</span>.</h2>
+          <p className="lead dim reveal d2">
+            Проблема не в навігації, а в першому кроці. Наша відповідь&nbsp;— рівно один крок.
+            Ось як&nbsp;→
           </p>
+          <a className="proto-cta reveal d2" href="/v2">
+            Відкрити прототип <span className="arrow">→</span>
+          </a>
+          <div className="shots">
+            <div className="shot reveal d2"><span className="label">screenshot: /v2 калібрування</span><span className="sub">картки колег · wow / heard / skip</span></div>
+            <div className="shot reveal d3"><span className="label">screenshot: /v2 мапа</span><span className="sub">маршрут · активний вузол</span></div>
+            <div className="shot reveal d4"><span className="label">screenshot: /v2 крок → done</span><span className="sub">результат + share</span></div>
+          </div>
         </div>
       </section>
 
