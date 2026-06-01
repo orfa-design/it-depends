@@ -1,15 +1,15 @@
 import type { Metadata } from 'next'
+import '../styles/design-tokens.css'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'It Depends — Checklist',
+  title: 'It Depends',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', background: '#f9f9f9' }}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

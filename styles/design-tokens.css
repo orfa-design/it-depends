@@ -1,0 +1,110 @@
+/* Design tokens — dark-first, OKLCH. Single mint accent. */
+
+:root {
+  /* Architecture — near-black, cool whisper */
+  --bg: oklch(0.165 0.007 264);
+  --surface: oklch(0.205 0.008 264);
+  --surface-2: oklch(0.245 0.009 264);
+  --surface-3: oklch(0.285 0.010 264);
+  --border: oklch(0.300 0.010 264);
+  --border-strong: oklch(0.380 0.012 264);
+
+  /* Text */
+  --ink: oklch(0.965 0.003 264);
+  --muted: oklch(0.700 0.012 264);
+  --faint: oklch(0.560 0.012 264);
+
+  /* Primary — mint / jade */
+  --primary: oklch(0.74 0.15 170);
+  --primary-fill: oklch(0.64 0.14 170);
+  --primary-fill-hover: oklch(0.69 0.14 170);
+  --primary-ink: oklch(0.14 0.06 170);
+  --primary-soft: oklch(0.74 0.15 170 / 0.10);
+  --primary-line: oklch(0.74 0.15 170 / 0.28);
+
+  /* Accent — same mint family, slightly deeper */
+  --accent: oklch(0.70 0.13 172);
+  --accent-fill: oklch(0.60 0.12 172);
+  --accent-ink: oklch(0.97 0 0);
+  --accent-soft: oklch(0.70 0.13 172 / 0.10);
+  --accent-line: oklch(0.60 0.12 172 / 0.38);
+
+  /* Status */
+  --success: oklch(0.760 0.150 150);
+  --warning: oklch(0.800 0.150 80);
+  --danger: oklch(0.660 0.180 25);
+
+  /* Spacing */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px;  --space-8: 64px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Type scale */
+  --text-xs: 0.78rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.18rem;
+  --text-xl: clamp(1.35rem, 1.1rem + 1vw, 1.6rem);
+  --text-2xl: clamp(1.7rem, 1.3rem + 1.6vw, 2.2rem);
+  --text-3xl: clamp(2.2rem, 1.6rem + 2.4vw, 3rem);
+
+  /* Families */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Motion */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Elevation */
+  --shadow-panel: 0 1px 0 oklch(1 0 0 / 0.04) inset, 0 24px 60px -28px oklch(0 0 0 / 0.6);
+  --shadow-pop: 0 12px 32px -12px oklch(0 0 0 / 0.55);
+
+  /* Background gradient tokens */
+  --bg-glow-a: oklch(0.74 0.15 170 / 0.38);
+  --bg-glow-b: oklch(0.74 0.15 170 / 0.16);
+  --bg-vignette: oklch(0.10 0.005 264 / 0.78);
+  --bg-grid: oklch(0.44 0.010 264 / 0.11);
+}
+
+/* ---------- Light theme (warm beige) ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: oklch(0.968 0.010 80);
+  --surface: oklch(0.946 0.012 80);
+  --surface-2: oklch(0.922 0.014 80);
+  --surface-3: oklch(0.898 0.015 80);
+  --border: oklch(0.834 0.015 80);
+  --border-strong: oklch(0.762 0.018 80);
+
+  --ink: oklch(0.18 0.012 264);
+  --muted: oklch(0.42 0.014 264);
+  --faint: oklch(0.58 0.012 264);
+
+  --primary: oklch(0.40 0.14 170);
+  --primary-fill: oklch(0.36 0.13 170);
+  --primary-fill-hover: oklch(0.40 0.14 170);
+  --primary-ink: oklch(0.97 0.005 0);
+  --primary-soft: oklch(0.40 0.14 170 / 0.08);
+  --primary-line: oklch(0.40 0.14 170 / 0.22);
+
+  --accent: oklch(0.38 0.13 172);
+  --accent-fill: oklch(0.34 0.12 172);
+  --accent-ink: oklch(0.97 0 0);
+  --accent-soft: oklch(0.38 0.13 172 / 0.08);
+  --accent-line: oklch(0.34 0.12 172 / 0.28);
+
+  --shadow-panel: 0 1px 0 oklch(0 0 0 / 0.04) inset, 0 8px 40px -16px oklch(0 0 0 / 0.10);
+  --shadow-pop: 0 8px 24px -8px oklch(0 0 0 / 0.12);
+
+  --bg-glow-a: oklch(0.40 0.14 170 / 0.13);
+  --bg-glow-b: oklch(0.40 0.14 170 / 0.06);
+  --bg-vignette: oklch(0.88 0.012 80 / 0.38);
+  --bg-grid: oklch(0.68 0.012 80 / 0.22);
+}

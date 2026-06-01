@@ -46,7 +46,7 @@ function Chrome({
           <div className="counter">{storyIdx + 1} / {STORIES.length}</div>
         )}
         {inProgressCount > 0 && (
-          <a href="/active" className="chrome-active-link">
+          <a href="/progress" className="chrome-active-link">
             Активні задачі
             <span className="chrome-active-badge">{inProgressCount}</span>
           </a>
@@ -1253,9 +1253,9 @@ function CalibratePageInner() {
   }, [phase])
 
   useEffect(() => {
-    document.body.classList.toggle('theme-light', theme === 'light')
+    document.documentElement.setAttribute('data-theme', theme)
     try { localStorage.setItem('itdepends_theme', theme) } catch {}
-    return () => { document.body.classList.remove('theme-light') }
+    return () => { document.documentElement.removeAttribute('data-theme') }
   }, [theme])
 
   const pickReaction = useCallback((v: string) => {
@@ -1271,7 +1271,7 @@ function CalibratePageInner() {
 
   function handleAnalysisDone() {
     saveCalibration(reactions)
-    setPhase('map')
+    router.push('/map')
   }
 
   function reset() {
@@ -1293,7 +1293,7 @@ function CalibratePageInner() {
         inProgressCount={inProgress.length}
       />
 
-      {phase === 'intro'    && <IntroScreen onStart={() => setPhase('story')} onSkip={() => { setViewMode('gallery'); setPhase('map') }} />}
+      {phase === 'intro'    && <IntroScreen onStart={() => setPhase('story')} onSkip={() => router.push('/gallery')} />}
       {phase === 'story'    && <StoryScreen idx={storyIdx} onPick={pickReaction} />}
       {phase === 'analysis' && <AnalysisScreen reactions={reactions} onDone={handleAnalysisDone} />}
 
