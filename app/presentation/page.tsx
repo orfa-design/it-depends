@@ -9,7 +9,8 @@ const RAIL = [
   { id: 'flow', label: '03 · Як працює' },
   { id: 'prototype', label: '04 · Прототип' },
   { id: 'tools', label: '05 · Інструменти' },
-  { id: 'journey', label: '06 · Як ми дійшли' },
+  { id: 'team', label: '06 · Команда' },
+  { id: 'journey', label: '07 · Як ми дійшли' },
 ];
 
 export default function PresentationPage() {
@@ -259,10 +260,38 @@ export default function PresentationPage() {
         </div>
       </section>
 
-      {/* ---------- 06 Iteration Journey ---------- */}
-      <section className="sec" id="journey" data-snap data-idx={5}>
+      {/* ---------- 06 Team / collaboration ---------- */}
+      <section className="sec" id="team" data-snap data-idx={5}>
         <div className="sec-inner">
-          <span className="eyebrow reveal"><span className="dot" /><span className="num">06</span> Як ми дійшли</span>
+          <span className="eyebrow reveal"><span className="dot" /><span className="num">06</span> Команда</span>
+          <h2 className="h-display reveal d1">Процес теж <span className="accent">інженерія</span>.</h2>
+          <p className="lead dim reveal d2">
+            Двоє людей, дві окремі сесії Claude, один репозиторій як спільний мозок.
+          </p>
+          <div className="tool-cols">
+            <div className="tool-card reveal d1">
+              <h3><span className="i">①</span>Спільний мозок</h3>
+              <p>Гілки, мерджі, авто-деплій на Vercel при кожному пуші. Живий лінк&nbsp;— завжди.</p>
+            </div>
+            <div className="tool-card reveal d2">
+              <h3><span className="i">②</span>Робот-тімейт</h3>
+              <p>Не дає правити спільне на застарілій версії, переказує, що напарник зробив, нагадує оновити журнал.</p>
+            </div>
+            <div className="tool-card reveal d3">
+              <h3><span className="i">③</span>Думання ≠ рішення</h3>
+              <p>Сирі ідеї&nbsp;— окремо. Синтез&nbsp;— разом. Узгоджене&nbsp;— стає рішенням у документації.</p>
+            </div>
+          </div>
+          <p className="kicker-note reveal d4">
+            Правила&nbsp;— це наміри. <span className="hi" style={{ color: 'var(--primary)' }}>Автоматика&nbsp;— це гарантії.</span>
+          </p>
+        </div>
+      </section>
+
+      {/* ---------- 07 Iteration Journey ---------- */}
+      <section className="sec" id="journey" data-snap data-idx={6}>
+        <div className="sec-inner">
+          <span className="eyebrow reveal"><span className="dot" /><span className="num">07</span> Як ми дійшли</span>
           <h2 className="h-display reveal d1">Процес важливіший за&nbsp;фасад.</h2>
           <div className="iters">
             <div className="iter reveal d1">
@@ -288,7 +317,7 @@ export default function PresentationPage() {
       </section>
 
       {/* ---------- Closing ---------- */}
-      <section className="sec closing" data-snap data-idx={6}>
+      <section className="sec closing" data-snap data-idx={7}>
         <div className="sec-inner">
           <h2 className="h-display reveal">Ми даємо <span className="accent">один крок</span>.</h2>
           <p className="sub reveal d1">

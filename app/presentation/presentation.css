@@ -300,6 +300,11 @@
   color: var(--primary);
   margin-right: 8px;
 }
+.tool-card p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
   font-family: var(--font-mono);
