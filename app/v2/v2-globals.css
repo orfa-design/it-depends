@@ -70,7 +70,7 @@
 
   /* --- Shell metrics --- */
   --header-h: 60px;
-  --strip-w:  236px;
+  --strip-w:  320px;
   --side-w:   300px;
   --shadow:   0 18px 50px -20px rgba(0,0,0,0.7);
   --shadow-lg: 0 40px 120px -30px rgba(0,0,0,0.85);
@@ -384,17 +384,28 @@
   transition: background .15s; width: 100%; text-align: left;
 }
 .node:hover { background: var(--bg-2); }
-.node.sel { background: var(--bg-3); }
+.node.sel {
+  background: var(--bg-3);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 4px 15px -4px rgba(0, 0, 0, 0.4);
+}
 .node-rail { position: relative; display: flex; justify-content: center; padding-top: 3px; }
 .node-dot {
   width: 11px; height: 11px; border-radius: 50%;
   border: 2px solid var(--text-dim); background: transparent; transition: all .18s; z-index: 2;
 }
-/* connector line */
-.node:not(:last-child) .node-rail::after {
-  content: ""; position: absolute; top: 18px; bottom: -22px; left: 50%; width: 2px; transform: translateX(-50%);
-  background: var(--line-2); z-index: 1;
+.node-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-1);
+  color: var(--ok);
+  z-index: 2;
+  margin-top: 1px;
 }
+
 .node.done .node-dot { background: var(--text-dim); border-color: var(--text-dim); }
 .node.current .node-dot { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft), 0 0 14px var(--accent-glow); }
 .node.avail .node-dot { border-color: var(--accent-line); }
@@ -402,14 +413,11 @@
 .node-body { min-width: 0; }
 .node-title { font-size: var(--t-sm); font-weight: 500; color: var(--text); line-height: 1.3; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .node-phases { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--text-3); padding: 2px 6px; border-radius: 5px; border: 1px solid var(--line-2); white-space: nowrap; }
-.node.current .node-phases, .node.avail .node-phases { color: var(--accent); border-color: var(--accent-line); }
-.node-sub { font-size: var(--t-xs); color: var(--text-3); margin-top: 2px; line-height: 1.35; }
+.node-sub { font-size: var(--t-xs); color: var(--text-3); margin-top: 2px; line-height: 1.35; display: none; /* Тимчасово приховано за запитом */ }
 .node.done .node-title { color: var(--text-2); }
 .node.done .node-title .check { color: var(--ok); }
 .node.future { opacity: 0.5; }
 .node.future .node-title { color: var(--text-2); }
-.node.avail .node-sub { color: var(--accent); }
-.node.current .node-title { color: var(--accent); }
 
 /* locked "coming soon" card at bottom of strip */
 .node-locked {
@@ -602,6 +610,12 @@
 .phase-collapsed-check { padding: 0 16px 14px 60px; margin-top: -4px; display: grid; grid-template-columns: 16px 1fr; gap: 10px; font-size: var(--t-sm); color: var(--text-3); }
 .phase-collapsed-check .pc-i { color: var(--text-dim); }
 
+/* phase A→B: output field and context badge */
+.phase-output { padding: 10px 16px 14px 60px; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); }
+.po-label { font-family: var(--font-mono); font-size: var(--t-xs); color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; }
+.phase-output .field-input { min-height: 52px; font-size: var(--t-sm); }
+.phase-context-badge { font-family: var(--font-mono); font-size: 10px; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
+
 /* next: stronger path */
 .next-path { margin-top: 34px; border-top: 1px solid var(--line); padding-top: 20px; width: 100%; }
 .next-head { width: 100%; display: flex; align-items: center; justify-content: space-between; text-align: left; }
@@ -657,8 +671,8 @@
 @keyframes scrimIn { from { opacity: 0; } to { opacity: 1; } }
 .modal {
   background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r-xl);
-  width: min(1040px, 100%); max-height: calc(100vh - 96px);
-  display: grid; grid-template-columns: 1fr var(--side-w); overflow: hidden;
+  width: min(1040px, 100%); height: calc(100vh - 96px);
+  display: grid; grid-template-columns: 1fr var(--side-w); grid-template-rows: 1fr; overflow: hidden;
   box-shadow: var(--shadow-lg); animation: modalIn .26s cubic-bezier(.2,.8,.2,1) both;
   position: relative;
 }

@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useV2Data } from '../V2DataContext';
-import { Icon } from '../V2ClientApp';
+import { Icon, EditStepModal } from '../V2ClientApp';
 import V2AppShell from '../V2AppShell';
 
 const infoCardStyle: React.CSSProperties = {
@@ -27,7 +27,17 @@ export default function V2MapPage() {
     copy,
     progress,
     getStatus,
+    steps,
+    syncStepsList,
   } = useV2Data();
+
+  const [editStepId, setEditStepId] = useState<string | null>(null);
+
+  const handleEditSave = async (updatedStep: any) => {
+    const updatedSteps = steps.map(s => s.id === updatedStep.id ? updatedStep : s);
+    await syncStepsList(updatedSteps);
+    setEditStepId(null);
+  };
 
   const visibleSteps = recommendedSteps.filter(s => !progress.notInterested?.[s.id]);
   const doneCount = recommendedSteps.filter(s => getStatus(s) === 'done').length;
@@ -94,23 +104,21 @@ export default function V2MapPage() {
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div style={infoCardStyle}>
-                  <div style={iconWrapStyle}>👆</div>
-                  <div>
-                    <h3 style={infoCardHeadStyle}>Top: Mode switcher</h3>
-                    <p style={infoCardParaStyle}>
-                      The "Path" tab keeps focus on your personal map. Switch to "Gallery" to freely browse all 10 practices without limits.
-                    </p>
-                  </div>
-                </div>
-
+                {/* Card 1 (now Left) */}
                 <div style={infoCardStyle}>
                   <div style={iconWrapStyle}>👈</div>
                   <div>
                     <h3 style={infoCardHeadStyle}>Left: Your personal Path</h3>
-                    <p style={infoCardParaStyle}>
-                      A sequence of 5–7 key steps, automatically selected for your needs. They'll help you tackle real pain points from DataArt practice.
-                    </p>
+                    <p style={infoCardParaStyle}>A sequence of 5–7 key steps, automatically selected for your needs. They'll help you tackle real pain points from DataArt practice.</p>
+                  </div>
+                </div>
+
+                {/* Card 2 (now Top) */}
+                <div style={infoCardStyle}>
+                  <div style={iconWrapStyle}>👆</div>
+                  <div>
+                    <h3 style={infoCardHeadStyle}>Top: Mode switcher</h3>
+                    <p style={infoCardParaStyle}>The "Path" tab keeps focus on your personal map. Switch to "Gallery" to freely browse all 10 practices without limits.</p>
                   </div>
                 </div>
               </div>
@@ -134,26 +142,30 @@ export default function V2MapPage() {
               When you select any step on the left, an action panel will appear here to manage your progress:
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--bg-2)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)', padding: '16px' }}>
-              <div style={{ textTransform: 'uppercase', fontSize: '10.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-3)', marginBottom: '8px', letterSpacing: '0.08em' }}>
-                Step actions
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Card 1 (now top) */}
+              <div style={{ background: 'var(--bg-2)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)', padding: '20px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                <div style={{ fontSize: '24px', lineHeight: 1 }}>👈</div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)', marginBottom: '6px', fontFamily: 'var(--font-head)' }}>
+                    Ліворуч: Твій персональний Шлях
+                  </h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--text-2)', lineHeight: '1.5' }}>
+                    Послідовність із 5–7 найважливіших кроків, автоматично підібраних під твої потреби. Вони допоможуть тобі вирішити реальні болі з практики DataArt.
+                  </p>
+                </div>
               </div>
 
-              <div style={mockBtnStyle}>
-                <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--accent)', marginBottom: '4px' }}>
-                  Take on
-                </div>
-                <div style={mockBtnDescStyle}>
-                  Activates the step. Your personal AI prompt and task editing field will appear in the centre.
-                </div>
-              </div>
-
-              <div style={mockBtnStyle}>
-                <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--ok)', marginBottom: '4px' }}>
-                  Done — next ✓
-                </div>
-                <div style={mockBtnDescStyle}>
-                  Completes the step. You'll be able to save a link to your result and celebrate your win!
+              {/* Card 2 (now bottom) */}
+              <div style={{ background: 'var(--bg-2)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)', padding: '20px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                <div style={{ fontSize: '24px', lineHeight: 1 }}>👆</div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text)', marginBottom: '6px', fontFamily: 'var(--font-head)' }}>
+                    Зверху: Перемикач режимів
+                  </h3>
+                  <p style={{ fontSize: '13.5px', color: 'var(--text-2)', lineHeight: '1.5' }}>
+                    Вкладка «Шлях» завжди тримає фокус на твоїй індивідуальній карті. Перемикайся на «Галерею», щоб вільно шукати й вибирати серед усіх 10 практик без обмежень.
+                  </p>
                 </div>
               </div>
 
