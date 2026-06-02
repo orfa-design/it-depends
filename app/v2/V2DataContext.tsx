@@ -237,7 +237,7 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-session': username
+          'x-user-session': username ?? ''
         },
         body: JSON.stringify(updatedSteps),
       });
@@ -254,7 +254,7 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-session': username
+          'x-user-session': username ?? ''
         },
         body: JSON.stringify(updatedCopy),
       });
