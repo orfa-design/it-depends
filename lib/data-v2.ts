@@ -411,6 +411,89 @@ Keep the structure concise and focus on the very first step of development.`,
       "⚡ Run `npx -y create-figma-plugin` in your terminal if you prefer using the standard Figma boilerplate instead of creating files manually.",
     ],
   },
+  {
+    id: "component-finder-pipeline",
+    title: "Build a Design System Component Finder",
+    subtitle: "Figma Scanner Plugin → AI Enrichment Script → Searchable Web UI",
+    cat: "code", tool: "Claude Code", kind: "build", effort: "90–120 min", layer: 4,
+    state: "avail",
+    doable: "Build a complete design system pipeline: scan Figma files to JSON, enrich with AI, display in a searchable web portal.",
+    promise: "You will build a complete design system pipeline: scan Figma files to JSON, enrich the data with AI, and display it in a searchable, interactive web portal.",
+    usedWhen: "Useful when your team needs a fast, searchable internal catalog of UI patterns and components synced from Figma and Storybook, but you want to avoid manual database entry.",
+    toolName: "Claude Code",
+    defaultTask: "Build a 3-part pipeline: 1) A Figma plugin to scan frames and export raw JSON, 2) A Node.js AI enrichment script using Claude, 3) A Next.js web application for searching, filtering, and previewing components.",
+    phases: [
+      {
+        n: 1, title: "Build the Figma Scanner Plugin", tool: "Claude Code",
+        action: "Create a new Figma plugin folder and run Claude Code with this prompt to generate the canvas scanner:",
+        checkpoint: "You run the plugin in Figma, select your components, and click 'Export JSON' to download a raw data file.",
+        task: "Generate the Figma plugin: manifest.json, tsconfig.json, code.ts, ui.html with Export JSON button.",
+        prompt: `Create a Figma plugin named "Pattern Lib Scanner" using TypeScript. The plugin should:
+1. Scan the current page or selection recursively to find frames that contain a header node named "Header for section".
+2. For each found section, collect:
+   — Name (from the section header text node)
+   — Hierarchy/Path (nesting parent frames)
+   — Section Type (determined by background HEX color)
+   — Texts (from any sticky notes inside the frame)
+   — Variants (from status/variant components inside)
+   — Direct Figma Node URL (using figma.currentPage.selection node IDs)
+3. Export and download this collected data as a raw JSON file.
+Generate the manifest.json, tsconfig.json, code.ts, and ui.html with an "Export JSON" button.
+
+My task: {task}`,
+      },
+      {
+        n: 2, title: "Build the AI Enrichment Script", tool: "Claude.ai",
+        action: "To structure the messy text and sticky notes data, run this prompt in Claude.ai to generate the enrichment script:",
+        checkpoint: "Running the node script processes your raw JSON and successfully generates the enriched-patterns.json file.",
+        task: "Generate the Node.js enrichment script that calls Claude API and outputs enriched-patterns.json.",
+        prompt: `I have a raw JSON file exported from my Figma plugin. The text is unstructured. I want to build a Node.js script using the Anthropic API that reads this JSON, calls Claude to structure the data, and outputs "enriched-patterns.json".
+Write a script that:
+1. Parses the input JSON in batches.
+2. Prompts Claude to structure the raw text into:
+   — "details": array of key-value rules (e.g. "Key: Value")
+   — "synonyms": alternative terms for better search
+   — "see_also": related pattern IDs
+   — "variants": list of visual variations
+3. Merges the results with the existing database (adds new, updates changed, marks missing as deleted).
+4. Outputs the final "enriched-patterns.json" file.
+
+My task: {task}`,
+      },
+      {
+        n: 3, title: "Build the Component Finder Web UI", tool: "Claude Code",
+        action: "Initialize a Next.js project and use Claude Code to build the searchable catalog interface:",
+        checkpoint: "You can run the web app locally, browse categories, search, and click a component to view the Figma link in the modal.",
+        task: "Build the Next.js web app: sidebar nav, search, card/table toggle, detail modal with Figma URL.",
+        prompt: `Create a React application ("BV360 Component Finder") that reads "enriched-patterns.json" and displays the components.
+Implement the following features:
+1. Sidebar navigation grouped by category.
+2. Fast text search highlighting matching queries in title and contents.
+3. Card/Table view toggle.
+4. Detail Modal showing: full pattern description, preview image, implementation details, Figma node URL link, and Storybook URL link.
+5. Gallery navigation (arrows + keyboard keys) to browse patterns.
+6. Deep linking using URL parameters (e.g. ?pattern=ID) to open the modal directly.
+7. An Import page allowing users to upload new JSON files to update the UI local state.
+
+My task: {task}`,
+      },
+    ],
+    authorExample: {
+      type: "link",
+      url: "https://it-depends.vercel.app/results/bv360-finder-demo",
+      label: "Demo of BV360 Component Finder Portal",
+    },
+    nextPath: "Once the catalog is live — ask <span class='np-tool'>Claude Code</span> to add a GitHub Action that re-runs the enrichment script automatically on every Figma export commit.",
+    related: ["figma-plugin-generator", "internal-tool"],
+    notes: [
+      "Start with a small sample of 5–10 components before running the full scan.",
+      "Keep your Anthropic API key in a .env file — never hardcode it in the script.",
+    ],
+    levelUp: [
+      "⚡ Integrate `exportAsync` (PNG thumbnails) into the Figma plugin (Phase 1) and package them into a ZIP file with the JSON.",
+      "⚡ Automate the pipeline: set up a script that runs the Figma scan via a CLI tool and runs the AI enrichment as a GitHub Action on commit.",
+    ],
+  },
 ];
 
 export const STEP_BY_ID = Object.fromEntries(STEPS.map(s => [s.id, s]));
@@ -427,6 +510,7 @@ const EFFORT_BY_ID: Record<string, 'quick' | 'iterative' | 'project'> = {
   "internal-tool": "project", "ds-automation": "project",
   "research-plan": "iterative", "notes-structure": "quick",
   "figma-plugin-generator": "quick",
+  "component-finder-pipeline": "project",
 };
 
 STEPS.forEach(s => {
