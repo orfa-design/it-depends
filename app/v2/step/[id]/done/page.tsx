@@ -14,16 +14,16 @@ export default function V2StepDonePage({ params }: DonePageProps) {
   const unwrappedParams = React.use(params);
   const { id } = unwrappedParams;
 
-  const { steps, copy, progress } = useV2Data();
+  const { steps, copy, progress, nextStep } = useV2Data();
 
   const step = steps.find(s => s.id === id);
 
   if (!step) {
     return (
       <div className="analysis" style={{ padding: '40px', textAlign: 'center' }}>
-        <h2>Крок не знайдено</h2>
+        <h2>Step not found</h2>
         <button className="btn btn-ghost" style={{ marginTop: '20px' }} onClick={() => router.push('/v2/map')}>
-          Повернутись на мапу
+          Back to map
         </button>
       </div>
     );
@@ -36,7 +36,7 @@ export default function V2StepDonePage({ params }: DonePageProps) {
         steps={steps} 
         copy={copy} 
         results={progress.results || {}} 
-        onMap={() => router.push('/v2/map')} 
+        onMap={() => router.push(nextStep ? `/v2/step/${nextStep.id}` : '/v2/map')}
         onOpenStep={(otherId) => router.push(`/v2/step/${otherId}`)} 
       />
     </div>

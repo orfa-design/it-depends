@@ -16,6 +16,7 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
     steps,
     copy,
     progress,
+    nextStep,
     showAddModal,
     setShowAddModal,
     showCopyDrawer,
@@ -23,7 +24,8 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
     syncStepsList,
     syncCopyContent,
     markStepDone,
-    resetProgress
+    resetProgress,
+    getStatus
   } = useV2Data();
 
   // Theme & Tweaks settings
@@ -32,16 +34,14 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
   const [tweaks, setTweaks] = useState({
     accent: '#f5a623',
     headFont: 'Unbounded',
-    width: 'повна',
-    style: 'стримано'
+    width: 'full',
+    style: 'calm'
   });
 
   const [saveFor, setSaveFor] = useState<string | null>(null);
 
   // Active in-progress tasks count
-  const activeCount = steps.filter(
-    s => progress.overrides?.[s.id] === 'inprogress' && !progress.notInterested?.[s.id]
-  ).length;
+  const activeCount = steps.filter(s => getStatus(s) === 'current').length;
 
   // Initialize theme choice
   useEffect(() => {
@@ -66,10 +66,14 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
     root.setAttribute('data-theme', theme);
   }, [tweaks.accent, tweaks.headFont, theme]);
 
-  const appCls = "app width-" + (tweaks.width === "фікс" ? "fixed" : "full") + " style-" + (tweaks.style === "експес" ? "exp" : "calm");
+  const appCls = `app width-${tweaks.width === 'fixed' ? 'fixed' : 'full'} style-${tweaks.style === 'exp' ? 'exp' : 'calm'}`;
+
+  const handlePathTab = () => {
+    router.push(nextStep ? `/v2/step/${nextStep.id}` : '/v2/map');
+  };
 
   const handleResetAll = async () => {
-    if (confirm('Скинути весь ваш прогрес і почати спочатку?')) {
+    if (confirm('Reset all your progress and start over?')) {
       await resetProgress();
     }
   };
@@ -112,17 +116,17 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
         </div>
 
         <nav className="tabs">
-          <button 
-            className={"tab" + (tab === "path" ? " active" : "")} 
-            onClick={() => router.push('/v2/map')}
+          <button
+            className={"tab" + (tab === "path" ? " active" : "")}
+            onClick={handlePathTab}
           >
-            Шлях
+            Path
           </button>
-          <button 
-            className={"tab" + (tab === "gallery" ? " active" : "")} 
+          <button
+            className={"tab" + (tab === "gallery" ? " active" : "")}
             onClick={() => router.push('/v2/gallery')}
           >
-            Галерея
+            Gallery
           </button>
         </nav>
 
@@ -130,10 +134,10 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
           <button 
             className={"h-counter" + (activeCount === 0 ? " empty" : "")} 
             onClick={() => router.push('/v2/progress')}
-            title="активні задачі"
+            title="active tasks"
           >
             <span className="n">{activeCount}</span>
-            <span>активні</span>
+            <span>active</span>
           </button>
           
           {isAdmin && (
@@ -149,7 +153,12 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
 
           <span className="h-divider" />
           <span className="h-user" onClick={() => router.push('/v2/login')} style={{ cursor: 'pointer' }}>{username}</span>
-          <button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title="тема">
+          <button className="icon-btn" onClick={handleResetAll} title="rebuild path">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+            </svg>
+          </button>
+          <button className="icon-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title="theme">
             {theme === "dark" ? <Icon.sun /> : <Icon.moon />}
           </button>
         </div>
@@ -159,8 +168,7 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
       <div className="body">
         {/* Pass down local page states via clone / context if necessary, but route components take from V2DataContext */}
         {React.Children.map(children, (child) => {
-          if (React.isValidElement(child)) {
-            // Also inject local save callback if the sub-pages have internal done triggers
+          if (React.isValidElement(child) && typeof child.type === 'function') {
             return React.cloneElement(child as React.ReactElement<any>, { setSaveFor });
           }
           return child;
@@ -182,7 +190,7 @@ export default function V2AppShell({ children }: { children: React.ReactNode }) 
         className="icon-btn" 
         style={{ position: 'fixed', right: '16px', bottom: '16px', zIndex: 100, background: 'var(--bg-2)', border: '1px solid var(--line-strong)' }}
         onClick={() => setShowTweaks(!showTweaks)}
-        title="Налаштування вигляду"
+        title="Appearance settings"
       >
         ⚙️
       </button>

@@ -15,9 +15,9 @@ const Icon = {
 };
 
 const EFFORT_LABELS = {
-  quick: "один підхід",
-  iterative: "кілька ітерацій",
-  project: "багатосесійний проєкт",
+  quick: "one session",
+  iterative: "iterative",
+  project: "multi-session project",
 };
 
 export default function CalibratePage() {
@@ -49,7 +49,11 @@ export default function CalibratePage() {
 
   const handleSkip = () => {
     try {
-      localStorage.setItem('id_calibrated', 'skipped');
+      if (username) {
+        localStorage.setItem(`id_calibrated_${username.toLowerCase().trim()}`, 'skipped');
+      } else {
+        localStorage.setItem('id_calibrated', 'skipped');
+      }
       router.push('/v2/map');
     } catch (err: any) {
       setErrorLog(`Calibration skip error: ${err.message || err}`);
@@ -133,7 +137,11 @@ export default function CalibratePage() {
     }
     
     try {
-      localStorage.setItem('id_calibrated', 'done');
+      if (username) {
+        localStorage.setItem(`id_calibrated_${username.toLowerCase().trim()}`, 'done');
+      } else {
+        localStorage.setItem('id_calibrated', 'done');
+      }
       router.push('/v2/map');
     } catch (err: any) {
       setErrorLog(`Calibration save error: ${err.message || err}`);
@@ -143,7 +151,7 @@ export default function CalibratePage() {
   if (errorLog) {
     return (
       <div className="analysis" style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', background: '#221111', color: '#ffaaaa' }}>
-        <h2 style={{ fontSize: '24px', marginBottom: '14px', fontFamily: 'var(--font-head)' }}>Помилка калібрування (Diagnostics)</h2>
+        <h2 style={{ fontSize: '24px', marginBottom: '14px', fontFamily: 'var(--font-head)' }}>Calibration error (Diagnostics)</h2>
         <pre style={{ padding: '16px', background: '#110505', border: '1px solid #552222', borderRadius: '8px', fontFamily: 'monospace', fontSize: '13px', whiteSpace: 'pre-wrap', maxWidth: '600px', width: '100%' }}>
           {errorLog}
         </pre>
@@ -155,7 +163,7 @@ export default function CalibratePage() {
             window.location.reload();
           }}
         >
-          Скинути сесію та перезапустити
+          Reset session and restart
         </button>
       </div>
     );
@@ -169,16 +177,16 @@ export default function CalibratePage() {
           <span className="it">It Depends</span>
         </div>
         <div className="intro-inner">
-          <div className="eyebrow">· {CALIBRATION_CARDS.length} кейси&nbsp;&nbsp;·&nbsp;&nbsp;≈2 хвилини</div>
-          <h1>Подивимось,<br/>де ти зараз.</h1>
-          <p>Реальні ситуації з практики DataArt дизайнерок. Реагуй чесно — і отримаєш свій персональний маршрут.</p>
+          <div className="eyebrow">· {CALIBRATION_CARDS.length} cases&nbsp;&nbsp;·&nbsp;&nbsp;≈2 minutes</div>
+          <h1>Let's see<br/>where you are.</h1>
+          <p>Real situations from DataArt design practice. React honestly — and get your personal route.</p>
           <div className="intro-cta">
             <button className="btn btn-primary" onClick={handleStart}>
-              почати <Icon.arrow />
+              start <Icon.arrow />
             </button>
-            <span className="intro-hint">або <kbd>Enter</kbd> (клавіатура 1·2·3)</span>
+            <span className="intro-hint">or <kbd>Enter</kbd> (keyboard 1·2·3)</span>
           </div>
-          <a className="skip-link" onClick={handleSkip} style={{ cursor: 'pointer' }}>пропустити → одразу до галереї</a>
+          <a className="skip-link" onClick={handleSkip} style={{ cursor: 'pointer' }}>skip → straight to gallery</a>
         </div>
       </div>
     );
@@ -188,9 +196,9 @@ export default function CalibratePage() {
     const card = CALIBRATION_CARDS.find(c => c.id === currentCardId) || CALIBRATION_CARDS[0];
     
     const REACTIONS = [
-      { num: "01", label: copy.calibrate.wowBtn, out: "нова територія" },
-      { num: "02", label: copy.calibrate.heardBtn, out: "на радарі" },
-      { num: "03", label: copy.calibrate.skipBtn, out: "у мене є" },
+      { num: "01", label: copy.calibrate.wowBtn, out: "new territory" },
+      { num: "02", label: copy.calibrate.heardBtn, out: "on my radar" },
+      { num: "03", label: copy.calibrate.skipBtn, out: "I've got this" },
     ];
 
     return (
@@ -213,15 +221,15 @@ export default function CalibratePage() {
               
               <div className="moments">
                 <div className="moment">
-                  <div className="moment-tag">було</div>
+                  <div className="moment-tag">before</div>
                   <div className="moment-text">{card.pain}</div>
                 </div>
                 <div className="moment did">
-                  <div className="moment-tag">що зробила</div>
+                  <div className="moment-tag">what she did</div>
                   <div className="moment-text">{card.move}</div>
                 </div>
                 <div className="moment">
-                  <div className="moment-tag">стало</div>
+                  <div className="moment-tag">after</div>
                   <div className="moment-text">{card.out}</div>
                 </div>
               </div>
@@ -235,8 +243,8 @@ export default function CalibratePage() {
 
           <div className="reaction-block">
             <div className="reaction-head">
-              <span className="q">як це для тебе?</span>
-              <span className="reaction-hint">натисни 1 · 2 · 3</span>
+              <span className="q">how does this land for you?</span>
+              <span className="reaction-hint">press 1 · 2 · 3</span>
             </div>
             <div className="reactions">
               {REACTIONS.map((r, idx) => (
@@ -269,7 +277,7 @@ function AnalysisScreen({ onContinue }: { onContinue: () => void }) {
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<'analyzing' | 'done'>('analyzing');
 
-  const chips = ["розшифровка", "кластеризація", "копірайтинг", "критика макета", "прототип", "дашборд", "планування"];
+  const chips = ["transcription", "clustering", "copywriting", "design critique", "prototype", "dashboard", "planning"];
 
   useEffect(() => {
     const t1 = setInterval(() => {
@@ -299,14 +307,14 @@ function AnalysisScreen({ onContinue }: { onContinue: () => void }) {
           <span key={i} className="an-chip">{c}</span>
         ))}
       </div>
-      <h1>{phase === 'analyzing' ? <>аналізую<span className="cursor">_</span></> : "готово."}</h1>
+      <h1>{phase === 'analyzing' ? <>analysing<span className="cursor">_</span></> : "done."}</h1>
       {phase === 'analyzing' ? (
         <div className="an-progress">
           <span style={{ width: progress + "%" }} />
         </div>
       ) : (
         <button className="btn btn-primary an-done-cta animate-fade-in" onClick={onContinue}>
-          подивитися карту <Icon.arrow />
+          view map <Icon.arrow />
         </button>
       )}
     </div>

@@ -3,8 +3,8 @@ import { V2DataProvider } from './V2DataContext';
 import './v2-globals.css';
 
 export const metadata: Metadata = {
-  title: 'It Depends — гайд до AI для дизайнерок',
-  description: 'Покроковий гід для переходу з casual у power AI користувачі для DataArt дизайнерок.',
+  title: 'It Depends — AI guide for designers',
+  description: 'A step-by-step guide for DataArt designers moving from casual to power AI users.',
 };
 
 export default function V2Layout({
@@ -27,7 +27,7 @@ export default function V2Layout({
         <div className="mw-box">
           <div className="mw-icon">💻</div>
           <div className="mw-text">
-            Цей продукт оптимізований для десктопу. Відкрий на комп'ютері для кращого досвіду.
+            This product is optimised for desktop. Open it on a computer for the best experience.
           </div>
         </div>
       </div>

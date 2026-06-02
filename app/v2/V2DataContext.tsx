@@ -11,6 +11,7 @@ export interface UserProgress {
   calibrationReactions?: Record<string, 'wow' | 'heard' | 'skip'>; // tree reactions
   notInterested?: Record<string, boolean>;
   tasks?: Record<string, string>; // custom edited tasks
+  phaseOutputs?: Record<string, Record<number, string>>; // stepId → { phaseN: output text }
 }
 
 interface V2DataContextType {
@@ -22,12 +23,14 @@ interface V2DataContextType {
   setCopy: React.Dispatch<React.SetStateAction<AppCopy>>;
   progress: UserProgress;
   recommendedSteps: Step[];
+  nextStep: Step | null;
   loading: boolean;
   isAdmin: boolean;
   takeInWork: (id: string) => Promise<void>;
   markStepDone: (id: string, resultUrl: string) => Promise<void>;
   toggleNotInterested: (id: string) => Promise<void>;
   saveCustomTask: (id: string, taskText: string) => Promise<void>;
+  savePhaseOutput: (stepId: string, phaseN: number, output: string) => Promise<void>;
   resetProgress: () => Promise<void>;
   getStatus: (s: Step) => 'avail' | 'done' | 'current' | 'future';
   getStatusString: (s: Step) => 'available' | 'done' | 'inprogress' | 'future';
@@ -64,11 +67,17 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
 
   // Custom setUsername that also sets localStorage
   const setUsername = (name: string | null) => {
+    const prevUsername = username;
     setUsernameState(name);
     if (name) {
       localStorage.setItem('id_username', name);
     } else {
       localStorage.removeItem('id_username');
+      localStorage.removeItem('id_calibrated');
+      localStorage.removeItem('id_last_step');
+      if (prevUsername) {
+        localStorage.removeItem(`id_calibrated_${prevUsername.toLowerCase().trim()}`);
+      }
     }
   };
 
@@ -88,7 +97,7 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
         if (storedUser) {
           setUsernameState(storedUser);
           
-          const calibrated = localStorage.getItem('id_calibrated');
+          const calibrated = localStorage.getItem(`id_calibrated_${storedUser.toLowerCase().trim()}`);
           if (!calibrated && !pathname.startsWith('/v2/calibrate') && !pathname.startsWith('/v2/login')) {
             router.push('/v2/calibrate');
             setLoading(false);
@@ -105,6 +114,7 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
               calibrationReactions: userData.calibrationReactions || {},
               notInterested: userData.notInterested || {},
               tasks: userData.tasks || {},
+              phaseOutputs: userData.phaseOutputs || {},
             });
           }
         }
@@ -182,9 +192,18 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
   const saveCustomTask = async (id: string, taskText: string) => {
     const nextProgress: UserProgress = {
       ...progress,
-      tasks: {
-        ...progress.tasks,
-        [id]: taskText,
+      tasks: { ...progress.tasks, [id]: taskText },
+    };
+    setProgress(nextProgress);
+    await persistUserProgress(nextProgress);
+  };
+
+  const savePhaseOutput = async (stepId: string, phaseN: number, output: string) => {
+    const nextProgress: UserProgress = {
+      ...progress,
+      phaseOutputs: {
+        ...progress.phaseOutputs,
+        [stepId]: { ...progress.phaseOutputs?.[stepId], [phaseN]: output },
       },
     };
     setProgress(nextProgress);
@@ -198,10 +217,13 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
       calibrationReactions: {},
       notInterested: {},
       tasks: {},
+      phaseOutputs: {},
     };
     setProgress(emptyProgress);
     localStorage.removeItem('id_calibrated');
+    localStorage.removeItem('id_last_step');
     if (username) {
+      localStorage.removeItem(`id_calibrated_${username.toLowerCase().trim()}`);
       await persistUserProgress(emptyProgress);
     }
     router.push('/v2/calibrate');
@@ -213,8 +235,11 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
     try {
       await fetch('/api/v2/steps', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, steps: updatedSteps }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-session': username
+        },
+        body: JSON.stringify(updatedSteps),
       });
     } catch (err) {
       console.error('Failed to sync steps list:', err);
@@ -227,8 +252,11 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
     try {
       await fetch('/api/v2/copy', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, copy: updatedCopy }),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-session': username
+        },
+        body: JSON.stringify(updatedCopy),
       });
     } catch (err) {
       console.error('Failed to sync copy content:', err);
@@ -240,7 +268,9 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
     const over = progress.overrides?.[s.id];
     if (over === 'done') return 'done';
     if (over === 'inprogress') return 'current';
-    return s.state as any; // fallback to data-level
+    const baseState = s.state;
+    if (baseState === 'future') return 'avail'; // treat future steps as available for MVP
+    return baseState as any; // fallback to data-level
   };
 
   const getStatusString = (s: Step): 'available' | 'done' | 'inprogress' | 'future' => {
@@ -251,9 +281,9 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
     return 'available';
   };
 
-  // Intelligent Recommendation Engine (Spec: твій старт 5–7 кроків)
+  // Intelligent Recommendation Engine (Spec: your start 5–7 steps)
   const getRecommendedStepsList = (): Step[] => {
-    const isSkipped = typeof window !== 'undefined' ? localStorage.getItem('id_calibrated') === 'skipped' : false;
+    const isSkipped = typeof window !== 'undefined' && username ? localStorage.getItem(`id_calibrated_${username.toLowerCase().trim()}`) === 'skipped' : false;
     const reactions = progress.calibrationReactions || {};
     const hasReactions = Object.keys(reactions).length > 0;
 
@@ -304,12 +334,18 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
   };
 
   const recommendedSteps = getRecommendedStepsList();
+  // notInterested maps to 'avail' in getStatus, so guard against it explicitly in the fallback
+  const nextStep: Step | null =
+    recommendedSteps.find(s => {
+      const st = getStatus(s);
+      return st === 'current' || (st === 'avail' && !progress.notInterested?.[s.id]);
+    }) ?? null;
 
   if (loading || !copy) {
     return (
       <div className="analysis" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <h1 style={{ fontSize: '32px' }}>
-          завантажую<span className="cursor">_</span>
+          loading<span className="cursor">_</span>
         </h1>
       </div>
     );
@@ -326,12 +362,14 @@ export function V2DataProvider({ children }: { children: React.ReactNode }) {
         setCopy,
         progress,
         recommendedSteps,
+        nextStep,
         loading,
         isAdmin,
         takeInWork,
         markStepDone,
         toggleNotInterested,
         saveCustomTask,
+        savePhaseOutput,
         resetProgress,
         getStatus,
         getStatusString,

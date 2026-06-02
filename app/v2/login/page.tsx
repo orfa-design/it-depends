@@ -34,18 +34,18 @@ export default function LoginPage() {
       </div>
       
       <div className="intro-inner" style={{ maxWidth: '440px', width: '100%' }}>
-        <div className="eyebrow" style={{ marginBottom: '20px' }}>Вхід у систему</div>
-        <h1 style={{ fontSize: '32px', marginBottom: '24px', letterSpacing: '-0.02em' }}>Як тебе звати?</h1>
-        
+        <div className="eyebrow" style={{ marginBottom: '20px' }}>Sign in</div>
+        <h1 style={{ fontSize: '32px', marginBottom: '24px', letterSpacing: '-0.02em' }}>What's your name?</h1>
+
         <form onSubmit={handleLogin} style={{ width: '100%', textAlign: 'left' }}>
-          <label className="field-label" htmlFor="username">ТВОЄ ІМ'Я</label>
+          <label className="field-label" htmlFor="username">YOUR NAME</label>
           <input
             id="username"
             type="text"
             className="field-input"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Введіть ім'я..."
+            placeholder="Enter your name..."
             required
             autoComplete="off"
             style={{ marginBottom: '24px', width: '100%' }}
@@ -56,13 +56,13 @@ export default function LoginPage() {
               {errorLog}
             </div>
           )}
-          
-          <button 
-            type="submit" 
-            className="btn btn-primary btn-block" 
+
+          <button
+            type="submit"
+            className="btn btn-primary btn-block"
             disabled={loading || !username.trim()}
           >
-            {loading ? 'Вхід...' : 'Увійти →'}
+            {loading ? 'Signing in...' : 'Sign in →'}
           </button>
         </form>
       </div>
