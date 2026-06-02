@@ -367,6 +367,50 @@ export const STEPS: Step[] = [
       "Ask it to flag where information is missing to make a decision.",
     ],
   },
+  {
+    id: "figma-plugin-generator",
+    title: "Design a Figma Plugin with AI",
+    subtitle: "Raw plugin idea → structured spec & starting prompt for Claude Code",
+    cat: "planning", tool: "Claude.ai", kind: "simple", effort: "10 min", layer: 2,
+    state: "avail",
+    doable: "Turn a raw Figma plugin idea into a structured spec with folder layout, manifest config, and a ready-to-run Claude Code prompt.",
+    promise: "You will turn your raw automation idea into a structured plugin spec and get a ready-to-use starting prompt to kick off coding.",
+    usedWhen: "Useful at the very beginning, when you want to write your own Figma plugin but don't know where to start with files, which APIs to call, and what permissions to set in the manifest.",
+    toolName: "Claude.ai",
+    defaultTask: "I want to write a Figma plugin that reads the variants of a selected component, analyzes their properties, and generates markdown documentation from them using the Claude API.",
+    prompt: `You are an experienced systems architect and Senior developer of Figma plugins.
+I want to create a Figma plugin. Help me translate my raw idea into a structured Technical Specification (spec) and formulate the very first step to kick off code generation.
+
+Here is my plugin idea: {task}
+
+Please generate the following:
+1. **Architectural Structure**: Describe the project folder layout and list the files needed for this plugin (e.g., manifest.json, code.ts, ui.html, tsconfig.json).
+2. **Manifest Configuration**: Write the exact JSON for manifest.json, specifying correct parameters (UI sizing, networkAccess permissions if external APIs are needed).
+3. **Figma API Scenario**: Describe exactly which Figma API objects (e.g., ComponentSetNode, Selection, TextNode) and methods the plugin needs to access to achieve my goal.
+4. **Starting Prompt for Code**: Formulate ONE clear, detailed prompt for Claude Code that I can copy and run in my terminal to make Claude Code immediately generate a working skeleton of this plugin (with esbuild and TypeScript configured).
+
+Keep the structure concise and focus on the very first step of development.`,
+    howto: [
+      "Describe your plugin idea in a few sentences — what it does and what it automates.",
+      "You'll get a folder structure, manifest.json, Figma API breakdown, and a Claude Code prompt.",
+      "Copy the Claude Code prompt and run it in your terminal to bootstrap the project.",
+    ],
+    checkpoint: "If you receive a ready-to-use folder structure and a specific prompt for Claude Code to bootstrap the codebase — **it worked**.",
+    authorExample: {
+      type: "link",
+      url: "https://github.com/example/figma-doc-plugin",
+      label: "Example Spec & Structure for a Documentation Plugin",
+    },
+    related: ["internal-tool", "notes-structure"],
+    notes: [
+      "Save the generated spec to a README.md in your new project so Claude always has context during development.",
+      "Run `npx -y create-figma-plugin` if you prefer the standard Figma boilerplate over manual setup.",
+    ],
+    levelUp: [
+      "⚡ Save the generated spec to a `README.md` file in your new project so the AI always has the context during development.",
+      "⚡ Run `npx -y create-figma-plugin` in your terminal if you prefer using the standard Figma boilerplate instead of creating files manually.",
+    ],
+  },
 ];
 
 export const STEP_BY_ID = Object.fromEntries(STEPS.map(s => [s.id, s]));
@@ -382,6 +426,7 @@ const EFFORT_BY_ID: Record<string, 'quick' | 'iterative' | 'project'> = {
   "prototype": "iterative", "critique": "quick", "dashboard": "iterative",
   "internal-tool": "project", "ds-automation": "project",
   "research-plan": "iterative", "notes-structure": "quick",
+  "figma-plugin-generator": "quick",
 };
 
 STEPS.forEach(s => {
