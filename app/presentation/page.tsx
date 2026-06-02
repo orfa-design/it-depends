@@ -11,8 +11,6 @@ const RAIL = [
   { id: 'journey', label: '03 · Дослідження' },
   { id: 'team', label: '04 · Команда' },
   { id: 'tools', label: '05 · Інструменти' },
-  { id: 'flow', label: '06 · Як працює' },
-  { id: 'prototype', label: '07 · Прототип' },
 ];
 
 export default function PresentationPage() {
@@ -276,62 +274,16 @@ export default function PresentationPage() {
         </div>
       </section>
 
-      {/* ---------- 06 User Flow ---------- */}
-      <section className="sec" id="flow" data-snap data-idx={5}>
-        <div className="sec-inner">
-          <span className="eyebrow reveal"><span className="dot" /><span className="num">06</span> Як це працює</span>
-          <h2 className="h-display reveal d1">Від тертя до дії&nbsp;— за один&nbsp;крок.</h2>
-          <div className="flow">
-            <div className="flow-step reveal d1">
-              <span className="n">1</span>
-              <span className="t">Реагуєш на картки колег: <b>«о, круто» / «це я знаю» / «не моє»</b>.</span>
-            </div>
-            <div className="flow-step reveal d2">
-              <span className="n">2</span>
-              <span className="t">Збирається персональний маршрут&nbsp;— <b>активний крок завжди один</b>.</span>
-            </div>
-            <div className="flow-step reveal d3">
-              <span className="n">3</span>
-              <span className="t">Готовий промпт, який інструмент відкрити, і як зрозуміти, що вийшло.</span>
-            </div>
-            <div className="flow-step reveal d4">
-              <span className="n">4</span>
-              <span className="t">Зробив → результат-посилання → кидаєш колезі → <b>петля замикається</b>.</span>
-            </div>
-          </div>
-          <p className="kicker-note reveal d4">
-            Не питаємо «що хочеш зробити». Показуємо, що&nbsp;можливо.
-          </p>
-        </div>
-      </section>
-
-      {/* ---------- 07 Prototype (демо-лаунчпад) ---------- */}
-      <section className="sec" id="prototype" data-snap data-idx={6}>
-        <div className="sec-inner">
-          <span className="eyebrow reveal"><span className="dot" /><span className="num">07</span> Прототип</span>
-          <h2 className="h-display reveal d1">Це не макет. Воно&nbsp;<span className="accent">живе</span>.</h2>
-          <p className="lead dim reveal d2">
-            Проблема не в навігації, а в першому кроці. Наша відповідь&nbsp;— рівно один крок.
-            Ось як&nbsp;→
-          </p>
-          <a className="proto-cta reveal d2" href="/v2">
-            Відкрити прототип <span className="arrow">→</span>
-          </a>
-          <div className="shots">
-            <div className="shot reveal d2"><span className="label">screenshot: /v2 калібрування</span><span className="sub">картки колег · wow / heard / skip</span></div>
-            <div className="shot reveal d3"><span className="label">screenshot: /v2 мапа</span><span className="sub">маршрут · активний вузол</span></div>
-            <div className="shot reveal d4"><span className="label">screenshot: /v2 крок → done</span><span className="sub">результат + share</span></div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- Closing ---------- */}
-      <section className="sec closing" data-snap data-idx={7}>
+      {/* ---------- Closing (+ live prototype link) ---------- */}
+      <section className="sec closing" data-snap data-idx={5}>
         <div className="sec-inner">
           <h2 className="h-display reveal">Ми даємо <span className="accent">один крок</span>.</h2>
           <p className="sub reveal d1">
             Після якого людина перестає думати, що AI&nbsp;— це не для&nbsp;неї.
           </p>
+          <a className="proto-cta reveal d2" href="/v2">
+            Спробувати прототип <span className="arrow">→</span>
+          </a>
           <div className="meta reveal d2">
             <span>It Depends</span>
             <span>·</span>
